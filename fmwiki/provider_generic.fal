@@ -1,0 +1,28 @@
+/*
+   FALCON - Falcon Micro Wiki
+
+   FILE: provider_generic.fal
+
+   Provides wiki processing for generic parser.
+   -------------------------------------------------------------------
+   Author: Giancarlo Niccolai
+   Begin: Sat, 18 Apr 2009 11:46:21 +0200
+
+   -------------------------------------------------------------------
+   (C) Copyright 2009: the FALCON developers (see list in AUTHORS file)
+
+   See LICENSE file for licensing details.
+*/
+
+import WikiParser from wikiparser as WikiParser
+
+function processPage( link, pageEntry )
+   wp = WikiParser( link )
+   ins = StringStream( pageEntry[ "content" ] )
+   outs = StringStream( pageEntry[ "content" ].len() )
+   wp.parse( ins, outs )
+
+   pageEntry[ "comp_cnt" ] = outs.closeToString()
+end
+
+export processPage

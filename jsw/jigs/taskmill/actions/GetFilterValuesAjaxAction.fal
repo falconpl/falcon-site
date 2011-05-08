@@ -1,0 +1,55 @@
+/**
+ * Get the values of a filter.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.11
+ *
+ * @param Jig jig - The Jig that owns this action.
+ */
+class GetFilterValuesAjaxAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	/**
+	 * Verify this action.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		if toInt(self.arg('filterId'), true) == nil
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'id')))	
+		end
+
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+		File.writeContent('/tmp/foo.txt', 'failreuxxxx')
+		self.redirect('resultAjax', ['code' => 'errorAjax', 'msg' => Mistake.pop().toString()])
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		// Set the view this action will use.
+		self.setView('GetFilterValuesAjaxView')
+	end
+end
+

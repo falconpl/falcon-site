@@ -1,0 +1,8 @@
+<style type="text/css" media="all">@import "styles/falcon_tabs.css";</style>
+<h1>Projects Bugtracker</h1>
+<p>We are working at an integrated Bugtracking application.</p>
+<p>In the meanwhile, please kindly report any bug related to a Falcon project
+at the bugtracker kindly offered by 
+<a href="https://launchpad.net/falconpl/+bugs?search=Search&field.status=New" target="_new">Ubuntu Launchpad</a>.
+
+

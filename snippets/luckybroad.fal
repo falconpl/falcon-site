@@ -1,0 +1,19 @@
+// Luck subscriptions - Subscribing to a message and receiving notifies (since 0.9.2)
+// Some person that may be lucky...
+class Person( number )
+   id = number
+   init
+      if random(0,1): subscribe( "lucky", self )
+   end
+
+   //... and receive a luck notification
+   function on_lucky( data )
+      > data, " ", self.id, " is lucky!"
+   end
+end
+
+// create all the people
+for i in [1:11]: Person(i)
+
+// lucky ones, hail!
+broadcast( "lucky", "Person" )

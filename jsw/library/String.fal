@@ -1,0 +1,28 @@
+/**
+ * String operations.
+ *
+ * @author 	Vladimir Florentino
+ * @package Library
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ */
+
+// Export everything in this file.
+export
+
+class String
+
+	/**
+	 * Uppercase the first letter of the first word.
+	 *
+	 * @static
+	 * @param 	string str - The string whose first to upper case.
+	 * @return 	string
+	 */
+	function firstUpper(str)
+		if str == nil : return ''
+		str[0:1] = strUpper(str[0:1])
+		return str
+	end	
+end
+

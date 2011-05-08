@@ -1,0 +1,408 @@
+/*
+Wikiparser: Markup Engine for Falcon PL
+
+Kibleur Christophe April 15, 2009.
+
+[Kib² http://thewikiblog.appspot.com/]
+
+-- Test with HTML engine
+*/
+
+import Regex from regex as Regex
+load .hl.gfh // uses Generic Falcon Highlighter
+
+class htmlHandler( sitelink )
+    parent = nil
+    sitelink = sitelink ? sitelink : ""
+    ext = ".html"
+    
+    function getAnother()
+        h = htmlHandler(self.sitelink)
+        h.parent = self.parent
+        return h
+    end
+    
+    
+    /* BLOCK RULES HANDLING */
+    function makeToc()
+        contents = self.parent.getToc()
+        out = []
+        for dummy, title, level in contents
+            title = self.esc(title)
+            t1 = strReplace(title, " ", "-")
+            out += [[level, "item", @'<a href="#$t1">$title</a>']]  
+        end
+        if out.len() > 0
+            return self.xhtml_makeList(out,false,false, "toc")
+        else
+            return ""
+        end
+
+    end
+
+    function makeTable(rows)
+        out = []
+        out += "<table class=\"wikitable\" border=\"1\">"
+        i = 0
+        for row in rows
+            // just to have different background colors for odd/even rows
+            if i%2 == 0
+                out += "<tr>"
+            else
+                out += "<tr class=\"odd\">"
+            end
+            // corectly, strSplit makes an extra empty entry at end...
+            cols = strSplit(row, "|")
+            //... so we have to discard it
+            for col in cols[0:-1:1]
+                if col
+                    if col[0] == "="
+                        k = self.inline( self.esc( strTrim(col[1:]) ))
+                        out += @"    <th>$(k)</th>"
+                    else
+                        k = self.inline( self.esc( strTrim(col) ))
+                        out += @"    <td>$(k)</td>"
+                    end
+                end
+            end
+            out += "</tr>"
+            i ++
+        end
+        out += "</table>"
+        return "\n".merge(out)
+    end
+
+    function makePara(text)
+        if text
+            return '<p>' + self.inline( self.esc(text)) + "</p>\n"
+        else
+            return ""
+        end
+    end
+
+    function makeCode(text, lang)
+        // Some decoration for personnal use
+        // out = @"<p class=\"source\">Code:$(lang)</p>\n"
+        out = ""
+        if self.parent.useGFH
+            lines = text
+            lines = strSplit(lines, "\n")
+            langs = [
+            'fal' => 'Falcon',
+            'fan' => 'Fan',
+            'cpp' => 'Cpp',
+            'js'  => 'Js',
+            'xml' => 'Xml',
+            'css' => 'Css',
+            'plain' => 'Plain'
+            ]
+            if lang in langs
+                f = HtmlFormatter()
+                hl = HL(f, langs[lang]) //"Falcon")
+                out += "<pre class=\"wiki_snippet\">\n" + hl.highlight(lines) + "</pre>\n"
+                return out
+            else
+                out += "<pre class=\"wiki_snippet\">\n" + self.esc(self.parent.tilda(text)) + "</pre>\n"
+                return out
+            end
+        end
+        // Beware the operator precedence! + as priority on @        
+        if lang == ""
+           return (@"<pre class=\"wiki_snippet\>\n") + self.esc(self.parent.tilda(text)) + "</pre>\n"
+        else
+            return (@"<pre class=\"brush:$lang\">\n") + self.esc(self.parent.tilda(text)) + "</pre>\n"
+        end
+    end
+
+    function makeHeader(title, level)
+        title = self.esc(title)
+        t1 = strReplace(title, " ", "-")
+        level = toString(level)
+        return @"<h$level><a name=\"$t1\">$title</a></h$level>\n"
+    end
+
+    function makeHrule()
+        return '<hr/>'
+    end
+    
+    function makeNavi(ptn)
+        prev,top,next = ptn[0], ptn[1], ptn[2]
+        out = "<center class=\"navi\">"
+        if prev
+            link = prev + self.ext
+            //out += @"<a class=\"navi\" href=\"$(link)\">&lt;</a>  "
+            out += "Previous: " + @"<a class=\"navi\" href=\"$(link)\">$(prev)</a>  "
+            out += " -- "
+        end
+        if top
+            link = top + self.ext
+            //out += @"<a class=\"navi\" href=\"$(link)\">TopPage</a>  "
+            out += "Top: " + @"<a class=\"navi\" href=\"$(link)\">$(top)</a>  "
+            out += " -- "
+        end
+        if next
+            link = next + self.ext
+            //out += @"<a class=\"navi\" href=\"$(link)\">&gt;</a>"
+            out += "Next: " + @"<a class=\"navi\" href=\"$(link)\">$(next)</a>"
+        end
+        out += "\n</center>"
+        return out
+    end
+
+    function makeList(items)
+        if items.len() > 0
+            return self.xhtml_makeList(items) //, false, false, listType)
+        else
+            return ""
+        end
+    end
+    
+    function xhtml_makeList(items, wantEsc, wantInline, stcls)
+        // items must be like [level,list-type,contents]
+        out = []
+        cumul = 1
+        old_lev = nil
+        stack = List()
+        if stcls == nil
+           stcls = ""
+        else
+           stcls = @' class="$stcls"'
+        end 
+
+        // handles indentation
+        indent = function(c)
+            return strReplicate("    ",c-1)
+        end
+    
+        // handles list types (normal, enumerated)
+        lt = function(c)
+            if c == "item"
+                return ["<ul"+stcls+">", "</ul>"]
+            else
+                return ["<ol"+stcls+">", "</ol>"]
+            end
+        end
+    
+        op_li = "<li>"
+        cl_li = "</li>"
+    
+        firstLev = items[0][0]
+        
+        if firstLev != 1
+            items2 = []
+            for lev,listtyp,content in items
+                items2 +=  [[lev-firstLev+1,listtyp,content]]
+            end
+            items = items2
+        end
+        
+        for lev,listtyp,content in items
+
+            if wantEsc : content = self.esc(content)
+            
+            if wantInline
+                cont = content
+            else
+                cont = self.inline( content )
+            end
+            
+            if not old_lev
+                out += indent(cumul) + lt(listtyp)[0] //op_it
+                stack.push( listtyp )
+                out += op_li + cont
+            elif lev == old_lev
+                diff = 0
+                out[-1] += cl_li
+                out += indent(cumul) + op_li + cont
+            elif lev > old_lev
+                diff = lev - old_lev
+                cumul += diff
+                for k in [0:diff]
+                    out += indent(cumul+k) + lt(listtyp)[0]
+                    stack.push( listtyp )
+                end
+                out += indent(cumul) +  op_li + cont
+            elif lev < old_lev
+                diff = old_lev - lev
+                cumul -= diff
+                
+                out[-1] += cl_li
+                for k in [0:diff]
+                    a = stack.pop( )
+                    out += indent(cumul+k+1) + lt(a)[1]
+                    out += indent(cumul+k) + cl_li
+                end
+                out += indent(cumul) + op_li + cont
+            end
+            
+            old_lev = lev
+        end
+    
+        out[-1] += cl_li
+        for k in [0:cumul]
+            a = stack.pop( )
+            out += indent(cumul - k) + lt(a)[1]
+            out += indent(cumul - k - 1) + cl_li           
+        end
+        out[-1] = ""
+        //return (["\n".join] + out)()
+        return "\n".merge(out)
+    end
+
+    /*
+        INLINE RULES HANDLING
+        When given, the m parameter is an array returned by
+        a Regex object, so that it is possible to manipulate it later on.
+        The array is like [group-0, group-1, etc] where group-n is the
+        captured Regex group (group-0 means the all match).
+    */
+    function esc(s, quote)
+        /*Replace special characters "&", "<" and ">" to HTML-safe sequences.
+        If the optional flag quote is true, the quotation mark character (")
+        is also translated.*/
+        s = strReplace( s, "&", "&amp;") // Must be done first!
+        s = strReplace( s, "<", "&lt;")
+        s = strReplace( s, ">", "&gt;")
+        if quote : s = strReplace( s,'"', "&quot;")
+        return s
+    end
+
+    function _bold(m)
+        return '<strong>\1</strong>'
+    end
+
+    function _italic(m)
+        return '<em>\1</em>'
+    end
+
+    function _underline(m)
+        return '<u>\1</u>'
+    end
+
+    function _stroked(m)
+        return '<strike>\1</strike>'
+    end
+
+    function _sup(m)
+        return '<sup>\1</sup>'
+    end
+
+    function _sub(m)
+        return '<sub>\1</sub>'
+    end
+
+    function _monospace(m)
+        return '<tt>\1</tt>'
+    end
+
+    function _linebreak(m)
+        return "<br />"
+    end
+
+    function _quote(m)
+        return '<blockquote>\1</blockquote>'
+    end
+
+   function _wiki_url(m)
+        // '(?<!~)\[(.*?)(?:\|(.+?))]'
+        // \1           : adress
+        // \2           : replacement text
+
+        // self.sitelink must contain a $link variable to be expanded
+        link = URI.encode( m[1] )
+        text = @ self.sitelink
+        return '<a href="' + text + '">\2</a>'
+    end
+
+    function _wiki_url_s(m)
+        // '(?<!~)\[(.*?)(?:\|(.+?))]'
+        // \1           : adress
+
+        // self.sitelink must contain a $link variable to be expanded
+        link = URI.encode( m[1] )
+        text = @ self.sitelink
+        return '<a href="' + text + '">'+m[1]+'</a>'
+    end
+    
+    function _url(m)
+        // '(?<!~)\[[(.*?)(?:\|(.+?))]](\[(.+?)\])?'
+        // \1           : address
+        // \2           : Replacement text
+        // \3[optional] :
+        return '<a href="\1">\2</a>'
+    end
+
+     function _url_s(m)
+        // '(?<!~)\[[(.*?)(?:\|(.+?))]](\[(.+?)\])?'
+        // \1           : Address
+        return '<a href="\1">\1</a>'
+    end
+
+    function _image(m)
+        // Regex("\[\[im (?.+?)\|(.+?)\|(.+?)\|(.+?)\]\]")
+        // \1           : url
+        // \2           : target
+        // \3           : pos (centered, etc)
+        // \4           : alternative text
+        // (align, link, url, alt)
+        return '<div class="\3"><a href="\2"><img src="\1" alt="\4"></a></div>'
+    end
+    /* END OF INLINE RULES HANDLING */
+
+    /*
+        Parse an inline paragraph.
+    */
+
+    function inline(rawtext)
+        for rule_name, rule_reg in self.parent.inline
+            mo = rule_reg.grab(rawtext)
+            if mo
+                // Calls the methods dynamically
+                rawtext = rule_reg.subst( rawtext, (#("self._" + rule_name))(mo) )
+            end
+        end
+
+        // no it's time to unescape tildes : ~
+        return self.parent.tilda(rawtext)
+    end
+
+    function genPage(html, title, wantPageList)
+        //if not tpl: tpl = 'data/html_template.txt'
+        if wantPageList
+            pages = self.makeChildPageList()
+        else
+            pages = "No other pages."
+        end
+        toc = self.makeToc()
+        
+        page_title = title
+        fname = 'data/html_template.txt'
+        to_html = html
+        content = strBuffer(FileStat(fname).size)
+        f= InputStream( fname )
+        f.setEncoding("utf-8")
+        c = f.readText(content)
+        f.close()
+        return @@'$content'
+    end
+    
+    // Just a useful function to return the list of all pages
+    function makeChildPageList()
+        contents = self.parent.doc.ppages
+        out = []
+        for title in contents
+            title = self.esc(title)
+            t1 = strReplace(title, " ", "%20")
+            out += [[1, 1, @'<a href="$(t1).html">$(title)</a>']]  
+        end
+        if out.len() > 0
+            return self.xhtml_makeList(out,false,false)
+        else
+            return ""
+        end
+
+    end
+
+end
+
+export htmlHandler

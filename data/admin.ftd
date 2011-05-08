@@ -1,0 +1,7 @@
+<h1>Falcon site administration panel</h1>
+<p>Sorry, we're bit in a hurry so it's quite spoil</p>
+<ul>
+<li><?= makeSiteLink( 'admin_users', true ) ?>Manage users</a></li>
+<li><?= makeSiteLink( 'admin_prjs', true ) ?>Manage projects</a></li>
+<li><a href="/popup_mailing.ftd" target="_blank">Mass mailing</a></li>
+</ul>

@@ -1,0 +1,17 @@
+<H1>Falcon Documentation project</H1>
+<P>Falcon is a huge project with a complex documentation system.
+Documentation is divided mainly in three categories:</p>
+<ol>
+<li><b>User level generic documentation</b>: manuals, tutorials and
+references for the language, extension modules and for the user tools.</li>
+<li><b>Third party development documentation</b>: documentation for
+embedding applications developers and for module developers. It covers the
+outer interface of the engine.</li>
+<li><b>Core documentation</b>: internals of the engine and technical
+documentation related with the virtual machine and its element.</li>
+</ol>
+<p>User documentation can be mainly found in the
+<a href="index.ftd?page_id=manuals">manuals</a> section. Usually, module
+specific documentation is provided directly by the project or the module
+extension; periodically, featured modules documentation collections
+are compiled by the documentation project.</p>

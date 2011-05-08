@@ -1,0 +1,21 @@
+
+/**
+ * English language file for Shell template. 
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.12
+ */
+lang = [
+	'admin'				=> 'Administration',
+	'advancedSearch'	=> 'Advanced Search',
+	'createIssue'		=> 'Create Issue',
+	'footerCopyright'	=> 'Taskmill is part of the $(1) Family © 2009', 
+	'listIssues'		=> 'List Issues',
+	'logout'			=> 'Logout',
+	'settings'  		=> 'My Settings',
+	'stats'				=> 'Stats',
+	'switch'			=> 'Switch'
+]
+

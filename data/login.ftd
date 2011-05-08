@@ -1,0 +1,14 @@
+<?
+// By this time, generic authorization code of the index
+// has already performed login sequence; our duty is that
+// of providing the right page on success...
+if loggedIn()
+   setPageId( Request.gets["origPageId"] )
+   loadContent()
+else
+// ... or to show a proper error message in case the login failed.
+?>
+<h2>Login failed</h2>
+<p>Sorry, either you provided the wrong password or
+your account is not registered with our database</p>
+<? end ?>

@@ -1,0 +1,57 @@
+/**
+ * Represents a Taskmill user.
+ *
+ * @author 	Vladjmir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.22
+ */
+class User(userId)
+	id 		 	   = nil
+	lang		   = nil
+	email		   = nil	
+	active		   = nil
+	fullname	   = nil
+	currentFilter  = nil
+	currentProject = nil
+
+	/**
+	 * Constructor.
+	 */
+	init
+		if userId : self._fill(userId)
+	end
+
+	/**
+	 * Load the data for this task.
+	 *
+	 * @private
+	 * @return nil
+	 */
+	function _fill(userId)
+		query  = 'SELECT User.email				AS email, '
+		query += '       UserExt.fullname		AS fullname, '
+		query += '       UserExt.currentFilter	AS currentFilter, '
+		query += '       UserExt.currentProject	AS currentProject, '
+		query += '       UserExt.lang			AS lang, '
+		query += '       UserExt.active 		AS active '
+		query += 'FROM User '
+		query += 'JOIN UserExt ON (User.id = UserExt.userId) '
+		query += 'WHERE User.id = ? '
+		query += 'LIMIT 1'
+
+		// Prepare the query.
+		stmt = DB.prepare(query)
+
+		// Grab the info.
+		row = stmt.getRow(userId)
+		self.id 	  	 	= userId
+		self.lang 	 		= row['lang']
+		self.email	 		= row['email']
+		self.active			= row['active']
+		self.fullname 	 	= row['fullname']
+		self.currentFilter  = row['currentFilter']	
+		self.currentProject = row['currentProject']	
+	end
+
+end

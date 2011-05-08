@@ -1,0 +1,127 @@
+export URL
+
+const TYPE_ABS 		 = 1 // http://...
+const TYPE_RELATIVE  = 2 // action/key/value
+
+/**
+ * Represents an Universal Resource Locator (URL)
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.5.14
+ */
+class URL(location, params) 
+	//! Location to redirect.
+	_location = location
+
+	//! Optional parameter to add to the URL.
+	_params = params
+
+	/**
+	 * Constructor.
+	 */
+	init
+		if not location
+			raise Error(0, 'URL location must no be empty.')
+		end
+
+		if self._params == nil : self._params = [=>]
+	end
+
+	/**
+	 * Return this URL.
+	 *
+	 * @public
+	 * @return string
+	 */
+	function toString()
+		if self.type() == TYPE_ABS
+			return self.toAbs()
+		end
+
+		return self.toRelative()
+	end
+
+	/**
+	 * Convert the URL to an absolute URL.
+	 *
+	 * @public
+	 * @return string
+	 */
+	function toAbs()
+		if self.type() == TYPE_ABS : return self._location
+
+		url  = 'http://' + Request.headers['Host'] 
+		if url[0:0] != '/'
+			url += URL.getFrameworkIndex()
+			url += '?jig=' + 'taskmill'
+			url += '&action=' + self._location
+			for key, val in self._params
+				url += '&' + key + '=' + val
+			end
+		end
+
+		return url
+	end
+
+	/**
+	 * Convert an URL to an relative URL.
+	 *
+	 * @public
+	 * @return string
+	 */
+	function toRelative()
+		link = URL.getFrameworkIndex()
+		jig  = Jig.singleton()
+
+		if Config.seoFriendlyURLs
+			link += '/' + jig.getName() + '/SEO_FRIENDLY'
+		else
+			link += '?jig=' + jig.getName()
+			link += '&action=' + self._location
+			if self._params.len()
+				for key, value in self._params
+					link += '&' + key + '=' + value
+				end
+			end
+		end
+
+		return link
+	end
+
+	/**
+	 * Determine whether this is an Absolute or Relative URL.
+	 *
+	 * @public
+	 * @return string
+	 */
+	function type()
+		if strFind(self._location, 'http://', 0, 'http://'.len()) != -1
+			return TYPE_ABS
+		end
+
+		return TYPE_RELATIVE
+	end
+
+	/************************** STATIC **************************/
+	
+	/**
+	 * Get the frameworks' index handler.
+	 *
+	 * If seoFriendlyLinks are sent, index.ftd is not shown.
+	 *
+	 * @static
+	 * @public
+	 * @return string
+	 */
+	function getFrameworkIndex()
+		index = Config.relativeURL 
+		if not Config.seoFriendlyURLs
+			index += '/' + 'index.ftd'
+		end
+
+		return index
+	end
+
+end

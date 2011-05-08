@@ -1,0 +1,69 @@
+export 
+
+/**
+ * Helper functions.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.6.10
+ */
+
+/**
+ * Determine if the given value can be considered false.
+ *
+ * False values include nil, false, empty string, string of only whitespace,
+ * 0 integer or float, 0 in string form, empty array, empty dictionary.
+ *
+ * @param mixed val - The value to check.
+ * @return boolean
+ */
+function isEmpty(val)
+	select val
+		case NilType
+			return true
+		case BooleanType
+			return not val
+		case StringType
+			if strTrim(val).len() == 0 : return true
+			if val == '0' : return true
+		case NumericType
+			if val == 0 : return true
+		case ArrayType, DictionaryType
+			return not val.len()
+	end
+
+	return false
+end
+
+/**
+ * Convert a value to an integer.
+ *
+ * @public
+ * @param 	mixed val - The value to convert to an integer.
+ * @param	boolean onErrNil [optional] - If there was no proper converstion of 
+ *			the integer and this is true, then nil will be returned. Otherwise,
+ *			0 will be returned. Defauts to false. 
+ * @return mixed - The converted integer or nil.
+ */
+function toInt(val, onErrNil)
+	result = nil
+	try : result = int(val)
+	if result == nil and not onErrNil  : return 0
+	return result
+end
+
+
+/**
+ * Return the value or nil, depending on the value.
+ *
+ * isEmpty() will be called on the value. If it yields true, nil
+ * will be returned. Othewise, the unchanged value will be returned.
+ * 
+ * @public
+ * @param 	mixed val - The value to check and return.
+ * @return mixed - The passed value or nil.
+ */
+function nilOnEmpty(val)
+	return (isEmpty(val) ? nil : val)
+end

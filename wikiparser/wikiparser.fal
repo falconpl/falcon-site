@@ -1,0 +1,587 @@
+#!/usr/bin/falcon
+
+load regex
+
+/*==============================================================================
+                            Rule Class
+==============================================================================*/
+class Rule(name, str, transit)
+    // A Rule is just a name associated with an optionnal Regex
+    name = name
+    raw = str
+    reg = nil
+    transit = transit
+    
+    init
+      if str
+         self.reg = Regex(self.raw)
+      end
+    end
+    
+    // If a rule as no associated Regex, we still need a match method for it.
+    function match(text)
+        if self.reg
+            if self.reg.match(text)
+               return true
+            end
+            //return self.reg.match(text)
+        else
+            return nil
+        end
+    end
+    
+    
+    function toString()
+        return self.name + " State Instance"// + " State  with Regex: [" + self.raw + "]"
+    end
+end
+
+/*==============================================================================
+                            BlockState Class
+==============================================================================*/
+class BlockState(rules)
+    rules = rules
+    
+    function toString()
+        out = []
+        for k,v in self.rules
+            out += @ "$k = $v"
+        end
+        out += "\n"
+        return "\n".merge(out)
+    end
+end
+
+/*==============================================================================
+                            Document Class
+==============================================================================*/
+function Doc() 
+   return bless([
+        "name"      => nil,
+        "path"      => "",
+        "parent"    => nil,
+        "pages"     => [],
+        "ppages"    => [],
+        "prev"      => "",
+        "top"       => "",
+        "next"      => "",
+        "ext"       => ".wiki",
+        "author"    => nil
+    ])
+end
+/*==============================================================================
+                    LBFSM : Line-Based Finite State Machine
+==============================================================================*/
+
+class LBFSM(handler)
+    // ============== Attributes
+    handler = handler
+    doc = Doc()
+        
+    stackStates = List("default") // will handle the states stack
+    
+    // INLINE RULES
+    // Italic is matched if not preceded by ':' like in 'http://www...'
+    inline = bless([
+        'bold'      =>  Regex('(?<!~)(?:\*\*)(.+?)(?:\*\*)' , "ms"),
+        'italic'    =>  Regex('(?<![:|~])//(.+?)//', "ms"), 
+        'underline' =>  Regex('(?<!~)__(.+?)__', "ms"),
+        'stroked'   =>  Regex('(?<!~)--(.+?)--', "ms"),
+        'sup'       =>  Regex('(?<!~)\^{2}(.+?)\^{2}', "s") ,
+        'sub'       =>  Regex('(?<!~)[.]{2}(.+?)[.]{2}', "s"),
+        'monospace' =>  Regex('(?<!~)[{]{2}(.+?)[}]{2}', "ms"),
+        'linebreak' =>  Regex('(?<!~)[/]$', "m"),
+        'url'       =>  Regex('(?<!~)\[\[(.*?)(?:\|(.+?))]](\[(.+?)\])?'),
+        'url_s'     =>  Regex('(?<!~)\[\[(.*?)]]'),
+        'wiki_url'  =>  Regex('(?<!~)\[(.*?)(?:\|(.+?))]'),
+        'wiki_url_s'=>  Regex('(?<!~)\[(.*?)]'),
+        'image'     =>  Regex('(?<!~)\[\[im (.+?)\|(.+?)\|(.+?)\|(.+?)]]'),
+        'quote'     =>  Regex('(?<!~)\[~(.*?)~\]', "ms")
+        ])
+    
+    // BLOCK STATES REGEX RULES
+    states = bless([
+        "blank"    => Rule("blank"  , '^$'  ),
+        "header"   => Rule("header" , '^(?<!~)([=]+)\s*(.+)?\s*\1?' ),
+        "list"     => Rule("list"   , '^(?<!~)([*#]+)\s(.*)$'       ),
+        "srcBeg"   => Rule("srcBeg" , '^(?<!~)\{\{\{\s*(\w+)?.*$'   ),
+        "plain"    => Rule("plain"  , '^(?<!~)\{\{\{\s*$'           ),
+        "srcEnd"   => Rule("srcEnd" , '^(?<!~)\}\}\}\s*'            ),
+        "hrule"    => Rule("hrule"  , '^(?<!~)([-]{3,})'            ),
+        "toc"      => Rule("toc"    , '^(?<!~)\.\.\.\s*TOC'         ),
+        "table"    => Rule("table"  , '^(?<!~)[|](.*?)[|]\s*$'      ),
+        "navi"     => Rule("navi"   , '^(?<!~)\{\{\s*(.*?):(.*?)\}\}\s*$'),
+        "default"  => Rule("default", nil                           ),
+        "end"      => Rule("end"    , nil                           )
+    ])
+    
+    // SPECIAL RULES
+    // Only one at the moment. They're processed first.
+    special = bless([
+        "synonym"    => Regex('\[synon\](?:\r?\n)(.*?)(?:\r?\n)\[/synon\]',"ms")
+        ])
+        
+    synons = [=>]                   // synonyms dictionnary
+    defaultLang = "falcon"          // used inside source-code blocks
+    lang = "falcon"                 // langage for source code
+    listLevel = nil                 // retain list item level
+    listType = nil                  // Type of list item (enum, normal)
+    listItems = []                  // All current items in a list env.
+    out  = []           // The main array given to the handlers for processing 
+    accu = []           // Keeps track of lines of text inside paragraphs
+    
+    // BLOCK TRANSITION TABLES (use self.states in "state" keys )
+    transit = [
+        // from default to ...
+        ["from" => "default", "state" => "header", "action" => "put_header"],
+        ["from" => "default", "state" => "blank",  "action" => "put_para"],
+        ["from" => "default", "state" => "list",   "action" => "make_firstListItem", "push" => "list"],
+        ["from" => "default", "state" => "plain", "action" => "get_sourceLangage_plain", "push" => "src"],
+        ["from" => "default", "state" => "srcBeg", "action" => "get_sourceLangage", "push" => "src"],
+        ["from" => "default", "state" => "hrule",  "action" => "put_hrule"],
+        ["from" => "default", "state" => "toc",    "action" => "put_toc"],
+        ["from" => "default", "state" => "table",  "action" => "make_table_item", "push" => "table"],
+        // navigation
+        ["from" => "default", "state" => "navi", "action" => "put_navi"],
+        // from list to ...
+        ["from" => "list", "state" => "list",   "action" => "make_ListItem" ],
+            // check if 2 blank lines ends a list
+        ["from" => "list", "state" => "blank",  "waitFor" => "blank|blank", "action" => "endList" ],
+        // from table to ...
+        ["from" => "table", "state" => "blank", "action" => "put_table" ,"pop" => "default"],
+        // from scr to ... 
+        ["from" => "src",  "state" => "srcEnd", "action" => "put_source" ,"pop" => "default"]
+        ]
+        
+    useGFH = 1 // Use the Generic Falcon Highlighter or JavaScript ?
+    
+    // ============== Initialisation
+    init
+        if self.handler: self.handler.parent = self
+    end
+    
+    // ============== Methods
+    // ==== Load and Save text files
+    function loadText(fname)
+        contents = strBuffer(FileStat(fname).size)
+        f= InputStream( fname )
+        f.setEncoding("utf-8")
+        f.readText(contents)
+        f.close()
+        return contents
+    end
+    
+    function saveText(fname, contents)
+        f = OutputStream( fname )
+        f.setEncoding("utf-8")
+        f.writeText(contents)
+        f.close()
+    end
+
+    function go(path, fileName)
+        self.doc.path = path
+        self.doc.name = fileName
+        contents = self.loadText(self.doc.path + self.doc.name + self.doc.ext)
+        return self.parse(contents)
+    end
+    
+    // ==== Process a child page
+    function goChild(path, fileName)
+        contents = self.loadText(self.doc.path + self.doc.name + self.doc.ext)
+        return self.parse(contents)
+    end
+    
+    // ==== Generates all the children pages of the main document
+    function genChildPages()
+        i = 0
+        self.doc.ppages += self.doc.name
+        for p in self.doc.pages
+            self.doc.ppages += p
+            //> "Processing: '",p,"'"
+            h = self.handler.getAnother() // produces another handler
+            lbsm = LBFSM(h)
+            if i == 0
+                next = self.doc.pages[0]
+                prev = self.doc.name
+            elif i == self.doc.pages.len()-1
+                next = ""
+                prev = self.doc.pages[i-1]
+            else
+                next = self.doc.pages[i+1]
+                prev = self.doc.pages[i-1]
+            end
+            lbsm.doc = bless([
+                "name"      => p,
+                "path"      => self.doc.path,
+                "parent"    => self, //.doc.name,
+                "pages"     => [],
+                "prev"      => prev,
+                "top"       => self.doc.name,
+                "next"      => next,
+                "ext"       => ".wiki",
+                "author"    => nil,
+                "ppages"    => [self.doc.name] + self.doc.pages
+            ])
+            f = OutputStream( lbsm.doc.path + lbsm.doc.name + h.ext )
+            f.setEncoding("utf-8")
+            cont = h.genPage( lbsm.goChild(lbsm.doc.path, lbsm.doc.name), lbsm.doc.name, true)
+            f.writeText( cont )
+            f.close()
+            lbsm = nil
+            h = nil // deletes the handler once the work is done
+            i ++
+        end
+        //> "Jobe is done!"
+    end
+    
+    // ==== Main parsing method
+    function generateDocNodes(text)
+        /*
+            This is the main method responsible for feeding self.out with
+            document nodes like headers, paragraphs, lists, etc.
+            
+            There are in fact two states within this state machine:
+                - a block based one;
+                - a line based one;
+            So ie in the following snippet :
+            {{{ falcon
+                
+                for i in [0:10]
+                    > i
+            }}}
+            
+            the line "for i in [0:10]"
+                - is in "src" state in a block-based approach;
+                - is in the "default" state in a line-based approach;
+                
+            This allows you to build nice structures as lists, wich ends
+            after a given number of blank lines.
+        */
+        text = text.split("\n")
+        
+        lineStack = ["default0"] // we need it for checking ie if we have 2 consecutive blanks lines
+        m = false   // knowing if a rule matched the line or not
+        wf = false  // waiting for... 
+        lineNum = 1 // keep tracks of line numbers
+        
+        for line in text
+            //line = line.trim()
+            for name, rule in self.states
+                if rule.match(line.trim()) //that's why State needed a match method!
+                
+                    for t in self.transit
+                        if t["from"] == self.stackStates.back() and t["state"] == name
+                            
+                            // Do we need to process the actions before or after the state change ?
+                            lineStack += name
+                            if "push" in t
+                                // Close the previous block if any before changinh state
+                                self.closeLastBlock()
+                                //self.oldState = self.stackStates.back()
+                                self.stackStates.push( t["push"] )
+                            end
+                            
+                            if "pop" in t
+                                self.stackStates.pop()
+                            end
+
+                            if "waitFor" in t
+                                wf = true
+                                waited = strSplit(t["waitFor"], "|")
+                                i=0
+                                if lineStack.len() >= waited.len() - 1
+                                    while i <= waited.len() - 1
+                                        if waited[i] == lineStack[-(i+1)] 
+                                            groups = rule.reg.grab(line)
+                                            //self.endList()
+                                            //break
+                                        else
+                                            break
+                                        end
+                                        i += 1
+                                    end  
+                                end
+                            end
+
+                            if "action" in t
+                                groups = rule.reg.grab(line)
+                                (#("self." + t["action"]))(line, groups)
+                            end
+
+                            m = true
+                            break
+                        end
+                    end
+                end
+            end
+             
+            if m
+                m = false
+            else // no rule matched : we add it into accu
+                self.accu += line
+                lineStack += "default"
+            end
+
+            lineNum ++
+        end
+        
+        self.closeLastBlock()
+        return self.out
+    end
+    
+    // ==== Table of contents
+    function getToc()
+        myFilt = function (x)
+            if x[0] == "header"
+                return true
+            else
+                return false
+            end
+        end
+        
+        return filter( myFilt, self.out)
+    end
+    
+    // ==== Escaping markup
+    function tilda(rawtext)
+        /*
+        This method is used by the handlers to remove the special "~"
+        char (used for escaping) inside paragraph and source code.
+        It is convenient because it allows us to support wiki-markup
+        block-code.
+        Note that to have a tilde "~", you'll need to write it twice: "~~". 
+        */
+        rawtext = strReplace( rawtext, "~~", "###@---") // i know, it's ugly !
+        rawtext = strReplace( rawtext, "~", "")
+        rawtext = strReplace( rawtext, "###@---", "~")
+        return rawtext
+    end
+    
+    // ==== Synonyms
+    function extractSynonyms(text)
+        r = self.special.synonym
+        
+        if r.match(text) and r.capturedCount() > 1
+            synons = strSplit(text[r.captured(1)], "\n")
+            text = r.replace( text, "")
+            for line in synons
+                k = strSplit(line,'=>')
+                syn = strTrim(k[0])
+                replace = strTrim(k[1])
+                self.synons[syn]= replace
+            end
+        end
+        
+        // Do we really need to store them ?
+        for k,v in self.synons
+            text = strReplace( text, k, v)
+        end
+        
+        return text  
+    end
+    
+    // ==== Generates the output
+    function parse(text)
+        text = self.extractSynonyms(text)
+        self.generateDocNodes(text)
+
+        tree = []
+        for el in self.out
+            switch el[0]
+                case "para"
+                    tree += self.handler.makePara(el[1])
+                case "code"
+                    tree += self.handler.makeCode(el[1], el[2])
+                case "header"
+                    tree += self.handler.makeHeader(el[1], el[2])
+                case "list"
+                    tree += self.handler.makeList(el[1])
+                case "hrule"
+                    tree += self.handler.makeHrule()
+                case "toc"
+                    tree += self.handler.makeToc()
+                case "table"
+                    tree += self.handler.makeTable(el[1])
+                case "navi"
+                    //inspect(el[1])
+                    tree += self.handler.makeNavi(el[1]) 
+                default
+                    // This should never happen, but who knows...
+                    tree += "<!-- UNKNOWN BLOCK ENTITY  -->"
+            end    
+        end
+        
+        out = "\n".merge(tree)
+        
+        // generates the child pages (if any) before returning the output
+        if self.doc provides pages and self.doc.pages.len() > 0
+            self.genChildPages()
+        end
+        
+        return out
+    end
+    
+    /*==========================================================================
+                            Actions
+    ==========================================================================*/
+    // ==== Headers
+    function put_header(line)
+        matchedArray = self.states["header"].reg.grab(line)
+        lev = len(matchedArray[1])
+        title = matchedArray[2]
+        self.out += [["header", title, lev]]
+    end
+
+    // ==== Paragraphs
+    function put_para(line)
+        if len(self.accu) > 0
+            self.out += [["para", "\n".merge(self.accu)]]
+            self.accu = []
+        end
+    end
+    
+    // ==== Horizontal Rule
+    function put_hrule(line)
+        self.out += [["hrule"]] 
+    end
+    
+    // ==== Table Of Contents
+    function put_toc(line)
+        self.out += [["toc"]] 
+    end
+
+    // ==== Navigation between pages
+    function put_navi(line, groups)
+        // See also genChildPages() method
+        switch groups[1]
+            // in the main "mainPage" document: {{pages: chap1 , chap2}}
+            case "pages"
+                // we are refering to other pages, so we need to build them
+                for p in strSplit(groups[2], ",")
+                    k = strTrim(p)
+                    if k notin self.doc.pages                    
+                        self.doc.pages += k // strTrim(p)
+                    end
+                end
+                // make the toppage navigation
+                self.out += [ ["navi", ["", self.doc.name, self.doc.pages[0]] ]]
+                return
+                
+            // in the child documents: {{toppage: mainPage}}
+            case "toppage"
+                self.out += [ ["navi", [self.doc.prev, self.doc.top, self.doc.next] ]]
+        end
+    end
+    
+    // ==== Source code handling
+    function get_sourceLangage_plain(line)    
+        // Extract the langage
+        self.lang = "plain"
+    end
+
+    function get_sourceLangage(line)    
+        // Extract the langage
+        self.lang = strTrim(line[3:])
+    end
+    
+    function put_source(line)    
+        self.out += [ ["code", "\n".merge(self.accu), self.lang] ]
+        self.accu = []
+        self.lang = self.defaultLang // reset langage to default
+    end
+    
+    // ==== List processing
+    function make_firstListItem(line, groups)
+        self.listLevel = int(groups[1].len())
+        listType = groups[1][0]
+        switch listType
+            case "#"
+                self.listType = "num"
+            default
+                self.listType = "item"
+        end
+        self.accu = []
+        self.accu += groups[2] // the line without the stars ('*')
+    end
+    
+    function make_ListItem(line, groups)
+        // close the previous item if any
+        self.closeListItem()
+        
+        // Get the level and the first line of a list item
+        self.listLevel = int(groups[1].len())
+        listType = groups[1][0]
+        switch listType
+            case "#"
+                self.listType = "num"
+            default
+                self.listType = "item"
+        end
+        self.accu = []
+        self.accu += groups[2] // the line without the stars ('*')
+    end
+    
+    function endList()
+        // we matched a blank, so empty accumulator for the next item
+        // We reached the end of a list env.
+
+        // close the previous item if any
+        self.closeListItem()
+        self.out += [["list", self.listItems ]]
+        // reset some atributes
+        self.listItems = []
+        // and change the state!
+        self.stackStates.pop()
+    end
+    
+    function closeListItem()
+        if self.listLevel
+            item = "\n".merge(self.accu)
+            self.listItems += [[self.listLevel,self.listType, item]]
+            self.listLevel = nil
+            self.listType  = nil
+            self.accu = []
+        end
+    end
+    
+    // ==== Tables
+    function make_table_item(line, groups)
+        self.accu += groups[0] // the line without the stars ('*')
+    end
+    
+    function put_table(line, groups)
+        self.out += [ ["table", self.accu] ] // "\n".merge(self.accu)] ]
+        self.accu = []
+    end
+    
+    // ==== Close an environment
+    function closeLastBlock(state)
+        if state
+            k = state
+        else
+            k = self.stackStates.back()
+        end
+        
+        if k == "list"
+            self.closeListItem()
+            self.out += [["list", self.listItems ]]
+            return
+        end
+        if k == "default": k = "para"
+        if len(self.accu) > 0
+            self.out += [[k, "\n".merge(self.accu)]]
+            self.accu = []
+        end
+    end
+end
+
+export BlockState
+export Rule
+export LBFSM
+
+/*
+IDEAS:
+
+- call closeLastBlock before pushing a state inside generateDocNodes()
+
+*/

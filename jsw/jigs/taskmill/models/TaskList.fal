@@ -1,0 +1,232 @@
+export TaskList
+
+/**
+ * Gathers data to display the task list.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.19
+ */
+class TaskList(userId, filterId)
+
+	//! All my children (TM)
+	_tasks = []
+
+	// A Task() object; will build tasks from pregathered data.
+	_taskBuilder = nil
+
+	// The filter for this list.
+	filter = nil
+
+	/**
+	 * Constructor.
+	 */
+	init
+		self._taskBuilder = Model.statically('Task')
+		self.filter = Model.instance('TaskListFilter', filterId)
+		self._fill()
+	end
+
+	/**
+	 * Get a all the applicable tasks for the user.
+	 *
+	 * @private
+	 * @return 	nil
+	 */
+	function _fill()
+		// Query for selecting most the task information.
+		// Get the task information.
+		query  = 'SELECT Task.id 			AS id, '
+		query += '       Task.projectId		AS projectId, '
+		query += '       Task.summary 		AS summary, '
+		query += '       Task.description	AS description, '
+		query += '       Task.dateCreated	AS dateCreated, '
+		query += '       Task.dateUpdated	AS dateUpdated, '
+		query += '		 Task.reporterId 	AS reporterId, '
+		query += '		 TaskPriority.id 	AS priorityId, '
+		query += '		 TaskPriority.name 	AS priority, '
+		query += '		 TaskPriority.rank 	AS priorityRank, '
+		query += '		 TaskStatus.id 		AS statusId,  '
+		query += '		 TaskStatus.name 	AS status,  '
+		query += '		 TaskStatus.rank	AS statusRank,  '
+		query += '		 TaskStatus.color	AS statusColor,  '
+		query += '		 TaskRelease.id 	AS releaseId, '
+		query += '		 TaskRelease.name 	AS `release`, '
+		query += '		 TaskCategory.id 	AS categoryId, '
+		query += '		 TaskCategory.name 	AS category, '
+		query += '		 UserExt.fullname 	AS reporter '
+		query += 'FROM Task '
+	   	query += 'JOIN TaskPriority ON (Task.priorityId = TaskPriority.id) '
+	   	query += 'JOIN TaskStatus 	ON (Task.statusId 	= TaskStatus.id) '
+	   	query += 'JOIN TaskRelease 	ON (Task.releaseId 	= TaskRelease.id) '
+	   	query += 'JOIN TaskCategory ON (Task.categoryId = TaskCategory.id) '
+	   	query += 'JOIN UserExt 		ON (Task.reporterId = UserExt.userId ) '
+
+		// Joint the LinkUserTask table if necessary
+		if not isEmpty(self.filter.assignedId)
+	   		query += 'JOIN LinkUserTask ON (LinkUserTask.taskId = Task.id ) '
+		end
+
+		// This line is to allow us to use AND clauses without having to
+		// worry if we have already added a WHERE before hand.
+		query += 'WHERE true '
+
+		// Query params.
+		params = []
+
+		// Category filter.
+		if not isEmpty(self.filter.categoryId)
+			query  += 'AND TaskCategory.id = ? '
+			params += self.filter.categoryId
+		end	
+
+		// Status filter.
+		if not isEmpty(self.filter.statusId)
+			query  += 'AND TaskStatus.id = ? '
+			params += self.filter.statusId
+		end	
+
+		// Priority filter.
+		if not isEmpty(self.filter.priorityId)
+			query  += 'AND TaskPriority.id = ? '
+			params += self.filter.priorityId
+		end	
+
+		// Release filter.
+		if not isEmpty(self.filter.releaseId)
+			query  += 'AND TaskRelease.id = ? '
+			params += self.filter.releaseId
+		end	
+
+		// Assigned filter.
+		if not isEmpty(self.filter.assignedId)
+			query  += 'AND LinkUserTask.userId = ? '
+			params += self.filter.assignedId
+		end	
+
+		// Reporter filter.
+		if not isEmpty(self.filter.reporterId)
+			query  += 'AND Task.reporterId = ? '
+			params += self.filter.reporterId
+		end	
+
+		//  Opened/Closed filter.
+		// It has 3 posibilities:
+		//	if closedPolicy >  0  : show only opened tasks.
+		//	if closedPolicy == 0  : show both opened and closed tasks
+		//	if closedPolicy <  0  : show only closed tasks.
+		if not isEmpty(self.filter.closedPolicy)
+			query += 'AND Task.statusId IN ('
+			query += '	SELECT TS2.id '
+			query += '	FROM TaskStatus AS TS2 '
+			query += ' 	WHERE TS2.closedContext = ? '
+			query += ' 	AND  TS2.projectId = Task.projectId '
+			query += ')'
+			params += self.filter.closedPolicy > 0 ? 0 : 1
+		end
+
+		// Sorting.
+		if not isEmpty(self.filter.primarySort)
+			primeSort = self.filter.primarySort
+			secSort = self.filter.secondarySort
+
+			// Is it priority ranking?
+			if primeSort == 'priority' : primeSort = 'priorityRank'
+			if secSort   == 'priority' : secSort   = 'priorityRank'
+
+			// Is it status ranking?
+			if primeSort == 'status' : primeSort = 'statusRank'
+			if secSort   == 'status' : secSort   = 'statusRank'
+
+			query += 'ORDER BY ' + primeSort
+			query += ' ' + self.filter.sortDir
+			query += ', ' + secSort
+			query += ' ' + self.filter.sortDir
+		else
+			query += 'ORDER BY id '
+		end
+
+		stmt = DB.prepare(query)
+
+		// Get an array of dictionaries.
+		self._tasks = stmt.getRowArray(params)
+
+		// We don't have rows.
+		if self._tasks.len() == 0
+			return
+		end
+
+		taskIdList = []
+		for row in self._tasks
+			taskIdList += row['id']	
+		end
+
+		// Select users assigned to each task.
+		query  = 'SELECT UserExt.userId			AS userId, '
+		query += '		 UserExt.fullname		AS fullname, '
+		query += '		 LinkUserTask.taskId 	AS taskId '
+	    query += 'FROM LinkUserTask '
+	    query += 'JOIN UserExt ON (LinkUserTask.userId = UserExt.userId) '
+		query += 'WHERE LinkUserTask.taskId IN ('
+		query += 	DB.placeholders(taskIdList)
+		query += ')'
+
+		stmt = DB.prepare(query)
+
+		// Get an array of dictionaries.
+		names = stmt.getRowArray(taskIdList)
+
+		// Will hold the mapping from assigned user fullnames and 
+		// user ids to the task assigned.
+		taskFullnameMap = [=>]
+		taskUserIdMap 	= [=>]
+
+		// Add the assigned user fullnames and user ids to each row.
+		for id in taskIdList 	 		 // For each task
+			taskFullnameMap[id] = [] 	 // List of all assigned names (new list per task).
+			taskUserIdMap[id]   = []	 // List of all assigned ids (new list per task).
+			for row in names 			 // For every name matching all tasks.
+				if row['taskId'] == id  
+					taskFullnameMap[id] += row['fullname']	
+					taskUserIdMap[id]	+= row['userId']
+				end
+			end
+		end
+
+		// Add the names to the rows.	
+		for i in [0:self._tasks.len()]
+			taskId = self._tasks[i]['id']
+			self._tasks[i]['assigned']   = taskFullnameMap[taskId]
+			self._tasks[i]['assignedId'] = taskUserIdMap[taskId]
+		end
+	end
+
+	/**
+	 * Get the amount of tasks in this list.
+	 *
+	 * @public
+	 * @return integer
+	 */
+	function len()
+		return self._tasks.len()
+	end
+
+
+	/**
+	 * Overrides the [] operator for reading operations.
+	 */
+	function getIndex__(index)
+		// Make sure the index is within range.
+		if index >= self._tasks.len() : return nil
+
+		// If convert the raw data at this index to a task object if necessary.
+		task = self._tasks[index]
+		if typeOf(task) == DictionaryType
+			task = self._taskBuilder.factory(task)
+			self._tasks[index] = task
+		end
+		
+		return task
+	end
+end

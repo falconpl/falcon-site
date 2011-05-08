@@ -1,0 +1,42 @@
+load core.Action
+
+/**
+ * Default application action.
+ *
+ * This action is executed when no applicable action was found.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ *
+ * @param Jig jig - The Jig that owns this action.
+ */
+ class DefaultAction(jig) from Action(jig)
+
+	/**
+	 * Verify this action.
+	 *
+	 * @return boolean
+	 */
+	function verify()
+		return true
+	end
+
+	/**
+	 * Called when verify() returns false.
+	 *
+	 * @return nil
+	 */
+	 function failure()
+	 end
+
+	/**
+	 * Called when verify() returns true.
+	 *
+	 * @return nil
+	 */
+	function success()
+	end
+end
+

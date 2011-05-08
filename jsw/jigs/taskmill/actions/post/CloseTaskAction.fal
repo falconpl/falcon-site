@@ -1,0 +1,78 @@
+/**
+ * Closes a task.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.8
+ */
+class CloseTaskAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	//! Set the allowed request type.
+	static requestMethod = 2 // Action.POST
+
+	/**
+	 * Verify this action.
+	 *
+	 * Check the form fields of the task page.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		task = Model.statically('Task')
+
+		// Make sure task exist.
+		if not task.exists(self.arg('taskId'))
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'taskId')))	
+		end
+
+		// Make sure there's an close status to set.
+		if not self.arg('closeStatus') or self.arg('closeStatus') == '0'
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('DetailsTemplate', 'closeStatus')), 'closeStatus')	
+		end
+
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+		// Back to the create task screen.
+		self.setView('DetailsView')
+
+		self.setMistakes(Mistake.getAll())
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * Saves the task information and redirects to result page.
+	 * 
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		// Get an instance of a task (if no taskId, it will be empty).
+		task = Model.instance('Task', self.arg('taskId'))
+
+		// Set the task details.
+		task.statusId = self.arg('closeStatus')
+
+		// Close the task.
+		task.commit()
+
+		// Redirect to result page.
+		self.redirect('result', ['code' => 'taskClosed', 'taskId' => self.arg('taskId')])
+	end
+end

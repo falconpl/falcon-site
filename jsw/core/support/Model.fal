@@ -1,0 +1,96 @@
+export Model
+load compiler
+
+/**
+ * Jig runtime Model support.
+ *
+ * A Model is a class which represents some domain specific data. A model knows
+ * both which data it represents, and how to get the data. For example,
+ * a UserInfo model could represent user information, such as username, 
+ * password, and email address. A controller/action/view or other model 
+ * could use UserInfo to query information about the current user. 
+ * The UserInfo class takes care of retrieving the data from it's
+ * sources; be it a database, flatfile, session, cache, web services, or 
+ * any other source. The classes using UserInfo don't need to know how
+ * UserInfo gather it's data; they only need to know what it provides.
+ *
+ * Models allow CAVMU (Controllers/Actions/Views/Models (others)/UserInterface) 
+ * to be decoupled from the physical aspect of data gathering, thereby allowing
+ * the same CAV (controller/Action/View) handler to support different request 
+ * types, such as HTML, web service, WAP, etc.
+ *
+ * This class allows handlers to access model during application runtime.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.5.19
+ */
+class Model
+
+	/**
+	 * Constructor
+	 */
+	init
+		raise Error(0, 'Model is a static only class.')
+	end
+
+	/**
+	 * Loads a model so that it can be used statically.
+	 *
+	 * @static
+	 * @public
+	 * @param string name
+	 * @return Class
+	 */
+	function statically(name)
+		compiler = Compiler()
+		filename = Model.getFullPath(name)
+		mod = compiler.loadFile(filename)
+
+		// Get a static reference.
+		return mod.get(name)
+	end
+
+	/**
+	 * Grab an instance of a model.
+	 *
+	 * @static
+	 * @public
+	 * @param 	string name
+	 * @param 	mixed args [many] - The arguments to be passed to the instance.
+	 * @return	Object
+	 */
+	function instance(name /*, ...args */)
+		compiler = Compiler()
+		filename = Model.getFullPath(name)
+		mod = compiler.loadFile(filename)
+
+		// Create a callable array, which will be used to pass arguments to
+		// instance, if there are any to pass.
+		func = [mod.get(name)]
+
+		for i in [1:paramCount()]
+			func += parameter(i)	
+		end
+
+		return func()
+	end
+
+
+	/**
+	 * Get the full file path to a model.
+	 *
+	 * @static
+	 * @public
+	 * @param 	string name - Name of model.
+	 * @return 	string
+	 */
+	function getFullPath(name)
+		jig = Jig.singleton()
+
+		filename  = jig.getFullPath(jig.getName())  
+		filename += Framework.dirModels + name + Framework.extFalcon
+		return  filename
+	end
+end

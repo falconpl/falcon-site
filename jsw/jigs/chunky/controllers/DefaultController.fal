@@ -1,0 +1,34 @@
+load core.Controller
+
+/**
+ * Default controller for default Jig.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.12
+ *
+ * @param Jig jig - The Jig that owns this controller.
+ * @param Action action - The action that summoned this controller.
+ */
+class DefaultController(jig, action) from Controller(jig, action)
+	/**
+	 * Verify current request.
+	 *
+	 * @return boolean
+	 */
+	function verify()
+		return true
+	end
+
+
+	/**
+	 * Called when verify() returns true.
+	 *
+	 * @return nil
+	 */
+	function success()
+		self.setValue('pageColor', '#CCC')
+	end
+end
+

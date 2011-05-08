@@ -1,0 +1,350 @@
+export DB
+load dbi
+
+/**
+ * Database Abstraction Layer.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.5.20
+ */
+class DB
+	//! Database handle.
+	static db_ = nil
+
+	//! Current transaction handle.
+	static transaction_ = nil
+
+	/**
+	 * Constructor.
+	 */
+	init
+		raise Error(0, 'This is a static only class.')
+	end
+
+	/**
+	 * Start the database.
+	 *
+	 * @static
+	 * @public
+	 * @return string
+	 */
+	function start()
+
+		// The MySql Connection String.
+		connKey  = 'mysql:'
+		connKey += Config.dbHost + ','
+		connKey += Config.dbUser + ','
+		connKey += Config.dbPass + ','
+		connKey += Config.dbDb
+
+		// Connect and start a transaction.
+		DB.db_ = DBIConnect(connKey)
+		DB.transaction_ = DB.db_.startTransaction()
+	end
+
+	/**
+	 * Abort the changes that have been made to the database so far.
+	 *
+	 * @static
+	 * @public
+	 * @return string
+	 */
+	function rollback()
+		DB.transaction_.rollback()
+	end
+
+	/**
+	 * Save the changes that have been made to this database.
+	 *
+	 * @static
+	 * @public
+	 * @return string
+	 */
+	function commit()
+		DB.transaction_.commit()
+	end
+
+
+	/**
+	 * Prepare an SQL statement.
+	 *
+	 * @static
+	 * @public
+	 * @return string
+	 */
+	function prepare(query)
+		return DBStatement(DB.db_, DB.rewritePreparedStmt_(query))
+	end
+
+	/**
+	 * Create X amount of placeholders to be used on a query.
+	 *
+	 * A placehold is in the form :1, :2, etc. 
+	 * This is useful when working with arrays, in we don't know how many
+	 * values it has. The amount of place holders is based on the size of
+	 * 'values'. This method is useful in conjuction with the IN(...) clause.
+	 * 
+	 * @static
+	 * @param Array values - We will get the count of replacements from here.
+	 * @param integer index [optional] - From where will the replacement 
+	 * 										  index will start.
+	 * @public
+	 * @return string
+	 */
+	function placeholders(values)
+		str = ''
+		for i in values
+			str += '?,'
+			forlast: str = strBackTrim(str, ',')
+		end
+
+		return str
+	end
+
+
+	/**
+	 * Report a fatal error.
+	 *
+	 * This function is meant to be used by the database layer, not users.
+	 * 
+	 * @static
+	 * @public
+	 * @param 	DBIError e
+	 * @return 	nil
+	 */
+	function reportError(query, e)
+		if Config.debug
+			> '<br />'
+			> 'SQL Error while executing query: '
+			> '<br />'
+			> '<b>', query, '</b>'
+			> '<br />'
+			> '<pre>'
+			> '</pre>'
+			raise e
+		end
+	end
+
+
+	/**
+	 * Rewrite an user written prepared stmt into the actual internal version.
+	 *
+	 * For instance, this will rewrite:
+	 * SELECT true FROM User WHERE email = ? AND password = ?
+	 * into:
+	 * SELECT true FROM User WHERE email = :1 AND password = :2 
+	 * 
+	 * @static
+	 * @private
+	 * @return string
+	 */
+	function rewritePreparedStmt_(query)
+		pos = 0
+		index = 1
+		while (pos = strFind(query, '?', pos)) != -1
+			query = strReplace(query, '?', ':' + index, pos, pos + 1)
+			++index
+		end
+
+		return query
+	end
+end
+
+/**
+ * Database prepared statement.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.5.20
+ */
+class DBStatement(handle, query)
+	//! The active database transaction.
+	_handle = handle
+
+	//! The unprepared query.
+	_query = query
+
+	/**
+	 * Get the last auto-increment id automatically inserted by the DB.
+	 *
+	 * @public
+	 * @return 	integer
+	 */
+	function getLastAutoId()
+		return self._handle.getLastInsertedId()
+	end
+
+	/**
+	 * Execute a writing operation, such as an UPDATE or INSERT statement.
+	 *
+	 * @public
+	 * @param [...] - Replacements.
+	 * @return integer
+	 */
+	function write(/* replace1, replace2, ... */)
+		func = [self._handle.query, self._query]
+		for i in [0:paramCount()]
+			param = parameter(i)
+			// If param is an array, expand it.
+			if typeOf(param) == ArrayType
+				for p in param : func += p
+			else
+				func += param
+			end
+		end
+
+		// Execute query.
+		try	
+			return func()
+		catch DBIError in e
+			DB.reportError(self._query, e)
+		end
+
+		return nil
+	end
+
+	/**
+	 * Get one value from the result set.
+	 *
+	 * @public
+	 * @param [...] - Replacements.
+	 * @return mixed
+	 */
+	function getOne(/* replace1, replace2, ... */)
+		func = [self._handle.queryOne, self._query]
+		for i in [0:paramCount()]
+			param = parameter(i)
+			// If param is an array, expand it.
+			if typeOf(param) == ArrayType
+				for p in param : func += p
+			else
+				func += param
+			end
+		end
+
+		// Execute query.
+		try	
+			return func()
+		catch DBIError in e
+			DB.reportError(self._query, e)
+		end
+
+		return nil
+	end
+
+	/**
+	 * Get an array representing '1 column to many rows' of data.
+	 *
+	 * @public
+	 * @param [...] - Replacements.
+	 * @return Array
+	 */
+	function getCol(/* replace1, replace2, ... */)
+		func = [self._handle.query, self._query]
+		for i in [0:paramCount()]
+			param = parameter(i)
+			// If param is an array, expand it.
+			if typeOf(param) == ArrayType
+				for p in param : func += p
+			else
+				func += param
+			end
+		end
+
+		// Execute query.
+		try	
+			records = func()
+		catch DBIError in e
+			DB.reportError(self._query, e)
+		end
+
+		rows = []
+		while one = records.fetchArray()
+			rows += one[0]
+		end
+
+		return rows
+	end
+
+	/**
+	 * Get a dictionary representing a row.
+	 *
+	 * @public
+	 * @param [...] - Replacements.
+	 * @return Dictionary
+	 */
+	function getRow(/* replace1, replace2, ... */)
+		func = [self._handle.queryOneDict, self._query]
+		for i in [0:paramCount()]
+			param = parameter(i)
+			// If param is an array, expand it.
+			if typeOf(param) == ArrayType
+				for p in param : func += p
+			else
+				func += param
+			end
+		end
+
+		// Execute query.
+		try	
+			row = func()
+			bless(row)
+			return row
+		catch DBIError in e
+			DB.reportError(self._query, e)
+		end
+
+		return nil
+	end
+
+	/**
+	 * Get an array dictionaries representing the rows.
+	 *
+	 * @public
+	 * @return Array
+	 */
+	function getRowArray(/* replace1, replace2, ... */)
+		func = [self._handle.query, self._query]
+		for i in [0:paramCount()]
+			param = parameter(i)
+			// If param is an array, expand it.
+			if typeOf(param) == ArrayType
+				for p in param : func += p
+			else
+				func += param
+			end
+		end
+
+		// Execute query.
+		try	
+			records = func()
+		catch DBIError in e
+			DB.reportError(self._query, e)
+		end
+
+		rows = []
+		while one = records.fetchDict()
+			bless(one)
+			rows += one
+		end
+
+		return rows
+	end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+

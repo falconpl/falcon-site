@@ -1,0 +1,34 @@
+/**
+ * An generic exception that happens during runtime.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.13
+ */
+class RuntimeError(msg, id) from Error(id, msg)
+
+	/**
+	 * Can be used to compare this object in a boolean method.
+	 *
+	 * By having this method, we can have functions return objects
+	 * of this type. The calling object can compare if the returned
+	 * value is false, and if so, it can assume that it's an exception
+	 * value containing information about the failure (if the function
+	 * was created with such return semantics.)
+	 * 
+	 * @public
+	 * @return 	integer
+	 */
+	function compare(obj)
+		inspect(obj)
+		if obj == nil or typeOf(obj) == BooleanType or typeOf(obj) == NumericType
+			return 0
+		end
+
+		// Let the VM do the rest of the comparison.
+		return nil
+	end
+end
+
+export RuntimeError

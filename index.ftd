@@ -1,0 +1,28 @@
+<? load site_functions
+   if ParseShortId(): return
+   
+   // Get the time when the VM started working on this page.
+   pageBegin = seconds()
+
+   // Checks if a login cookie has been set, or set one if useful.
+   // (Notice: Login transactions are actually performed on a separate page).
+   checkLogin()
+
+   // Check requests to be fulfilled before loading the page
+   checkRequest()
+
+   // Reads the page ID from the environment and load proper metadata.
+   setPageId()
+
+   // writes the HTML header
+   header()
+?>
+<!-- body already given by header -->
+<? include( "login_mask.ftd" ) ?>
+<div id="main_contents">
+<div class="main_column">
+   <? loadContent() ?>
+</div>
+<? loadRightCol() ?>
+</div>
+<? export pageBegin; footer() ?>

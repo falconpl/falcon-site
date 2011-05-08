@@ -1,0 +1,105 @@
+//===============================================
+// Expands (efficiently) bbcode into HTML
+
+function bbExpand( strInput, streamOut )
+   pos = 0
+
+   // A trick, but I am in a hurry; will fix later.
+   strInput = strReplace( strInput, "\n", "<br/>" )
+
+   while (posNext = strFind( strInput, "[", pos ) ) >= 0
+      posEnd = strFind( strInput, "]", posNext )
+
+      if posEnd < posNext
+         // we're done
+         break
+      end
+
+      // write what we left behind
+      streamOut.writeText( strInput, pos, posNext )
+      code = strInput[ posNext+1 : posEnd ]
+      streamOut.flush()
+
+      // special codes
+      if strFind( code, "url" ) == 0
+         urlEnd = strFind( strInput, "[/url", posEnd)
+         inData = strInput[ posEnd + 1: urlEnd ] // ok also if -1
+
+         // have we an = in the url?
+         if ( eqpos = strFind( code, "=" ) )>0
+            locName = code[eqpos+1:]
+         else
+            locName = inData
+         end
+
+         streamOut.writeText( "<a target=\"_blank\" href=\"" + locName + "\">"+inData+"</a>" )
+         if urlEnd == -1: break;
+         pos = strFind( strInput, "]", urlEnd )
+         if pos != -1: pos++
+         continue
+      end
+
+      if strFind( code, "img" ) == 0
+         urlEnd = strFind( strInput, "[/img", posEnd)
+         inData = strInput[ posEnd + 1: urlEnd ] // ok also if -1
+         streamOut.writeText( "<img source=\"" + inData + "\"/>" )
+         if urlEnd == -1: break;
+         pos = strFind( strInput, "]", urlEnd )
+         if pos != -1: pos++
+         continue
+      end
+
+      if strFind( code, "code" ) == 0
+         urlEnd = strFind( strInput, "[/code", posEnd)
+         inData = strInput[ posEnd + 1: urlEnd ] // ok also if -1
+         streamOut.writeText( "<pre>" + inData + "</pre>" )
+         if urlEnd == -1: break;
+         pos = strFind( strInput, "]", urlEnd )
+         if pos != -1: pos++
+         continue
+      end
+
+      if (posColon = strFind( code, ":" )) >0
+         code = code[0:posColon]
+      end
+
+      switch code
+         case "b"
+            streamOut.writeText( "<b>" )
+
+         case "/b"
+            streamOut.writeText( "</b>" )
+
+         case "i"
+            streamOut.writeText( "<i>" )
+
+         case "/i"
+            streamOut.writeText( "</i>" )
+
+         case "list"
+            streamOut.writeText( "<ul>" )
+
+         case "/list"
+            streamOut.writeText( "</ul>" )
+
+         case "*"
+            streamOut.writeText( "<li>" )
+      end
+
+      // else just go on
+      pos = posEnd + 1
+      streamOut.flush()
+   end
+
+   // last one
+   if pos >= 0 and pos < strInput.len()
+      if posNext > 0
+         streamOut.writeText( strInput, pos, posNext )
+      else
+         streamOut.writeText( strInput, pos )
+      end
+   end
+end
+
+export bbExpand
+

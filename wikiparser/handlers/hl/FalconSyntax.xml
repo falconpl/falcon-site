@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rules>
+<rule from="default" pattern="(#!/usr/bin/falcon)" useStyle="falShebang" />
+
+<rule from="default" pattern="(\b[0-9A-Ea-ex\.\+-_]+\b)" useStyle="Integer" />
+
+<rule from="default" pattern="\b(default|try|case|catch|continue|select|while|loop|for|forfirst|formiddle|forlast|end|if|elif|else|break|switch|inspect)\b" useStyle="falKeywords" />
+
+<rule from="default" pattern="\b(bless|dropping|return|launch|from|global|const|sender|catch|raise|give|pass|directive|load|len|export|enum|try|select|object|print|printl)\b" useStyle="falKeywords2" />
+
+<rule from="default" pattern="\b(NilType|IntegerType|NumericType|RangeType|MemBufType|FunctionType|StringType|ArrayType|DictionaryType|ObjectType|ClassType|MethodType|ExtMethodType|ClassMethodType|LibFuncType|OpaqueType)\b" useStyle="falTypes" />
+
+<rule from="default" pattern="\b(allp|anyp|all|any|choice|iff|lit|map|filter|reduce|dolist|xmap|lbind| &amp;self|eval|floop|times|downto|upto|oob)\b" useStyle="falKeywords3" />
+
+<rule from="default" pattern="\b(true|false|nil|on|fself|self)\b" useStyle="falSpecial" />
+
+<rule from="default" pattern="\b(macro|cascade|innerfunc|init|static|def)\b" useStyle="falEntities" />
+
+<rule from="default" pattern="\b(class|object)\b(\s+)(\w+)" fromGroups="falEntities2-fal-className" />
+<rule from="default" pattern="\b(function)\b(\s+)(\w+)" fromGroups="falEntities2-fal-funcName" />
+<rule from="default" pattern="(\w+\s*)(\=)(\s*)(innerfunc|function)" fromGroups="falEntities2-falOperators-fal-funcName" />
+
+<rule from="default" pattern="\b(and|or|in|notin|not|from|to)\b" useStyle="falLogic" />
+<rule from="default" pattern="(\.|<|>|@|=|:|\+|-|\*|/|\^|\?|\!|%)" useStyle="falOperators" />
+<rule from="default" pattern="(,|;|\[|]|\(|\)|\{|\})" useStyle="falPars" />
+<rule from="default" pattern='(")' useStyle="falDoubleString" push="falDoubleString" />
+<rule from="falDoubleString" pattern='(?<!\\|")(")' useStyle="falDoubleString" pop="default" />
+<rule from="default" pattern="(')" useStyle="falSingleString" push="falSingleString" />
+<rule from="falSingleString" pattern="(?<!'|\\)(')" useStyle="falSingleString" pop="default" />
+<rule from="default" pattern="(/\*)" useStyle="falBigComment" push="falBigComment" />
+<rule from="falBigComment" pattern="(\*/)" useStyle="falBigComment" pop="default" />
+<rule from="default" pattern="(//.*$)" useStyle="falComment" />
+
+</rules>
+

@@ -1,0 +1,52 @@
+load library.File
+/**
+ * Handles the homepage login form.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.12
+ */
+class QuickViewAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	/**
+	 * Verify this action.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		if not self.arg('taskId') or not self.arg('elemId') 
+			msg = 'elemId and taskId' + self.arg('taskId') + ', ' + self.arg('elemId')
+			Mistake.push(Lang('MISTAKES', 'invalidValue', msg))
+		end
+
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+		self.setMistakes(Mistake.getAll())
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		self.setView('QuickViewView')
+	end
+end

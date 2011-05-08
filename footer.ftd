@@ -1,0 +1,12 @@
+<!-- end #mainContent --></div>
+<!-- This clearing element should immediately follow the #mainContent div in order to force the #container div to contain all child floats -->
+<br class="clearfloat" />
+<div class="flacon_elapsed"/>
+Elapsed time: <?
+   import pageBegin
+   now = seconds()
+   f = Format(".3")
+   >> f.format( now - Request.startedAt ) ?> secs. (VM time <?=f.format( now - pageBegin )?> secs.)
+</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+{{pages:one}}
+
+= The Falcon wikiParser module
+
+== Block formating
+
+When _wp parses a text file, it separates elements in blocks:
+
+* Headers
+* Paragraphs
+* Lists
+* Horizontal Rules
+* Table of Contents
+* Source Code
+* Synonyms
+
+You just have to know that to build a block, a newline is needed 
+//**before and after**// it.
+
+Once the separation has ended, //inline formating// rules are applied. 
+
+== Inline formating
+
+You can have **bold**, //italic//, --deleted--, __underlined__. Also, 
+you can --**//mix them//**-- as ..__//you need//__...
+
+sup^^text^^ and sub..text.. and here is a linebreak: /
+Special HTML chars like the following ones are automatically escaped: & < > " /
+
+Also, you can have {{monospaced text}}, and a horizontal rule like this : 
+
+---
+
+Links are like this: [http://www.falconpl.org|The Falcon programming langage]
+Internal one: [kib/index.html|The Index page]
+
+=== Escaping rules
+
+That's very simple, just put a tilde "~~" before each //inline rule// so that 
+it will not be parsed, so you would have:
+
+~**bold**, ~//italics// , etc.
+
+Note that tildes are also used inside quotations, but that there's no conflict.
+Howerver, there's a problem I've found : do not terminate a line by italics,
+because it will then be interpreted as a linebreak. I have to fix this. 
+
+=== Images
+
+Images can be centered, left or right aligned (you'll have to tweak you css file for that):
+
+[[im http://falconpastebin.appspot.com/static/i/FalconIcon.png|http://falconpastebin.appspot.com/static/i/FalconIcon.png|center|Falcon logo]]
+
+[[im http://falconpastebin.appspot.com/static/i/FalconIcon.png|http://falconpastebin.appspot.com/static/i/FalconIcon.png|left|Falcon logo]]
+
+[[im http://falconpastebin.appspot.com/static/i/FalconIcon.png|http://falconpastebin.appspot.com/static/i/FalconIcon.png|right|Falcon logo]]
+
+== Blocks
+
+Block like markup:
+
+=== Quotations
+
+A test with a **True** quotation: [~Falcon is GREAT~]
+
+== Source code
+
+Some source code like the following Falcon one:
+
+{{{ fal
+for i in ["a","b","c"]
+    printl(i)
+    > i
+    >> i
+end
+}}}
+
+Some other langages are supported, like **C++** :
+
+{{{ cpp
+//: C07:Stash3.h
+// Function overloading
+#ifndef STASH3_H
+#define STASH3_H
+
+class Stash {
+  int size;      // Size of each space
+  int quantity;  // Number of storage spaces
+  int next;      // Next empty space
+  // Dynamically allocated array of bytes:
+  unsigned char* storage;
+  void inflate(int increase);
+public:
+  Stash(int size); // Zero quantity
+  Stash(int size, int initQuantity);
+  ~Stash();
+  int add(void* element);
+  void* fetch(int index);
+  int count();
+};
+#endif // STASH3_H ///:~
+}}}
+
+== Lists
+
+Normal list items starts with the {{*}} symbol, followed by a space : 
+
+* One **item here**.
+
+** Second one there
+
+*** Third
+
+* Then first on
+two lines {{mono}}.
+
+** Second
+
+* one
+** two
+
+[~Remember that a list finishes only after a blank new line !~]
+
+You can also use enumerated lists with the {{#}} symbol : 
+
+# One
+# Two
+# Three
+## Three.1
+## Three.2
+
+
+== Tables
+
+Let's see if they're working fine :
+
+|=Column1|=Column2|=Column3|=Column4|
+|Cell 1.1|Cell 1.2|Cell 1.3|Cell 1.4|
+|Cell 2.1|Cell 2.2|Cell 2.3|Cell 2.4|
+|Cell 3.1|Cell 3.2|Cell 3.3|Cell 3.4|
+

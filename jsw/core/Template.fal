@@ -1,0 +1,215 @@
+export Template
+
+load library.File
+load compiler
+
+// This is for the templates to access data.
+X = [=>]
+export X
+
+/**
+ * Represents a displayable template.
+ *
+ * Use Template.factory() to instantiate templates.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.15
+ *
+ * @param Jig jig - The Jig that owns this view.
+ * @param string template - The name of the template.
+ */
+class Template(jig, template) from Service(jig)
+
+	//! Name of the template to compile.
+	_compiler		= nil
+
+	_template 		= template
+	_templateDir 	= nil
+
+	/**
+	 * Constructor
+	 */
+	init
+		// The feathers compiler.
+		self._compiler = Compiler()
+
+		// Create the full path to the templates.
+		self._templateDir  = Config.installPath + '/' + Framework.dirJigs 
+		self._templateDir += jig.getName() + '/' + Framework.dirTemplates
+ 	end
+
+	/**
+	 * Execute the template.
+	 *
+	 * @public
+	 * @return nil
+	 */
+	function execute()
+		self._process()	
+	end
+
+	/**
+	 * Load a template's language file. 
+	 * 
+	 * @private
+	 * @param string templateName - Template for which to get info.
+	 * @return nil
+	 */
+	function _loadTemplateI18N(templateName)
+		// Get the current language.
+		// It was stored here by the Jig.
+		data = self.getValuesDict()
+		if data: lang = data[Framework.keyJig][Framework.keyI18N]
+
+		// Set a default, just in case it's not present (which should be).
+		if not lang 
+		   	lang = Config.defaultLang
+		end
+
+		// See if the localized file exists.
+		filename  = self.getJig().getFullPath(self.getJig().getName())
+		filename += Framework.dirI18N + lang + '/' + templateName 
+		filename += Framework.extFalcon
+
+		// This page doesn't have localized settings.
+		if not File.exists(filename) : return 
+
+		// Create the module name.
+		modName  = Framework.dirJigs + self._jig.getName()
+		modName += '/' + Framework.dirI18N + lang + '/' + templateName
+		modName  = strReplace(modName, '/', '.')
+
+		// Get the lang string.
+		
+		self._compiler.path = Config.installPath
+		mod = self._compiler.loadByName(modName)
+		info = mod.get('__main__')()
+		info = mod.get(Framework.keyI18N)
+
+		// Create dictionary for lang strings, if it doesn't exist.
+		try
+			tmp = data[Framework.keyI18N]
+		catch AccessError
+			data[Framework.keyI18N] = [=>]
+		end
+
+		// Merge with current language strings.
+		for key, value in info
+			data[Framework.keyI18N][key] = value
+		end
+
+		// Set all the values back.
+		self.setValuesDict(data)
+	end
+
+	/**
+	 * Run the requested template.
+	 *
+	 * @private
+	 * @return string
+	 */
+	function _process()
+		jig = self.getValue('jig')
+		jig['request'] = Template.Saran_request
+		self.setValue('jig', jig)
+
+		// Set an include function.
+		self.setValue('include', self.Saran_include)
+
+		// Set the link creation function.
+		self.setValue('link', self.Saran_link)
+
+		// Include the template.
+		self.Saran_include(self._template)
+	end
+
+	/**************************** STATICS ********************************/
+
+	/**
+	 * Check if a template exists.
+	 *
+	 * @static
+	 * @public
+	 * @param	string jigName - Name of jig where to search for the template.
+	 * @param 	string 	name - Name of the template file to check.
+	 * @return	boolean
+	 */
+	function exists(jigName, name)
+		return File.exists(Template.getFullPath(jigName, name))
+	end
+
+	/**
+	 * Get a template handler instance based on it's name.
+	 *
+	 * @static
+	 * @public
+	 * @param 	string jig - The owning Jig.
+	 * @param 	string template - Name of the template file, minus extension.
+	 * @return 	Template	
+	 */
+	function factory(jig, template)
+		return Template(jig, template)
+	end
+
+	/**
+	 * Get the full path to a template file.
+	 *
+	 * @static
+	 * @param 	string jigName - Name of jig where to search to action class.
+	 * @param 	string name - Name of template
+	 * @return 	string
+	 */
+	function getFullPath(jigName, name)
+		return Service.getFullPath(jigName, 
+								   Framework.dirTemplates, 
+								   name,
+								   Framework.extTemplate)
+	end
+
+	/***************************** Saran Functions ********************/
+
+	function Saran_include(name)
+		// Load the applicable i18n settings for this template.
+		self._loadTemplateI18N(name)
+
+		// Load the template file.
+		filename = Template.getFullPath(self.getJig().getName(), name)
+		mod = self._compiler.loadFile(filename)
+
+		data = self.getValuesDict()
+		bless(data)
+
+		// Set the Saran magic object.
+		try: mod.set('X', data)
+
+		// Run the template.
+		mod.get('__main__')()
+	end
+
+	function Saran_link(action /*, GET params...*/)
+		params = [=>]
+
+		// Loop through the params and format them into a dict.
+		if paramCount() > 1
+			for i = 1 to paramCount() - 1
+				get = parameter(i)
+				keyValue = strSplitTrimmed(get, '=', 2)		
+				if keyValue.len() == 2
+					value = keyValue[1]
+				else
+					value = ''
+				end
+
+				params[keyValue[0]] = value
+			end
+		end
+
+		return URL(action, params).toString()	
+	end
+
+	function Saran_request(name)
+		return Request.getField(name, '')
+	end
+end

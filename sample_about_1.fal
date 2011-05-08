@@ -1,0 +1,27 @@
+// return a square of the argument
+function sqr( a )
+   return a*a
+end
+
+// create an object that extracts the (base)nth radix of an argument
+// i.e.
+// tenth_radix = radix_of( 10 )
+// > tenth_radix.extract( exp(50) )   --> extracts the tenth radix of 50^e
+
+class radix_of( base )
+   _base = base
+
+   function extract( value )
+      return value ** (1/self._base)
+   end
+end
+
+//create a functional "absolute" through the math sqr(x) operation
+func_abs = .[ cascade .[      // this is the functional sequence operator
+   sqr                        // our square argument
+   radix_of( 2 ).extract      // get the extract method of an instance of square root.
+   ]
+]
+
+// then call it
+> func_abs( -4 )              // shall be 4

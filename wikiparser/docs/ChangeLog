@@ -1,0 +1,18 @@
+== 19.05.2009 :
+   
+- LBSM has now an itemMaker method used by all the handlers;
+- added XHTML Lists handling thanks to the new xhtml_makeList 
+method;
+- changed the Table of contents Regex so that it handles spaces;
+
+== 18.05.2009 :
+    
+- Added Synonyms;
+- Fixed hard coded paths;
+
+== 17.04.2009 :
+
+- Added bullet lists, and escaping.
+- Changed all callbacks functions to :
+(#("self._"+name))(reg.grab(line))
+following the tips of Jonnymind. 

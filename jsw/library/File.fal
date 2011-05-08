@@ -1,0 +1,156 @@
+/**
+ * File operations.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.14
+ */
+
+// Export everything in this file.
+export
+
+class File
+
+	/**
+	 * Check if a file exist.
+	 *
+	 * @static
+	 * @param   string path - The path of the file to check.
+	 * @return	boolean
+	 */
+	function exists(path)
+		// Check the requested jig exists.
+		result = fileType(path)
+
+		// We should check agains constant instead of -1 but I
+		// don't know how to import the FILE_TYPE_NOTFOUND constant
+		return result != -1
+	end
+
+	/**
+	 * Removes a file.
+	 *
+	 * @static
+	 * @param   string path - The path of the file to remove.
+	 * @return	boolean
+	 */
+	function remove(path)
+		try
+		 	fileRemove(path)
+		catch IoError
+			return false
+		end
+
+		return true
+	 end
+
+
+	/**
+	 * Read the contents of a file.
+	 *
+	 * @static
+	 * @param   string path - The path of the file to read.
+	 * @return	string
+	 */
+	function readContent(path)
+		// Open for reading.
+		stream = InputStream(path)
+
+		// Get file size.
+		stream.seekEnd(0)
+		size = stream.tell()
+		stream.seek(0)
+
+		// Read contents.
+		buffer = strBuffer(size)
+		stream.readText(buffer)
+		stream.close()
+
+		return buffer
+	end
+
+	/**
+	 * Write some contents to a file.
+	 *
+	 * @static
+	 * @param   string path - The path of the file to write the contents.
+	 * @param 	string content - The content to write to the file.
+	 * @return	nil
+	 */
+	function writeContent(path, content)
+		// Open for reading.
+		stream = OutputStream(path)
+		stream.setEncoding('utf-8')
+
+		// Read contents.
+		stream.writeText(content)
+		stream.close()
+	end
+
+	/**
+	 * Serialize a Falcon item into a file.
+	 *
+	 * @static
+	 * @param   string path - The path of the file to unserialize.
+	 * @return	nil
+	 */
+	function serialize(path, item)
+		// Open for writing.
+		stream = OutputStream(path)
+		stream.setEncoding('utf-8')
+
+		item.serialize(stream)
+		stream.close()
+	end
+
+
+	/**
+	 * Deserialize a file into a Falcon item.
+	 *
+	 * @static
+	 * @param   string path - The path of the file to unserialize.
+	 * @return	mixed
+	 */
+	function deserialize(path)
+		if not File.exists(path) : return nil
+
+		// Open for reading.
+		stream = InputStream(path)
+		stream.setEncoding('utf-8')
+
+		try
+			item = deserialize(stream)
+			stream.close()
+		catch in e
+			return nil
+		end
+
+		return item
+	end
+
+	/**
+	 * Create a random name, suitable for a filename.
+	 *
+	 * @static
+	 * @public
+	 * @param 	integer charCount - How many chars the name is to have.
+	 * @param 	Array exclude [optional] - a list of chars to exclude from the generation.
+	 * @return 	string
+	 */
+	function getRandomName(charCount, exclude)
+		id  = ''
+		if not exclude : exclude = []
+		available = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
+		for i = 0 to charCount - 1
+			while true
+				j   = available[random(available.len() - 1)]
+				if j in exclude : continue
+				id += j
+				break
+			end
+		end
+
+		return id
+	end
+end

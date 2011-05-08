@@ -1,0 +1,257 @@
+<?
+   // get project data
+   query="select name from projects " +
+         "where project_id=:1"
+
+   r = connectDB().query( query, project_id )
+   r.next()
+   prj_name = r.asString(0)
+
+   // read the clearance level
+   clearance = checkPrjRights( project_id )
+   con = connectDB()
+
+   if clearance == "admin"
+      switch Request.getField( "req", "" )
+         case "add_release"
+            add_release()
+         case "del_release"
+            del_release( Request.getField( "rel_id" ), Request.getField( "rel_name" ) )
+         case "set_official"
+            setOfficialRelease( Request.getField( "rel_id" ) )
+         case "set_latest"
+            setLatestRelease( Request.getField( "rel_id" ) )
+      end
+   end
+
+   // determine official and latest release
+   r = con.query( "select latest_release, official_release from projects where project_id=:1", project_id )
+   if r.getRowCount() == 0: raise "Project ID \"$project_id\" not found in database"
+   latest_release, official_release = r.fetchArray()
+
+   // load all the releases associated with this project; we're going to need them
+   releases = []
+   r = con.query( "select * from project_releases where project_id=:1 order by rel_id desc", project_id )
+
+   while (data = r.fetchDict())
+      // send the release in the correct place.
+      switch data['rel_id']
+
+         case latest_release
+            latest_data = data
+
+         case official_release
+            official_data = data
+
+         default
+            releases += data
+      end
+   end
+?>
+<style type="text/css" media="all">@import "styles/falcon_tabs.css";</style>
+<script language="javascript">
+function createDL()
+{
+   window.open("popup_manage_dl.ftd?project_id=<?=project_id?>" +
+         "&project_name=" + escape( "<?=prj_name?>" ),
+         '_blank','scrollbars=yes,resizable=yes,width=950,height=700');
+}
+
+function updateFree()
+{
+   window.open("popup_cleanup_dloads.ftd?project_id=<?=project_id?>" +
+         "&project_name=" + escape( "<?=prj_name?>" ),
+         '_blank','scrollbars=yes,resizable=yes,width=700,height=500');
+}
+
+function openChangelog( rel_id )
+{
+   window.open("popup_show_changelog.ftd?rel_id=" + rel_id,
+         '_blank','scrollbars=yes,resizable=yes,width=700,height=500');
+}
+
+function openEditWnd( rel_id )
+{
+   window.open("popup_edit_rel.ftd?project_id=<?=project_id?>&rel_id=" + rel_id,
+         '_blank','scrollbars=yes,resizable=yes,width=700,height=500');
+}
+
+function openUpdateWnd( rel_id, rel_name )
+{
+   window.open("popup_update_rel.ftd?rel_id=" + rel_id
+         + "&prj_id=<?=project_id?>"
+         + "&rel_name=" + escape( rel_name ),
+         '_blank','scrollbars=yes,resizable=yes,width=700,height=500');
+}
+
+function openDeleteWnd( rel_id, rel_name )
+{
+   if ( confirm( "Do you really want to delete release \"" + rel_name + "\"?" ) )
+      window.location = "?page_id=<?=page_id?>&prj_id=<?=project_id?>"+
+         "&sid=<?=sid?>&req=del_release&rel_id=" + rel_id + "&rel_name="+escape(rel_name);
+}
+</script>
+<h1><?=prj_name?> downloads</h1>
+<? if clearance == "admin" ?>
+<?
+   include("relInfo.ftd")
+?>
+<p>Admin menu:</p>
+<ul>
+<li><a href="javascript:createDL()">Manage downloads</a><li>
+<li><a href="javascript:updateFree()">Cleanup downloads</a></li>
+<li><form action="?page_id=<?=page_id?>" method="POST">
+<input type="hidden" name="prj_id" value="<?=htmlEscape(project_id)?>"/>
+<input type="hidden" name="sid" value="<?=htmlEscape(sid)?>"/>
+<input type="hidden" name="req" value="set_official"/>
+Set Official Release:&nbsp;<? makeRelSelect("rel_id") ?>
+&nbsp;<input type="submit" value="Update"/>
+</form>
+</li>
+<li><form action="?page_id=<?=page_id?>&amp;prj_id=<?=project_id?>&amp;sid=<?=sid?>" method="POST">
+<input type="hidden" name="req" value="set_latest"/>
+Set Latest Release:&nbsp;<? makeRelSelect("rel_id") ?>
+&nbsp;<input type="submit" value="Update"/>
+</form>
+</li>
+</ul>
+<? include("addRelease.ftd" ) ?>
+<? end ?>
+<div class="falcon_main_download"><?
+   if official_data
+      MakeRelease( official_data, "Official Release", "falcon_official_release" )
+   else
+      > "<div class=\"falcon_official_release\">"
+      > '<h1>Official Release</h1>'
+      > '<hr/>'
+      >> "<i>The project has not yet issued an official release.</i></div>"
+   end
+
+   if latest_data: MakeRelease( latest_data, "Latest Release", "falcon_latest_release" )
+?>
+</div>
+<?
+   MakeDownloads()
+   if releases: MakeOtherReleases()
+
+   function MakeDownloads()
+      con = connectDB()
+
+      // get the other dloads associated with this project.
+      r = con.query( "select * from project_dloads where rel_id is null and project_id=:1 and relevant=1", project_id )
+      if r.getRowCount() > 0
+         > "<hr style=\"clear: both;\"/>"
+         > "<div class=\"falcon_downloads\">"
+         > "<h2 style=\"clear: both;\">Other related downloads</h2>"
+         MakeDloadSet( r )
+         >"</div>"
+      end
+   end
+
+   function MakeOtherReleases()
+      > "<hr style=\"clear: both;\"/>"
+      > "<div class=\"falcon_downloads\">"
+      > "<h2 style=\"clear: both;\">Other releases in this project</h2>"
+      for r in releases
+         MakeRelease( r, nil, "falcon_release" )
+      end
+      > "</div>"
+   end
+
+   //========================================================
+
+   function add_release()
+      query = "insert into project_releases (project_id, rel_name, changelog, free_text) "+
+              "values (:1, :2, :3, :4)"
+
+      con = connectDB()
+      con.query( query,
+         project_id,
+         Request.posts["Release_name"],
+         Request.posts["Release_changelog"],
+         Request.posts["Release_comments"]
+      )
+      > @"<b>Added new release \"$( Request.posts['Release_name'] )\"</b>"
+   end
+
+   function del_release( rel_id, rel_name )
+      con= connectDB()
+      con.query( "delete from project_releases where rel_id=:1", rel_id )
+      > @"<b>Deleted release \"$( rel_name )\"</b>"
+   end
+
+   function setOfficialRelease( rel_id )
+      con= connectDB()
+      if rel_id
+         con.query( "update projects set official_release=:1 where project_id=:2",
+            rel_id, project_id )
+      else
+         con.query( "update projects set official_release=null where project_id=:1",
+            project_id )
+      end
+      > @"<b>Changed official release</b>"
+   end
+
+   function setLatestRelease( rel_id )
+      con= connectDB()
+      if rel_id
+         con.query( "update projects set latest_release=:1 where project_id=:2",
+            rel_id, project_id )
+      else
+         con.query( "update projects set latest_release=null where project_id=:1",
+            project_id )
+      end
+      > @"<b>Changed latest release</b>"
+   end
+
+?>
+<? function MakeDloadSet( r ) ?>
+   <table width="0" cellspacing="2" cellpadding="5">
+   <tr style="border:1px"><th>File</th><th>Description</th><th>Type</th></tr>
+   <? while ( dload = r.fetchDict() ) ?>
+      <? if dload['dl_type'] == 'text' ?>
+      <tr><td><a target="_blank" href="project_dl/<?=project_id?>/<?=dload['sysres'] ?>"><?=dload['sysres'] ?></a></td><td><?=dload['description']?></td><td><?=dload['dl_type']?></td></tr>
+      <? else ?>
+      <tr><td><a href="project_dl/<?=project_id?>/<?=dload['sysres'] ?>"><?=dload['sysres'] ?></a></td><td><?=dload['description']?></td><td><?=dload['dl_type']?></td></tr>
+      <? end ?>
+   <? end ?>
+   </table>
+<? end ?>
+
+<? function MakeRelease( data, title, cls ) ?><div class="<?=cls?>">
+   <? if title ?>
+      <h1><?=title?></h1>
+      <hr/>
+   <? end ?>
+   <div style="position: relative;">
+   <h2><?=data['rel_name']?></h2>
+   <? if clearance ?>
+      <div class="news_actions">
+         <a href="javascript:openEditWnd('<?=data['rel_id']?>');">Edit</a>
+         <? if clearance == "admin" ?>
+            <br/><a href="javascript:openUpdateWnd('<?=data['rel_id']?>', '<?=htmlEscape(data['rel_name'])?>');">Update</a>
+            <br/><a href="javascript:openDeleteWnd('<?=data['rel_id']?>', '<?=htmlEscape(data['rel_name'])?>');">Delete</a>
+         <? end ?>
+      </div>
+   <? end ?>
+   </div>
+   <p><?=data['free_text']?></p>
+   <? if data['changelog'] ?>
+      <p class="falcon_release_open_changelog"><a href="javascript:openChangelog('<?=data['rel_id']?>');">...ChangeLog</a></p>
+   <? end ?>
+   <?
+      // get the dloads associated with this rel_id
+      r = con.query( "select * from project_dloads where rel_id=:1", data['rel_id'] )
+      MakeDloadSet( r )
+   ?>
+   </div>
+<? end ?>
+
+<? function makeRelSelect( name ) ?>
+   <select name="<?=name?>">
+   <option value="">Reset</option>
+   <? for r in releases ?>
+      <option value="<?=r['rel_id']?>"><?=htmlEscape(r['rel_name'])?></option>
+   <? end ?>
+   </select>
+<? end ?>

@@ -1,0 +1,50 @@
+<table border="0" cellspacing="10">
+<TR><TD valign="top">
+<H2>Wiki Documentation</H2>
+<P>A growing documentation is being maintained in the <a href="http://www.falconpl.org/wiki">wiki documentation section</a>.
+The area provies details on bleeding edge features, technical articles and the developers diaries.</P>
+<H2>Online documents</H2>
+<P>The Falcon Documentation Project is providing a set of online documents which are related with the
+Falcon Programming Language.</P>
+<P>The documents in this page and in the related pages are released under the
+"GNU Free Documentation License 1.2" that can be found at <a href="http://www.gnu.org/copyleft/fdl.html">http://www.gnu.org/copyleft/fdl.html</a>.</P>
+<H3>The survival guide</H3>
+<P>A cross between a tutorial and a reference guide, the <a href="http://www.falconpl.org/docs/survival/survival.html">survival guide</a>
+is an entry level document that is aimed both to first time users and script specialists.
+<P>See below for a downloadable PDF version (with indices).
+<H3>The Showdown</H3>
+<P>It's a brief introduction to the language, and an exposition of the most
+interesting and peculiar features of Falcon.
+<P>Download the <a href="http://www.falconpl.org/docs/showdown/showdown.html">Showdown</a>.
+<P>See below for a downloadable PDF version (with indices).
+<H3>The function reference</H3>
+The complete reference of functions and modules currently available for falcon is
+<a href="http://falconpl.org/project_docs/core/">here</a>. See below for a downloadable PDF version (with indices).
+
+<H3>The Command Line Guide</H3>
+<P>A guide to the tools to run falcon scripts directly (i.e. outside embedding applications) is available
+<a href="http://www.falconpl.org/docs/cmdline/cmdline.html">here</a>. See below for a downloadable PDF version (with indices).
+
+<H3>What's new about Falcon?</H3>
+<P>Or in other words, why should I go for Falcon when there are so many other good languages out there?
+<a href="http://www.falconpl.org/?page_id=whatsnew">Follow this link to discover it</A>!
+
+<H3>The Falcon Programming Language License</H3>
+<P>Falcon is an open source project. You can copy it, study it, modify it, and use it in your application,
+even commercial or closed source ones. Due the relevance of the object code which can be produced with Falcon (the Falcon modules) and the importance of being an embeddable system, the Falcon Project has adopted a license based on the Apache License which treates specifically those two entities.
+</P>
+<p>The <a href="/?page_id=license_comment">commentary to the license</a> explains the reasons of this choice and resumes its most important features; be sure to read it before using Falcon in your project.</p>
+<p>The <a href="/?page_id=license_1_1">Falcon Programming Language License</a> contains the license under
+which Falcon is released. This document is under evaluation and will be registered as an OSI certified license,
+or substituted with the most fitting one, as soon as possible; however, this license applies to everything
+contained in this site at this moment, even if it will be changed later.</p>
+<p>The <a href="/?page_id=license">Version 1.0 of the license</a> is outdated, but kept here
+for historical reasons.</p>
+<H3>On line source level documentation</H3>
+<P>This is the documentation extracted from the source through
+<a href="http://www.doxygen.org">Doxygen</a>. It's still a bit sparse, but the important things
+that integrate the embedders guide and the module writer's guide should be quite complete.
+It can be accessed <a href="http://www.falconpl.org/docs/falcon_engine">here</a>.
+
+
+

@@ -1,0 +1,20 @@
+// Comprehension - Comprehension on arrays, dictionaries and sets (since 0.9.4)
+
+// An array with 2,4,6,8
+array = [].comp( [2:9:2] )
+
+// a dictionary like 'a' => 1, 'b' => 2 ...
+d = [=>].comp( [0:6],
+         { n => [ 'a'/ n, n] } )
+
+// a set of 10 random int 1 .. 100 
+s = Set().comp( .[random 1 100],
+      { n, myself =>
+          // normally, return the element
+          if myself.len() < 10: return n
+          // out-of-band 0 to terminate
+          return oob(0)
+      } )
+
+// ...and show the things in the set
+for n in s: > n

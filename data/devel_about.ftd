@@ -1,0 +1,61 @@
+<h1>About Falcon Development</h1>
+<p>Falcon development is divided into three branches:</p>
+<ul>
+<li><a href="?page_id=feat_prj">Featured projects</a>: Core Falcon system,
+Feathers (default modules) and system related projects as Faldoc.</li>
+<li><a href="?page_id=mod_list">Modules</a>: loadable Falcon extensions.</li>
+<li><a href="?page_id=prj_list">Projects</a>: software related to Falcon,
+plugins for third party integration, web server modules and so on.</li>
+</ul>
+<h2>How to access Falcon build environment<a name="how_to"> </a></h2>
+<P>Informations about downloading source and the build environment is
+located in <a href="http://falconpl.org/index.ftd?page_id=sitewiki">our wiki</a></i>.
+Be sure to read both the the documents about the Source
+Tree organization and the setup of the Build Environment.</p>
+<p>Please, notice that the source code downloadable in the
+download section is not enough to build directly a complete
+installation of Falcon. The build system needs some setup that
+is found only on our anonymous SVN server (again, check our wiki).</p>
+<p>If you arn't still a certified developer, you may send us a fix in the
+<a href="http://groups.google.com/group/falconpl">Bug Reports Forum</a>.</p>
+<p>If your contribution consists of a separate module, you can send it in just one packed file.</p>
+
+<h2>Contributor levels</h2>
+<p>If you wish to improve the Falcon project in any way you can become either a Flanker, a Contributor or a
+Committee member.</p>
+<p>Flankers are single persons or group of people developing Falcon based applications and interacting with the
+Falcon community. In sort, to become a known Flanker you just have to start your Falcon project and tell
+it to the Committee; we'll exchange links, documentation, development ideas and opportunities. For example,
+we may cite you an example for various conventions, or even bringing you along with us to intervene; we may
+cite you or ask for your participation in the documentation, publications, books etc.</p>
+<p>As the project takes off, we are willing to provide a home for the Falcon Developers Community, where
+the Flankers will be provided with Open Source development facilities as in Source Forge and Belios.</p>
+<p>Contributors are persons sending us their fixes, addition or updates. If the Committee evaluates
+the contribution as valid, it will be added to the Falcon project, and your name will be listed in
+the contributor list (if you wish to).</p>
+<p>If you are a contributor and you get more interest in the Falcon Project, you may become a Committee
+member. The number of members is not fixed, and we are always happy to meet a new member.</p>
+<p>Members are selected upon the value of their contributions; the other members will decide (or vote,
+if the decision is not unanimous) if a contributor may become a member.</p>
+<p>Members have their privileges: they have access to a private mailing list, they can make announcements,
+speak for the Falcon Project Committee as a whole (if they don't overdo it ;-); we'll also provide a
+"Falcon Committee Member" registered trademark (this time a real trademark) that the members will have the
+right to place on their site, documentation, business cards and whatever they like. Being a Falcon
+Committee member means to be an esteemed developer with high programming skills, but also with organizational
+and group oriented skills, so it may be an interesting addition to a developer's curriculum.</P>
+<P>And obviously they have full access to SVN and can mangle with Falcon Source at their will. However,
+this power will be regulated by the committee as a whole, that may decide (and eventually vote) on other
+members contributions. With time we'll have specializations, so that we'll have members specializing in 
+code audit, other writing documentation, other specializations such as writing fixes, or writing
+extensions and so on.</p>
+
+<h2>Joining the community</h2>
+<p>If you want to enter the community, either join
+<a href="?page_id=IRC">our IRC channel</a> or
+<a href="?page_id=contacts">drop a line to the Committee</a>.</p>
+<p>To join our development community, you have just to be willing to
+do something. Come with a plan, and be prepared to fulfil it; we'll
+give you assistance to realize it, and if your ideas are interesting,
+you may easily find developers willing to help you in realizing them.</p>
+
+

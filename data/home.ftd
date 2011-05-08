@@ -1,0 +1,68 @@
+<? import project_id; project_id = "_falcon_site" ?><div class="front_matter">
+   <style>
+   .front_matter h1 {
+      font-family: "Times new roman", "Times", "FreeSerif", serif;
+      font-style: italic;
+   }
+
+   .front_matter p {
+      font-family: "Times new roman", "Times", "FreeSerif", serif;
+      font-style: italic;
+      font-size: 14pt;
+   }
+
+   .front_matter .open_source {
+      font-style: normal;
+      font-weight: bold;
+      color: #E87442;
+      font-family: Verdana, Arial, Helvetica, sans-serif;
+      font-size: 13pt;
+   }
+   </style>
+
+   <table border="0" width="100%">
+   <tr><td valign="top">
+      <h1>Falcon is ...</h1>
+      <p>...an <span class="open_source"><a href="http://www.opensource.org" target="_blank">Open Source</a></span>, simple,
+      fast and powerful programming language,
+      easy to learn and to feel comfortable with, and a scripting engine ready to empower
+      mission-critical multithreaded applications.</p>
+      <p>Falcon provides six integrated
+      programming paradigms: procedural, object oriented, prototype oriented,
+      functional, tabular and message oriented. And you don't have to master
+      all of them; you just need to pick
+      the ingredients you prefer, and let the code to follow your
+      inspiration.</p>
+   </td>
+   <td valign="top">
+   <? include( "load_snippet.ftd" ) ?>
+   </td>
+   </tr>
+   </table>
+
+</div>
+<div>
+<table border="0">
+<tr>
+<td>
+<div class="CollapsiblePanelTab" onClick="document.location='http://www.falconpl.org/index.ftd?page_id=sitewiki&prj_id=_falcon_site&sid=wiki&pwid=Home&wid=Getting%20started';">Get started</div>
+</td>
+
+<td>
+<div class="CollapsiblePanelTab" onClick="document.location='?page_id=join';">Join now!</div>
+</td>
+
+<td>
+<div class="CollapsiblePanelTab" onClick="document.location='?page_id=start_prj';">Start a project</div>
+</td>
+
+</tr>
+</table>
+</div>
+<?
+   include( 'data/partners.ftd' )
+?>
+<?
+   include( 'load_prjnews.ftd' )
+?>
+</div>

@@ -1,0 +1,92 @@
+<? // common prologue
+   load site_functions
+   load postMail
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Send a mass mailing to members.</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon" style="padding:10px">
+<!-- are we authorized to perform edit? -->
+<!--  ok, we can do things. Are we requested to update? -->
+<?
+
+   checkLogin()
+   if userLevel != "inner"
+      > "Sorry, not authorized to see this page"
+      return
+   end
+
+if Request.getField( "req", "" ) == "send"
+   level = Request.getField( "level", "inner" )
+   subject = Request.posts[ "subject" ]
+   sender = Request.posts[ "from" ]
+   content = "[MESSAGE FOR FALCON MEMBERS]\r\n\r\n" 
+
+   // perform the real update
+   query = "select email from members " 
+   switch level
+      case "inner"
+         query +="where membership='inner'"
+         tgt = "Inner committee members"
+
+      case "outer"
+         query +="where membership='inner' or membership='outer'"
+         tgt = "All committee members"
+
+      case "developers"
+         query +="where membership='inner' or membership='outer' or membership='developer'"
+         tgt = "All Falcon developers"
+
+      default
+         tgt = "All subscribed members" 
+   end
+
+   content = (@"[MESSAGE FOR $(tgt)]\r\n\r\n") + Request.posts[ "content" ]
+   r = connectDB().query( query )
+   try
+      while r.next()
+         email = r.asString(0)
+         > @"Sending mail to:$email <br/>\n"
+         postMail( sender, email, subject, content )
+      end
+      > @"<h2>Email sent to \"$tgt\".</h2>"
+   catch StringType in raised
+      ?>
+      <h2>Sorry, mail send failed.</h2>
+      <p>The mail subsystem returned the following error:</p>
+      <pre>
+         <?=raised?>
+      </pre>
+   <? end ?>
+
+   <p>You can return to the main site.</p>
+   <hr/>
+   <p><a href="javascript:window.close()">Close this window</a></p>
+<? else ?>
+   <h2>Send a mail to the Falcon Committee</h2>
+   <form action="?" method="POST">
+   <input type="hidden" name="req" value="send"/>
+   <table border="0">
+   <tr><td><b>Target:</b></td><td><select name="level">
+      <option value="inner">Inner Committee</option>
+      <option value="outer">Committee</option>
+      <option value="developers">All the developers</option>
+      <option value="all">All members</option>
+   </select>
+</td></tr>
+   <tr><td><b>Mail from:</b></td><td><input type="text" name="from" size="30" maxsize="99"/></td></tr>
+   <tr><td><b>Subject:</b></td><td><input type="text" name="subject" size="30" maxsize="128"/></td></tr>
+   <tr><td colspan="2"><b>Message:</b></td></tr>
+   <tr><td colspan="2">
+   <textarea name="content" rows="10" cols="70"></textarea>
+   </td></tr>
+   <tr><td colspan="2"><input type="submit" name="sub" value="Send"/>&nbsp;
+   <input type="button" value="Cancel" onClick="javascript:window.close()"/></td></tr>
+   </form>
+<? end ?>
+</body>
+</html>

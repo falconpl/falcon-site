@@ -1,0 +1,94 @@
+<script language="javascript">
+function openEditWnd( newsId )
+{
+   window.open("popup_edit_news.ftd?news_id=" + newsId +
+               "&project_id=<?=project_id?>",
+               '_blank','scrollbars=yes,resizable=yes,width=700,height=500');
+}
+
+function openDetailsWin( newsId )
+{
+   window.open('popup_show_news.ftd?news_id=' + newsId +
+               '&project_id=<?=project_id?>',
+               '_blank','scrollbars=yes,resizable=yes,width=700,height=500');
+}
+
+function openDeleteWnd( newsId, newsTitle )
+{
+   window.open("popup_confirm.ftd?project_id=<?=project_id?>" +
+               "&query="+
+                  escape("delete from project_news where news_id=" + newsId + ";") +
+               "&action=" + escape( "Delete news \""+ newsTitle + "\""),
+               '_blank','scrollbars=yes,resizable=yes,width=700,height=500');
+}
+</script>
+<?
+load bbexpand
+
+// are we allowed to change things?
+clearance = checkPrjRights( project_id )
+
+con = connectDB()
+
+// getting only content lenght, as we're not displaying it here
+
+query = "
+   select
+   news_id, news_title, news_heading,
+   news_poster, news_posted_on, CHAR_LENGTH(news_content)
+   from project_news where project=:1 order by news_id desc limit 10"
+
+r = con.query( query, project_id, false )
+
+if r.next()
+   > "<h2>News</h2>"
+   // anyhow; allow to add news
+   if clearance == "support" or clearance == "developer" or clearance == "admin"
+      include( "addNews.ftd" )
+   end
+
+   loop
+      showNews( r )
+      if not r.next(): break
+   end
+else
+   // anyhow; allow to add news
+   if clearance == "support" or clearance == "developer" or clearance == "admin"
+      include( "addNews.ftd" )
+   end
+end
+
+function showNews( recordset, showAlsoDetails )
+   static
+      output = stdOut()
+   end
+
+   date = TimeStamp()
+   content = ""
+   news_id = recordset.asNumeric(0)
+?>
+
+<div class="news">
+   <div class="news_title">
+      <? htmlEscape( recordset.asString(1), output ) ?>
+      <? if clearance ?>
+      <div class="news_actions">
+         <a href="javascript:openEditWnd('<?=news_id?>');">Edit</a>
+         <br/><a href="javascript:openDeleteWnd('<?=news_id?>', '<? htmlEscape( recordset.asString(1), output ) ?>');">Delete</a>
+      </div>
+      <? end ?>
+   </div>
+   <div class="news_signature">
+      Posted by <?=recordset.asString(3)?> on
+      <?= recordset.asDate(4, date).toString()[0:10] ?>
+   </div>
+   <div class="news_heading">
+      <? bbExpand( htmlEscape( recordset.asString(2, content) ), output)  ?>
+   </div>
+   <? if recordset.asNumeric(5) > 0 ?>
+      <div class="news_more">
+         <a href="javascript:openDetailsWin('<?=news_id?>');">more...</a>
+      </div>
+   <? end ?>
+</div>
+<? end ?>

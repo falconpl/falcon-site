@@ -1,0 +1,123 @@
+/**
+ * Creates and updates the task details.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.2
+ */
+class CreateTaskAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	//! Set the allowed request type.
+	static requestMethod = 2 // Action.POST
+
+	/**
+	 * Verify this action.
+	 *
+	 * Check the form fields of the task page.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		// Check category.
+		if self.arg('category') == '0'
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'category')), 'category')	
+		end
+
+		// Check status.
+		if self.arg('taskId') and self.arg('status') == '0'
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'status')), 'status')	
+		end
+
+		// Check priority.
+		if self.arg('priority') == '0'
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'priority')), 'priority')	
+		end
+
+		// Check release.
+		if self.arg('release') == '0'
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'release')), 'release')	
+		end
+
+		// Check assignment.
+		if self.arg('assigned') == nil
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'assignment')), 'assigned[]')	
+		end
+
+		// Check summary.
+		if self.arg('summary').len() == 0
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'summary')), 'summary')	
+		end
+
+		// Check description.
+		if self.arg('description').len() == 0
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'description')), 'description')	
+		end
+
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+		// Back to the create task screen.
+		self.setView('CreateView')
+
+		self.setMistakes(Mistake.getAll())
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * Saves the task information and redirects to result page.
+	 * 
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		// Get the current project for the user.
+		project = Model.instance('Project', Session.get('user.uid'))
+
+		// Get an instance of a task (if no taskId, it will be empty).
+		task = Model.instance('Task', self.arg('taskId'))
+
+		// Set the task details.
+		task.projectId		= project.id
+		task.categoryId 	= int(self.arg('category'))
+		task.priorityId 	= int(self.arg('priority'))
+		task.releaseId 		= int(self.arg('release'))
+		task.assignedId		= self.arg('assigned')
+		task.summary 		= self.arg('summary')
+		task.description	= self.arg('description')
+
+		if not self.arg('taskId')
+			// For new tasks.
+			task.statusId 	= project.initialStatus
+			task.reporterId	= Session.get('user.uid')
+		else
+			// Updating tasks.
+			task.statusId 	= int(self.arg('status'))
+		end
+
+		// Create or update the task.
+		task.commit()
+
+		// Redirect to result page with proper result code.
+		if self.arg('taskId')
+			self.redirect('result', ['code' => 'taskUpdated', 'taskId' => task.id])
+		else
+			self.redirect('result', ['code' => 'taskCreated', 'taskId' => task.id])
+		end
+	end
+end

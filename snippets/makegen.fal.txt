@@ -1,0 +1,20 @@
+// Funcgen - Functional generators (since 0.9.4)
+// A function returning a closure
+function makeGen( vector )
+   i = 0
+   // our generator, taking 1 item per call
+   return function()
+      if i == vector.len(): return oob(0)
+      return vector[i++]
+   end
+end
+
+// create the generator
+f = makeGen( .['a' 'b' 'c' 'd'] )
+
+// iterate with a standard for/in loop
+for value in f
+   >> value
+   formiddle: >> ", "
+   forlast: > "."
+end

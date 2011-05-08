@@ -1,0 +1,22 @@
+<?
+import X
+?>
+
+<br /><br /><br />
+
+<div align="center">
+<table width="700" style="border: 1px solid #CCC" bgcolor="white" cellpadding="5">
+	<tr>
+		<th style="border-bottom: 1px solid #CCC">
+			Resource Not Found (404)
+		</th>
+	</tr>
+	<tr>
+		<td align="left">
+			<h5>	
+			<? > X.resource ?>
+			</h5>
+		</td>
+	</tr>
+	</table>
+</div>

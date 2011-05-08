@@ -1,0 +1,19 @@
+// binded - Array bindings (from 0.8.12)
+// This is an array calling printl...
+arr = .[printl 'Hello ' &name '!']
+
+// now we assign a value to name:
+arr.name = "Mr. Livingstone"
+
+// and we perform the calling
+arr()
+
+// but we can bind before usage...
+arr.epigraph = "I presume"
+
+// changing the last "!" and getting
+// a binding from a foreign array
+arr[-1:] = .[', ' &epigraph '...']
+
+// Finally calling the whole sequence
+arr()

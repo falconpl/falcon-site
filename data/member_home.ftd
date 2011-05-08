@@ -1,0 +1,77 @@
+<?
+   // get project data
+   query="select * from members where member_id=:1"
+   try
+      member_id = Request.getField( "member_id" )
+   catch
+      > "Wrong member id"
+      return
+   end
+   
+   con = connectDB()
+   r = con.query( query, member_id )
+   data = r.fetchDict()
+
+   function calcPos( role )
+      switch role
+         case 'inner': return "Inner Committee"
+         case 'outer': return "Outer Committee"
+         case 'developer': return "Developer"
+         case 'contributor': return "Contributor"
+         case 'flanker': return "Added contributor" 
+         default: return "No specific role"
+      end
+   end
+?>
+<script language="javascript">
+function sendMail()
+{
+   window.open('popup_sendmail.ftd?member_id=<?=member_id?>',
+      "_blank",
+      "width=700, height=500" );
+}
+</script>
+<h1><?=data['name']+" "+data['surname']?> personal page</h1>
+<h2>Facts</h2>
+<table border="0">
+<tr><td><b>Name:</b></td><td><?=data['name']?></td></tr>
+<tr><td><b>Surname:</b></td><td><?=data['surname']?></td></tr>
+<tr><td><b>Usual nikname:</b></td><td><?=member_id?></td></tr>
+<tr><td><b>Position:</b></td><td><?=calcPos(data['membership'])?></td></tr>
+<tr><td><b>Activity:</b></td><td><?=htmlEscape(data['activity'])?></td></tr>
+<? if data['homesite'] ?>
+<tr><td><b>Home site:</b></td>
+<td><a href="<?=URI.encode(data['homesite'])?>" target="_blank"><?=htmlEscape(data['homesite'])?></a></td>
+</tr>
+<? end ?>
+<? if data['email'] ?>
+<tr><td colspan="2"><a href="javascript:sendMail()">Send an e-mail to this person</a></td></tr>
+<? end ?>
+</table>
+<?
+   // is this person in some project?
+   r = con.query( "
+         select project, role, name from
+         project_members join projects on (project=project_id)
+         where member=:1 order by role, name",
+      member_id )
+
+   if r.getRowCount() > 0
+      > "<h2>Involvements</h2>"
+      > "<ul>"
+      while ( pm = r.fetchDict() )
+         >> "<li>"
+         switch pm['role']
+            case 'admin': >> "Admin at "
+            case 'developer': >> "Developer at "
+            case 'support': >> "Supporting "
+         end
+         >> '<a href="?page_id=prjs&amp;prj_id=', pm['project'], '">'
+         >> htmlEscape(pm['name'])
+         >> "</a>"
+         > "</li>"
+
+      end
+      > "</ul>"
+   end
+?>

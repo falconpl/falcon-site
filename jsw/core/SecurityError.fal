@@ -1,0 +1,29 @@
+
+/**
+ * Represents a basic security voliation.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.13
+ */
+class SecurityError(id, extra) from Error(id)
+	static BAD_REQUEST_METHOD   = 1	
+	static POST_NOT_REDIRECTED = 2
+	
+	/**
+	 * Constructor.
+	 */
+	init
+		if id == SecurityError.BAD_REQUEST_METHOD
+			msg  = 'Action does not support the Request method-type ('
+			msg += extra + ').'
+			self.message =  msg
+		elif id == SecurityError.POST_NOT_REDIRECTED
+			msg  = 'An action handling a form POST must redirect on success.'
+			self.message =  msg
+		end
+	end
+end
+
+export SecurityError

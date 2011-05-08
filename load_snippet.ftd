@@ -1,0 +1,40 @@
+<div class="snippet">
+   <div class="snippet_header">
+      Falcon is like...
+   </div>
+   <div class="snippet_code">
+      <pre><?
+
+   load highlight
+
+   const sample_dir = "snippets"
+   dir = Directory( sample_dir )
+   files = []
+   while (fname = dir.read())
+      if ".fal" in fname: files += fname
+   end
+   dir.close()
+
+   randomSeed()
+   file = randomPick( files )
+   f = InputStream( sample_dir +"/"+file )
+   f.setEncoding( "utf-8" )
+
+   title = f.grabLine(256)
+   pos = strFind( title, "-" )
+   if pos > 0
+      title = strTrim(title[pos+1:])
+   end
+
+   // by design, we want all the snippet to satay in 2048 bytes
+   strIn = strBuffer( 2048 )
+   if f.readText(strIn)
+      >> highlight( strIn )
+   end
+?>
+</pre>
+      </div>
+      <div class="snippet_footer">
+        <?= title ?>
+      </div>
+   </div>

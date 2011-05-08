@@ -1,0 +1,25 @@
+load core.Action
+
+/**
+ * Fallback for handling basic security violations.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.5.13
+ *
+ * @param Jig jig - The Jig that owns this action.
+ */
+class ErrorSecurityAction(jig) from Action(jig)
+	//! Set the allowed request type.
+	static requestMethod = 3 // Action.GET_AND_POST
+
+	/**
+	 * Constructor.
+	 */
+	init
+		// Set the view.
+		self.setView(Framework.errorSecurityView)
+	end
+end
+

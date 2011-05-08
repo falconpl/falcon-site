@@ -1,0 +1,73 @@
+/**
+ * Task list view.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ *
+ * @param Jig jig - The Jig that owns this view.
+ */
+class CreateView(jig) from View(jig)
+
+	/**
+	 * Constructor.
+	 */
+	init
+		// Set the template this view will use.
+		self.setTemplate('Shell', 'CreateTemplate')
+	end
+
+	/**
+	 * Process this view's logic.
+	 *
+	 * @return nil
+	 */
+	function process()
+		project = Model.instance('Project', Session.get('user.uid'))
+		self.setValue('project', project)
+
+		if self.arg('category')
+			// Form-post update failure.
+			// Re-enter the chosen values.
+			category 	= int(self.arg('category'))
+			priority 	= int(self.arg('priority'))
+			release  	= int(self.arg('release'))
+			status  	= int(self.arg('status'))
+			assigned	= self.arg('assigned')
+			summary  	= self.arg('summary')
+			description = self.arg('description')
+			taskId	 	= self.arg('taskId')
+		elif self.arg('taskId')
+			// Comming in for the first time to update the task.
+			task = Model.instance('Task', self.arg('taskId'))
+			category 	= task.categoryId
+			priority 	= task.priorityId
+			release  	= task.releaseId
+			status  	= task.statusId
+			assigned	= task.assignedId
+			summary  	= task.summary
+			description = task.description
+			taskId		= task.id
+		else
+			// New task.
+			category 	= nil
+			priority 	= nil
+			release  	= nil
+			status		= nil
+			assigned	= []
+			summary  	= ''
+			description = ''
+			taskId		= ''
+		end
+		
+		self.setValue('priority', priority)
+		self.setValue('category', category)
+		self.setValue('release',  release)
+		self.setValue('status',  status)
+		self.setValue('summary',  summary)
+		self.setValue('assigned',  assigned)
+		self.setValue('description', description)
+		self.setValue('taskId', taskId)
+	end
+end

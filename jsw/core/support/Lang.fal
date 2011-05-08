@@ -1,0 +1,138 @@
+export Lang
+
+load compiler
+load core.Jig
+load library.File
+
+/**
+ * Grab language strings from a language file.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.13
+ */
+class Lang(langFile, langKey /*, replace1, replace2, ... */)
+
+	//! Used to cache files that have been loaded.
+	static cache_ = nil
+
+	//! The language file used to get the data.
+	_langFile = langFile
+
+	//! The key of the language string we got.
+	_langKey  = langKey
+
+	//! The string itself.
+	_string	  = ''
+
+	/**
+	 * Constructor.
+	 */
+	init
+		// Make sure the cache exists.
+		if not Lang.cache_
+			Lang.cache_ = [=>]
+		end
+
+		// Grab the current language.
+		lang = Lang.getCurrentLang()
+
+		// Create the cache key for this lang file.
+		cacheKey = lang + ':' + langFile
+
+		// See if we already got this info.
+		info = nil
+		try: info = Lang.cache_[cacheKey]
+
+		// We don't have the cache. Load the file
+		if not info
+			// Grab the language info from the requested file.
+			info = Lang.getLangInfo(lang, langFile)
+			if not info : raise Error(0, 'Could not get lang info for: ' + langFile)
+
+			// Cache the newly gotten info.
+			Lang.cache_[cacheKey] = info
+		end
+
+		// Grab the string from the list.
+		try
+			self._string = info[langKey]
+		catch AccessError
+			raise Error(0, 'Key "' + langKey + '" not found in lang file "' + langFile +'".')
+		end
+
+		// Perform any replacement that need to be made in the string.
+		if paramCount() > 2
+			// The first 2 are langFile and LangKey
+			for i = 2 to paramCount() - 1
+				self._string = strReplace(self._string, ':' + (i - 1), 
+										  parameter(i).toString())
+			end
+		end
+	end
+
+	/**
+	 * Grab the string.
+	 *
+	 * @public
+	 * @return	string
+	 */
+	function toString()
+		return self._string
+	end
+
+
+	/**
+	 * Grab the current language the application is using.
+	 *
+	 * @static
+	 * @public
+	 * @return	string
+	 */
+	function getCurrentLang()
+		return Config.defaultLang
+	end
+
+	/**
+	 * Grab language information from a language file.
+	 *
+	 * @static
+	 * @public
+	 * @param	string lang - The language set to use.
+	 * @param	string file - the basename of the file where to grab the data.
+	 * @return 	Dictionary
+	 */
+	function getLangInfo(lang, file)
+		// Grab a ref to the running Jig.
+		jig = Jig.singleton()
+
+		// Feathers compiler.
+		compiler = Compiler()
+
+		// Create the localized filename.
+		filename  = jig.getFullPath(jig.getName())
+		filename += Framework.dirI18N + lang + '/' + file
+		filename += Framework.extFalcon
+
+		// This page doesn't have localized settings.
+		if not File.exists(filename) : return 
+
+		// Create the module name.
+		modName  = Framework.dirJigs + jig.getName()
+		modName += '/' + Framework.dirI18N + lang + '/' + file
+		modName  = strReplace(modName, '/', '.')
+
+		// Get the lang string.
+		compiler.path = Config.installPath
+		mod = compiler.loadByName(modName)
+		info = mod.get('__main__')()
+		try
+			info = mod.get(Framework.keyI18N)
+		catch AccessError 
+			return
+		end
+
+		return info
+	end
+end

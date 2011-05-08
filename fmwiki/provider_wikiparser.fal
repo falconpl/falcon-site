@@ -1,0 +1,27 @@
+/*
+   FALCON - Falcon Micro Wiki
+
+   FILE: provider_generic.fal
+
+   Provides wiki processing for Kib2 WikiParser
+   -------------------------------------------------------------------
+   Author: Giancarlo Niccolai
+   Begin: Sat, 18 Apr 2009 11:46:21 +0200
+
+   -------------------------------------------------------------------
+   (C) Copyright 2009: the FALCON developers (see list in AUTHORS file)
+
+   See LICENSE file for licensing details.
+*/
+
+import LBFSM from wikiparser.wikiparser in wp
+import htmlHandler from wikiparser.handlers.htmlhandler in wp1
+
+function processPage( link, pageEntry )
+   h = wp1.htmlHandler( link )
+   lbsm = wp.LBFSM(h)
+   lbsm.useGFH= 0
+   pageEntry[ "comp_cnt" ] = lbsm.parse(pageEntry[ "content" ])
+end
+
+export processPage

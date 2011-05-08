@@ -1,0 +1,255 @@
+<H2>Idea List -- How can I help?</H2>
+<p>This page contains a set of ideas for Falcon related projects that may be targets for student applications. They pose interesting challenges in terms of effort, experience and support given to this project.</p>
+
+<p>The list is not to be considered exhaustive. Applicants may present their own ideas for a public discussion on our forum and/or IRC channel (see the <a href="http://falconpl.org/index.ftd?page_id=contacts">contacts area</a>). If the idea proposed is found worthy, this will result in additional consideration for the final evaluation.</p>
+
+<h3>MIME support</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Module extension</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Easy</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (basic), IEEE protocols (basic).</td></tr>
+<tr><td><b>Time frame:</b></td><td>15 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>High</td></tr>
+</table>
+<p>This idea consists of creating a binary native module using the Falcon multi platform C++ SDK to parse and create MIME documents. This is relates to big string management and virtual streams of strings.</p>
+
+<p>The applicant will be in charge of designing an interface to the module functionality, implement it in C++, document it through the <b>faldoc</b> integrated module documentation system, provide code samples and automated unit test for evaluation by <b>faltest</b>.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code. Extra consideration will be granted to work that promotes the uniquely multi-paradigm approach of the Falcon Programming Language in the interface provided to the final users. Top evaluation is given if the final work also provides a <b>Falcon Service</b> exposing the same functionalities provided to scripts via a C++ interface.</p>
+
+<h3>Client side HTTP protocol support</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Module extension</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Intermediate</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (intermediate), IEEE Protocols (intermediate)</td></tr>
+<tr><td><b>Time frame:</b></td><td>20 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>High</td></tr>
+</table>
+<p>This idea consists of creating a binary native module using the Falcon multi-platform C++ SDK to support client HTTP connections.</p>
+<p>The module should provide both all-in-one features to directly download the contents of a web page and more general usage functionalities such as slice download, persistent connection management, HTTP uploads and so on.</p>
+<p>An interface for the Virtual Filesystem interface (providing abstract Falcon Streams pointing to web resources) should also be taken into consideration.</p>
+<p>The applicant shall use the already existing URI parsing and multi-platform Socket library provided by the Falcon SDK. If it is not adequate for the task, the applicant may modify the library as needed.</p>
+
+<p>The applicant will be in charge of designing an interface to the module functionality, implement it in C++, document it through the <b>faldoc</b> integrated module documentation system, provide code samples and automated unit test for evaluation by <b>faltest</b>.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code. Extra consideration will be granted to work that promotes the uniquely multi-paradigm approach of the Falcon Programming Language in the interface provided to the final users. Top evaluation is given if the final work also provides a <b>Falcon Service</b> exposing the same functionalities provided to scripts via a C++ interface.</p>
+
+
+<h3>Light CMS</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Web application</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Intermediate</td></tr>
+<tr><td><b>Required skills:</b></td><td>Web scripting (high), database (basic).</td></tr>
+<tr><td><b>Time frame:</b></td><td>15 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>Low</td></tr>
+</table>
+<p>This idea consists of creating a light Content Management System able to drive personal & small communities blogs. The applicant is free to design the features and the interface, but the following minimal requirements must be met:</p>
+<ul>
+<li>Easy configuration of the data presentation (skinnability, via text templates or via Falcon FTDs).</li>
+<li>Horizontal/vertical/diagonal site design (blogs go down, sections go lateral, static resources go diagonal).</li>
+<li>Possibility to register users and to have more bloggers.</li>
+<li>Threaded comments.</li>
+</ul>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code.</p>
+
+
+<h3>Client side FTP protocol support</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Module extension</td></tr>
+<tr><td><b>Difficulty:</b></td><td>High</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (intermediate), IEEE Protocols (high)</td></tr>
+<tr><td><b>Time frame:</b></td><td>25 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>High</td></tr>
+</table>
+<p>This idea consists of creating a binary native module using the Falcon multi-platform C++ SDK to support client FTP connections.</p>
+<p>The module should provide both all-in-one features to directly download the contents of a remote file and more general usage functionalities as slice file transfers, remote directory manipulation, active/passive settings and so on.</p>
+<p>An interface for the Virtual Filesystem interface (providing abstract Falcon Streams pointing to remote resources) should also be taken into consideration.</p>
+<p>The applicant shall use the already existing URI parsing and multi-platform Socket libraries provided by the Falcon SDK. If they are not adequate for the task, the applicant may modify them as needed.</p>
+
+<p>The applicant will be in charge of designing an interface to the module functionality, implement it in C++, document it through the <b>faldoc</b> integrated module documentation system, provide code samples and automated unit test for evaluation by <b>faltest</b>.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code. Extra consideration will be granted to work that promotes the uniquely multi-paradigm approach of the Falcon Programming Language in the interface provided to the final users. Top evaluation is given if the final work also provides a <b>Falcon Service</b> exposing the same functionalities provided to scripts via a C++ interface.</p>
+
+<h3>Client side POP3 protocol support</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Module extension</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Low</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (basic), IEEE Protocols (basic)</td></tr>
+<tr><td><b>Time frame:</b></td><td>10 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>Medium</td></tr>
+</table>
+<p>This idea consists of creating a binary native module using the Falcon multi-platform C++ SDK to support client POP3 connections.</p>
+<p>The module should provide support to transparently handle remote mail folders and to download headers or whole mail bodies.</p>
+<p>An interface for the Virtual Filesystem interface (providing abstract Falcon Streams pointing to remote resources)
+should also be taken into consideration.</p>
+<p>The applicant shall use the already existing URI parsing and multi-platform Socket library provided by the Falcon SDK. If it is not adequate for the task, the applicant may modify the library as needed.</p>
+
+<p>The applicant will be in charge of designing an interface to the module functionality, implement it in C++, document it through the <b>faldoc</b> integrated module documentation system, provide code samples and automated unit test for evaluation by <b>faltest</b>.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code. Extra consideration will be granted to work that promotes the uniquely multi-paradigm approach of the Falcon Programming Language in the interface provided to the final users. Top evaluation is given if the final work also provides a <b>Falcon Service</b> exposing the same functionalities provided to scripts via a C++ interface.</p>
+
+<h3>FLTK GUI widget library binding</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Module binding</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Intermediate</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (high)</td></tr>
+<tr><td><b>Time frame:</b></td><td>15 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>Medium</td></tr>
+</table>
+<p>This idea consists of creating a binary native module to bind the multiplatform GUI library <a href="http://www.fltk.org/">FLTK</a>.</p>
+<p>The applicant will be in charge of designing an interface to the module functionality, implement it in C++, document it through the <b>faldoc</b> integrated module documentation system, provide code samples and automated unit test for evaluation by <b>faltest</b>.</p>
+<p>The modules should expose the full suite of functionality provided by FLTK, but the applicant is free to chose how to present the interface in the final module. Valid solutions
+are either a total conformance with FTLK API or the redesign of the interface to better conform with the Falcon
+programming language constructs.</p>
+<p>The final work must be granted to be working on at least two platforms of choice among those supported by FLTK.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code.</p>
+
+
+<h3>Client side IMAP protocol support</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Module extension</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Intermediate</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (basic), IEEE Protocols (high)</td></tr>
+<tr><td><b>Time frame:</b></td><td>20 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>Medium</td></tr>
+</table>
+<p>This idea consists of creating a binary native module using the Falcon multi-platform C++ SDK to support client IMAP connections.</p>
+<p>The module should provide support to handle transparently the remote mail folders and to download headers or whole mail bodies.</p>
+<p>An interface for the Virtual Filesystem interface (providing abstract Falcon Streams pointing to remote resources) should also be taken into consideration.</p>
+<p>The applicant will be in charge of designing an interface to the module functionality, implement it in C++, document it through the <b>faldoc</b> integrated module documentation system, provide code samples and automated unit test for evaluation by <b>faltest</b>.</p>
+
+<p>The applicant will be in charge of designing an interface through which to access the module functionalities, implement it in C++, document it through <b>faldoc</b> integrated module documentation system and provide samples and automated unit test to be run through <b>faltest</b> tool.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code. Extra consideration will be granted to work that promotes the uniquely multi-paradigm approach of the Falcon Programming Language in the interface provided to the final users. Top evaluation is given if the final work also provides a <b>Falcon Service</b> exposing the same functionalities provided to scripts via a C++ interface.</p>
+
+<h3>SSL Cryptography library binding module </h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Module binding</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Low</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (intermediate)</td></tr>
+<tr><td><b>Time frame:</b></td><td>30 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>High</td></tr>
+</table>
+<p>This idea consists of creating a binary native module using the Falcon multi-platform C++ SDK to bind a SSL cryptography library. It is essential that the applicant review the C based interface proposed by SSL libraries and presents a more ergonomic interface suite to the Falcon language paradigms.</p>
+
+<p>The applicant will be in charge of designing an interface to the module functionality, implement it in C++, document it through the <b>faldoc</b> integrated module documentation system, provide code samples and automated unit test for evaluation by <b>faltest</b>.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code. Extra consideration will be granted to work that promotes the uniquely multi-paradigm approach of the Falcon Programming Language in the interface provided to the final users. Top evaluation is given if the final work also provides a <b>Falcon Service</b> exposing the same functionalities provided to scripts via a C++ interface.</p>
+
+<h3>Firebird Database Server module driver for DBI system</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Module binding</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Intermediate</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (high), database (basic)</td></tr>
+<tr><td><b>Time frame:</b></td><td>30 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>High</td></tr>
+</table>
+<p>This idea consists of creating a binary native module using the Falcon multi-platform C++ SDK to provide an interface to the Firebird database server through the DBI abstract interface system.</p>
+<p>The resulting module shall use the Falcon Service interface to expose methods used by the DBI system to access database resources. Other than that, the applicant shall implement a set of functions interfacing directly the Firebird database API which can be called directly by scripts bypassing the DBI interface.</a>
+
+<p>The applicant will be in charge of designing an interface to the module functionality, implement it in C++, document it through the <b>faldoc</b> integrated module documentation system, provide code samples and automated unit test for evaluation by <b>faltest</b>.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code. Extra consideration will be granted to work that promotes the uniquely multi-paradigm approach of the Falcon Programming Language in the interface provided to the final users. Top evaluation is given if the final work also provides a <b>Falcon Service</b> exposing the same functionalities provided to scripts via a C++ interface.</p>
+
+<h3>Compiler optimization</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Core design</td></tr>
+<tr><td><b>Difficulty:</b></td><td>Very High</td></tr>
+<tr><td><b>Required skills:</b></td><td>C++ (high), compilers theory (intermediate).</td></tr>
+<tr><td><b>Time frame:</b></td><td>20 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>High</td></tr>
+</table>
+<p>This idea consists of introducing syntactic tree level script optimizations in the 0.9 Falcon compiler.</p>
+<p>Falcon compiler is still completely unoptimized, and this makes a perfect playground to put into practice various optimization theories.</p>
+<p>The applicant is required to write a two or more level optimizer, with different levels having different optimization/complexity ratios.</p>
+<p>The applicant may also intervene on the generation of Falcon bytecode for further optimization on the resulting output, if he/she is so interested in this topic.</p>
+<p>The applicant may also suggest changes to the Virtual Machine to better accommodate language features or generated bytecode, if this may result in overall better performance.</p>
+<p>Evaluation will be based on the quality of the work in terms of performance improvement.</p>
+
+<h3>Web platform development</h3>
+<table border="0">
+<tr><td><b>Type:</b></td><td>Web application</td></tr>
+<tr><td><b>Difficulty:</b></td><td>High</td></tr>
+<tr><td><b>Required skills:</b></td><td>Web scripting (very high), database (high).</td></tr>
+<tr><td><b>Time frame:</b></td><td>45 days</td></tr>
+<tr><td><b>Mentoring:</b></td><td>Low</td></tr>
+</table>
+<p>This idea consists of creating a platform for general web application development. Details are totally left to the applicant, but the plan must include the following features:</p>
+<ul>
+<li>Easy mapping of logical entities to database records.</li>
+<li>Well identified presentation logic that is easily configurable.</li>
+<li>Remotely callable API.</li>
+<li>Extendibility via plug-ins.</li>
+<li>Integrability with client-side scripting (browser widgets).</li>
+</ul>
+<p>The applicant is not required to produce client side scripting facilities, but is required to provide hooks for client side scripting facilities to be added by the end users.</p>
+<p>Resources (database, web server, hosting) can be provided by the Falcon Committee, or the applicant can provide their own.</p>
+<p>Due to the complexity of the project, it is recommended that applicants gather in a small work group.</p>
+<p>The work will be evaluated based on the elegance of the interface, efficiency in terms of memory footprint and CPU consumption, completeness of the documentation (including samples) and on readability of the produced code.</p>
+
+
+<h2>Application Form</h2>
+<p>Although applications must be submitted to Google Summer of Code initiative, here is the application form for reference:</p>
+<pre>
+
+Name     :_____________________________________
+
+
+Birth year:_____________________________________
+
+
+Location  :_____________________________________ (Please, indicate GMT offset).
+
+
+Education :_____________________________________ (Just your highest degree or current study course).
+
+
+Known OSs :_____________________________________________(Indicate Operating system you can develop on).
+
+
+Skills -- Rate each voice from 1 (know some) to 3 (master), leave blank.
+
+    * C/ASM  :__
+    * C++    :__
+    * Perl   :__
+    * PHP    :__
+    * Python :__
+    * Ruby   :__
+    * English:__  (3 is native and well instructed speaker)
+    * RPM making :__
+    * DEB making :__
+    * Other packaging systems (Nsys...): __________________________________________________(specify)
+    * Web development :__  (refers to known web platforms).
+
+
+What is the task that would interest you the most? (rate 1 to 3, none if uninteresting):
+
+    * Development of the compiler/lexer/optimzier        :__
+    * Development of the virtual machine/memory manager  :__
+    * Development of modules (mime, http, GD2...)        :__
+    * Development of web-based platforms/applications    :__
+    * Development of AI/data analysis tools              :__
+    * Development of GUI/editors/graphic tools           :__
+    * Testing, benchmarking, algorithm implementation    :__
+    * Documentation                                      :__
+
+
+What is the value you think you can add to The Falcon Programming Language? (don't be shy: be bold!)
+
+_
+
+_
+
+_
+
+_
+
+_
+
+
+Describe why would you work with us and what you expect from our project:
+
+_
+
+_
+
+_
+
+_
+
+_
+</pre>
+

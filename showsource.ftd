@@ -1,0 +1,34 @@
+<?
+   load highlight
+
+   // our file is in gets file
+   if not "file" in Request.gets
+      > "...Sorry, no file to source.."
+   else
+      source = Request.gets["file"]
+      > "<h2>Source of file ", source, "</h2>\n"
+      if '..' in source or source[0] == '/'
+          > "<h3>You tried it...</h3>"
+          return
+      end
+
+      try
+         > "<pre>\n"
+         file = InputStream( source )
+         strIn = strBuffer( 1024 )
+         data = ""
+         while file.read( strIn )
+            strTmp = strReplace( strIn, "&", "&amper;" )
+            strTmp = strReplace( strTmp, "<", "&lt;" )
+            strTmp = strReplace( strTmp, ">", "&gt;" )
+            data += strTmp
+         end
+         file.close()
+         >> highlight( data )
+         > "</pre>\n"
+      catch IoError in e
+         > "</pre>\n"
+         reportError( "Can't load required source", e )
+      end
+   end
+?>

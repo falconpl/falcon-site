@@ -1,0 +1,10 @@
+<style type="text/css" media="all">@import "styles/falcon_tabs.css";</style>
+<?
+   page_name = Request.getField( "wid", "" )
+   if page_name
+      > "<h1>", getProjectName(), " - ", page_name, "</h1>"
+   else
+      > "<h1>", getProjectName(), "</h1>"
+   end
+   include( "data/wikidoc_core.ftd", "utf-8" ) 
+?>

@@ -1,0 +1,56 @@
+<H2>Licensing scheme</H2>
+<p>Falcon is currently distributed under a dual licensing GPL/FPLL scheme.</p>
+
+<p>The GPL licensing scheme is provided to ensure compatibilty with Open
+Source and Free Software products. It's a relative strict license which
+is not particularly adequate for virtual machine based scripting languge
+interpreters and engines, but it can be chosen to develop pure GPL applications
+or to favor integration with already existing GPL embedding applications.</p>
+
+<p>The Falcon Programming Language License is specifically designed around
+the concept of an open source scripting language engine. It grants usability
+of the covered source in commercial applications, as it supports applying
+different and incompatible licenses to embedding and extension elements, while
+ensuring the openness of the core engine and of any work derived directly from
+it.</p>
+
+<p>Falcon version 0.8.10 and higher are released under one of GPLv2 or FPLLv1.1, at your choice.</p>
+<p>The GPLv2 license can be found at <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
+   target="_blank">http://www.gnu.org/licenses/old-licenses/gpl-2.0.html</a></p>
+
+<p>The FPLLv1.1 license can be found <a href="index.ftd?page_id=license_1_1">following this link</a></p>
+<p>
+<ul>
+<li><a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
+   target="_blank">The GNU GPL license, version 2.0</a></li>
+<li><a href="index.ftd?page_id=license_1_1">The Falcon Programming Language License, version 1.1</a></li>
+</ul>
+</p>
+
+<H2>Logos and images</H2>
+<p>All the logos and images contained in this site and related to Falcon, including the "Round Falcon Logo"
+below here are licensed as <a href="http://creativecommons.org/about/licenses/">Creative Commons</a> "Attribution Non-Commercial Share Alike".
+<center><img src="/images/falcon-red-200.png">&nbsp;&nbsp;<img src="/images/CC_88x31.png"></center>
+<p/>
+<center><img src="/images/logo.png">&nbsp;&nbsp;<img src="/images/CC_88x31.png"></center>
+<p>
+<a href="http://creativecommons.org/licenses/by-nc-sa/3.0/legalcode">CC Attribution Non-Commercial Share Alike legal code</a>.
+
+<H2>"Powered by" buttons</H2>
+<p>Here we have a pair of "powered by Falcon" buttons that you may stick on your site or include in your documentation
+to help out our project.</p>
+<p>A larger one (png, 32 bit, 200 x 55 px):
+<br/>
+<a target="_blank" href="http://www.falconpl.org"><img border="0" src="http://www.falconpl.org/images/Powered-by.png" alt="Powered by Falcon" width="200" height="55"/></a>
+&nbsp;&nbsp;<textarea rows="3" cols="40">
+&lt;a target="_blank" href="http://www.falconpl.org"&gt;&lt;img border="0" src="http://www.falconpl.org/images/Powered-by.png" alt="Powered by Falcon" width="200" height="55"/&gt;&lt;/a&gt;
+</textarea>
+</p>
+<p>A wider one (png, 32 bit, 250 x 42 px):
+<br/>
+<a target="_blank" href="http://www.falconpl.org"><img border="0" src="http://www.falconpl.org/images/powered-by-large.png" alt="Powered by Falcon" width="250" height="42"/></a>
+&nbsp;&nbsp;<textarea rows="3" cols="40">
+&lt;a target="_blank" href="http://www.falconpl.org"&gt;&lt;img border="0" src="http://www.falconpl.org/images/powered-by-large.png" alt="Powered by Falcon" width="250" height="42"/&gt;&lt;/a&gt;
+</textarea>
+</p>
+<br/>

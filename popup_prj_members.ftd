@@ -1,0 +1,123 @@
+<? // common prologue
+   load site_functions
+   checkLogin()
+
+   // gather query data
+   project_id = Request.getField( "prj_id" )
+   project_name = Request.getField( "prj_name" )
+
+   // read the clearance level
+   clearance = checkPrjRights( project_id )
+
+   function updateRoles()
+      con = connectDB()
+      old_members = Request.getField( "member" )
+      roles = Request.getField( "role" )
+
+      query_change = "update project_members set role=:1 where project=:2 and member=:3"
+      query_delete = "delete from project_members where project=:1 and member=:2"
+      for i in [0:roles.len()]
+         member = old_members[i]
+         role = roles[i]
+         if role == 'remove'
+            con.query( query_delete, project_id, member )
+         else
+            con.query( query_change, role, project_id, member )
+         end
+      end
+
+      dispStatus()
+   end
+
+   function addMember()
+      con = connectDB()
+      member_id = Request.getField( "new_member" )
+      r = con.query( "select name from members where member_id=:1", member_id )
+      if r.getRowCount() > 0
+         con.query( "insert into project_members( project, member, role) values( :1, :2, :3)",
+            project_id,
+            member_id,
+            Request.getField( "new_role" )
+         )
+      else
+         > "<br/><b>ERROR</b>: member id \"", member_id, "\" not present."
+      end
+      dispStatus()
+   end
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Edit members working on "<?=project_name?>"</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon">
+<!-- are we authorized to perform edit? -->
+<? if clearance == "admin" ?>
+<!--  ok, we can do things. Are we requested to update? -->
+   <?
+   switch Request.getField( "req", "" )
+      case "update_roles"
+         updateRoles()
+      case "add_member"
+         addMember()
+   end
+   ?>
+   <div>
+   <h2>Editing members in <?=project_id?> - "<?=htmlEscape(project_name)?>"</h2>
+   <form method="POST" action="?prj_id=<?=project_id?>&amp;prj_name=<?=URI.encode(project_name)?>">
+   <input type="hidden" name="req" value="add_member"/>
+   <p>Add member: <input type="text" size="15" maxsize="15" name="new_member"/>&nbsp;
+   <select name="new_role">
+      <option value="admin">Admin</option>
+      <option value="developer">Developer</option>
+      <option value="support">Contributor</option>
+   </select>
+   &nbsp;
+   <input type="submit" value="add"/>
+   </p>
+   </form>
+   </div>
+   <hr/>
+   <div>
+   <h3>Modify members</h3>
+   <form method="POST" action="?prj_id=<?=project_id?>&amp;prj_name=<?=URI.encode(project_name)?>">
+   <input type="hidden" name="req" value="update_roles"/>
+   <table border="0">
+   <?
+      // load the project roles.
+      r = connectDB().query( "select member, role from project_members where project=:1", project_id )
+      while( data = r.fetchArray() )
+         > '<tr><td>', data[0], '<td/><td>'
+         makeSelRole( data[0], data[1] )
+         > '</td></tr>'
+      end
+   ?>
+   </table>
+   <input type="submit" value="Update roles"/>
+   </form>
+   </div>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to edit this user.</p>
+<? end ?>
+</body>
+</html>
+<? function dispStatus() ?>
+<h2>Project members "<?=project_name?>" updated</h2>
+<p>You can return to the main site.</p>
+<p><a href="javascript:window.close()">Close this window</a></p>
+<hr/>
+<? end ?>
+<? function makeSelRole( member, role )
+   rl = ['remove', 'admin', 'developer', 'support']
+?>
+<input type="hidden" name="member[]" value="<?=member?>"/>
+<select name="role[]">
+<? for r in rl ?>
+   <option value="<?=r?>" <?=(r==role ? 'selected="selected"':'')?>><?=r?></option>
+<? end ?>
+</select>
+<? end ?>

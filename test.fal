@@ -1,0 +1,14 @@
+// This test says Hello world!
+
+doTitle( "Hello", 1 )
+doPara( "Hello world" )
+doPara( "Hello Again" )
+
+function doTitle( t, lev )
+ > @"<h$lev>$t</h$lev>"
+end
+
+function doPara( t )
+ > "<p>", t, "</p>"
+end
+

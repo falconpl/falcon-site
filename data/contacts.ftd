@@ -1,0 +1,20 @@
+<h1>Contacting Falcon</h1>
+<script language="javascript">
+function openMailForm()
+{
+   window.open('popup_committeeMail.ftd',
+      "_blank",
+      "width=700, height=500" );
+}
+</script>
+
+<p>To get directly in touch with the Falcon community, we highly suggest you use
+the <a target="_blank" href="http://groups.google.com/group/falconpl">Falcon Google Group</a>.
+For very specific queries, you can directly contact the developers of the inner part of the language by
+<a href="javascript:openMailForm()">sending a mail to the the Inner Committee</a>.
+</p>
+<p>It is also possible to directly contact our developers by sending a message to
+them from their member home pages. The page is accessible by clicking on their
+names listed either in the projects they participate in, or in the list of
+developers on <a href="?page_id=authors">the authors page</a>.</p>
+<p>Finally, if you like immediate feedback, <a href="?page_id=IRC">enter now our chat channel</a> and you'll find various developers and committee members willing to help you.</p>

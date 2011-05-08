@@ -1,0 +1,86 @@
+<?fal
+/**
+ * Entry point into the framework.
+ *
+ * Every action must enter through here and exit through here. 
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ */
+
+load config 	// Configuration settings.
+load core.Page 	// Manages page execution.
+
+// Load these here so they are available to CAVMU
+// (Controllers/Actions/Views/Models/UI) handlers
+// without having to load them explicitly in the handlers themselves.
+load core.support.URL
+load core.support.Mistake
+load core.support.Lang
+load core.support.Session
+load core.support.Model
+load core.support.DB
+load core.support.RuntimeError
+load core.support.functions
+
+// Temporary, to deal with Falcon quirk.
+// Should be removed ASAP.
+load library.JSON
+
+// Get the requested execution info from URL.
+jig    = Request.getField('jig', 	Config.defaultJig)    // App to execute.
+action = Request.getField('action', Config.defaultAction) // Action within app to execute.
+
+if not jig    : jig    = Config.defaultJig
+if not action : action = Config.defaultAction
+
+// Start output buffering.
+outputBuffer = StringStream()
+oldOut		 = stdOut(outputBuffer)
+
+// Start the session management.
+Session.start(jig)
+
+// Start the database.
+DB.start(jig)
+
+// This object handles overall request execution.
+page = Page.factory(jig, action)
+
+// Execute the page.
+try
+	result = page.execute()
+	// The result could be, among other things:
+	// A) An HTML page to display (most likely).
+	// B) A HTTP redirect (some times).
+	// C) A web services call (We don't have web services, yet).
+	// D) Some other thing (theoretically).
+	result.execute()
+catch in e
+	// Only an error in the framework itself (not in Jig) should leak up here.
+	// Errors in Jigs should be man-handled by the framework without issues.
+	if Config.debug
+		> '<b>Uncaught exception bubbled to index page:</b>'
+		> '<br /><br />'
+		> '<pre>'
+		> e
+		> '</pre>'
+	else
+		> 'An error has occurred.'
+		> 'Please, try again in a few minutes.'
+	end
+end
+
+// Save database changes.
+DB.commit()
+
+// Save the session.
+Session.commit()
+
+// End output buffering.
+stdOut(oldOut)
+>> outputBuffer.closeToString()
+
+?>

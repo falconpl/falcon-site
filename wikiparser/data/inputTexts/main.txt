@@ -1,0 +1,182 @@
+= Falcon Markup Engine!
+
+...TOC
+
+== Inline formating
+
+You can have **bold**, //italic//, --deleted--, __underlined__. Also, 
+you can --**//mix them//**-- as ..__//you need//__...
+
+sup^^text^^ and sub..text.. and here is a linebreak: /
+Special HTML chars like the following ones are automatically escaped: & < > " /
+
+Also, you can have {{monospaced text}}, and a horizontal rule like this : 
+
+---
+
+Links are like this: [http://www.falconpl.org|The Falcon programming langage]
+Internal one: [kib/index.html|The Index page]
+
+=== Escaping rules
+
+That's very simple, just put a tilde "~~" before each //inline rule// so that 
+it will not be parsed, so you would have:
+
+~**bold**, ~//italics// , etc.
+
+Note that tildes are also used inside quotations, but that there's no conflict.
+Howerver, there's a problem I've found : do not terminate a line by italics,
+because it will then be interpreted as a linebreak. I have to fix this. 
+
+=== Images
+
+Images can be centered, left or right aligned:
+
+[[im http://falconpastebin.appspot.com/static/i/FalconIcon.png|http://falconpastebin.appspot.com/static/i/FalconIcon.png|center|Falcon logo]]
+
+[[im http://falconpastebin.appspot.com/static/i/FalconIcon.png|http://falconpastebin.appspot.com/static/i/FalconIcon.png|left|Falcon logo]]
+
+[[im http://falconpastebin.appspot.com/static/i/FalconIcon.png|http://falconpastebin.appspot.com/static/i/FalconIcon.png|right|Falcon logo]]
+
+== Blocks
+
+Block like markup:
+
+=== Quotations
+
+A test with a **True** quotation: [~Falcon is GREAT~]
+
+== Source code
+
+Some source code like the following Falcon one:
+
+{{{ fal
+for i in ["a","b","c"]
+    printl(i)
+    > i
+    >> i
+end
+}}}
+
+Some other langages are supported, like **Python** :
+
+{{{ python
+
+for k in [1,2,3]:
+    print k # print is not a function in Python < 3
+}}}
+
+== Lists
+
+* One **item here**.
+** Second one there
+*** Third
+* Then first on
+two lines {{mono}}.
+** Second
+
+* one
+** two
+
+[~Remember that a list finishes only after a blank new line !~]
+
+== Ideas
+
+* --Synonyms--;
+* Options to include/exclude headers from the TOC;
+
+== Falcon cookbook
+
+Here, I'll start a little tutorial:
+
+=== Writting to a file
+
+Writting inside a text file is really easy :
+
+{{{ fal
+
+f= OutputStream( '/C:/Users/kib/Desktop/New Folder/test.html' )
+f.setEncoding("utf-8")
+f.writeText("MY TEXT GOES HERE")
+f.close()
+}}}
+
+=== Reading from a file
+
+Reading from a text file needs a little more work because you have to know
+the contents lenght. We'll use {{FileStat}} for such task :
+
+{{{ fal
+
+fname = 'inputTexts/main.txt'
+contents = strBuffer(FileStat(fname).size)
+f= InputStream( fname )
+f.setEncoding("utf-8")
+c = f.readText(contents)
+f.close()
+
+// result is now inside the contents var
+}}}
+
+=== Repeating a string
+
+You can use {{strReplicate( str, count )}}, or even :
+
+{{{ fal
+
+"a".replicate(19)
+// >> aaaaaaaaaaaaaaaaaaa
+}}}
+
+=== Code
+
+{{{ fal
+
+for i in [4,5,6]
+    print i
+// a line on two
+}}}
+
+=== load or import ?
+
+[~This is a bit of conversation on IRC chanel~]
+
+The idea is that **load** is to be used:
+
+* to bring in one piece broken up single applications.
+(inlcuing site-like applications, where only a part of the complete app is active at a time).
+* to load well known system-wide modules and directly access their full 
+functionalities.
+
+**import** from is to be used:
+
+* when the need for a foreign unknown library is localized to a module 
+in your total app and limited to some symbols
+(or not, actually)
+* when you know you have or you may have name clashes.
+* dynamic loading (include() or Compiler.loadBy*) is to load dynamic piece of codes, like code compiled on the fly or third party plug-ins.
+
+import has also another useful employ:
+* to bridge clashing names.
+
+Suppose you have a foreign library that exports "myfunc", but that name clashes with something yours.
+you can still load it int the global application namespace through a module so made:
+import myfunc from clashinglib as AnotherName
+export AnotherName
+
+- So import is more similar to include() that load?
+
+Yes, just it's static (you know what to import at compile time), so it can 
+create default namespaces for you at compile time.
+
+- Makes sense.
+
+as namespaces are resolved at compile time, although you access them with 
+".", they use no runtime time
+
+== To be done
+
+* Synonyms
+* Enumerated Lists
+* Tables
+* Other output format

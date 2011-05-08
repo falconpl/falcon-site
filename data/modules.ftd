@@ -1,0 +1,16 @@
+<h1>Falcon modules</h1>
+<p>This section hosts Falcon extension modules development. The projects listed here
+are Falcon modules which provide extended functionalities to the base engine.</p>
+
+<ul>
+<?
+   query="
+      select project_id, name, description from projects
+      where project_type='module' order by name;"
+
+   r = connectDB().query( query )
+   while (adata = r.fetchArray() )
+   ?>
+   <li><a href="?page_id=prjs&prj_id=<?=adata[0]?>"><?=adata[1]?></a>: <?=adata[2]?></li>
+   <? end ?>
+</ul>

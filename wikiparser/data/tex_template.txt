@@ -1,0 +1,137 @@
+\documentclass[11pt]{article}
+
+%\usepackage{amsmath}
+%\usepackage{textcomp}				    % For T1 character encoding.
+%\usepackage{mathptmx}				    % For Type 1 "Times Roman" serif text and math.
+\usepackage{geometry}				    % To define page size, margins, etc.
+\usepackage[pdftex]{hyperref}			% For hyper-references in the generated PDF.
+\usepackage[hyperref]{xcolor}			% To use colours in the document.
+\usepackage[pdftex]{graphicx}			% To import graphics.
+\usepackage{epstopdf}				    % For on-the-fly conversion of eps to pdf.
+\usepackage[english]{babel}			    % Pour la césure française.
+\usepackage{ucs}                        % Encodings
+\usepackage[utf8x]{inputenc}            % Encodings
+\usepackage{ae}					        % For T1 encoding using Type 1 fonts.
+\usepackage[scaled=0.92]{helvet}		% For Type 1 "Helvetica" sans serif text.
+\usepackage{courier}				    % For Type 1 "Courier" monospaced text.
+\usepackage{xspace}				        % For automatic handling of spaces after macros.
+\usepackage[titles]{tocloft}			% For Table of Contents customisation.
+\usepackage{subfig}				        % For subfigures.
+\usepackage{fancyvrb}				    % For fancy verbatim environments.
+\usepackage[stable]{footmisc}			% For stable footnotes.
+\usepackage{float}				        % For extra control over floats.
+\usepackage{titlesec}				    % To configure sections headings.
+\usepackage[nottoc]{tocbibind}			% To put the Bibliography in the TOC.
+\usepackage{units}				        % To typeset units.
+\usepackage{xmpincl}				    % To include Creative Commons metadata in XMP format.
+%\usepackage[upright]{fourier}          % The best fonts :)
+\usepackage{fourier}                    % The best fonts :)
+\usepackage{stmaryrd}                   % For // symbol
+\usepackage{ulem}                       % to use deleted text
+\usepackage{listings}                   % For source code
+
+%%Definition of the "subfloatenv" environment.
+
+
+\makeatletter
+\newsavebox{\sfe@box}
+\newenvironment{subfloatenv}[1]{%
+\def\sfe@caption{#1}%
+\setbox\sfe@box\hbox\bgroup\color@setgroup}%
+{\color@endgroup\egroup\subfloat[\sfe@caption]%
+{\usebox{\sfe@box}}}
+\makeatother
+
+%%
+%% Miscellaneous commands.
+%%
+
+\DefineVerbatimEnvironment{CodeInline}{Verbatim}
+  {gobble=0,  xleftmargin=2em, xrightmargin=0em,
+   %numbers=left, numbersep=2mm,
+   frame=lines ,framerule=1pt} 
+
+%%
+%% Definition of the colours used in the document.
+%%
+
+\definecolor{codefront}{rgb}{0,0,0}
+\definecolor{codeback}{rgb}{1,1,0.8}
+\definecolor{codeframe}{rgb}{0,0,0}
+\definecolor{Brick}{HTML}{7B0C00}
+\definecolor{RoyalBlue}{cmyk}{1,0.50,0,0}
+
+%%
+%% Code box configuration.
+%%
+
+\setlength{\fboxsep}{1em}
+\setlength{\fboxrule}{1bp}
+\newcommand{\displaycode}[1]{\fcolorbox{codeframe}{codeback}{\BUseVerbatim[formatcom=\color{codefront},fontsize=\small]{#1}}}
+
+%%
+%% TOC configuration.
+%%
+
+\setlength{\cftbeforesecskip}{0.1ex}
+\setlength{\cftbeforesubsecskip}{0.1ex}
+\renewcommand{\cftsecfont}{\normalfont}
+\renewcommand{\cftsecpagefont}{\normalfont}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+
+%%
+%% Configure captions.
+%%
+
+\captionsetup{font=small,labelfont=bf,margin=2em}
+\captionsetup[subfloat]{format=hang,font=small,labelfont=bf,margin=1em}
+
+%%
+%% Configure titles.
+%%
+
+\titleformat{name=\section}{\normalfont\rmfamily\Large\bfseries\color{Brick}}{\thesection.}{1em}{}
+\titleformat{name=\section,numberless}{\normalfont\rmfamily\Large\bfseries\color{Brick}}{}{0em}{}
+\titleformat{name=\subsection}{\normalfont\rmfamily\Large\bfseries\color{Brick}}{\thesubsection.}{1em}{}
+\titleformat{name=\subsubsection}{\normalfont\rmfamily\large\bfseries\color{Brick}}{\thesubsubsection.}{1em}{}
+
+%%
+%% Configuration of paper geometry.
+%%
+
+\geometry{dvipdfm,a4paper,centering,tmargin=3.5cm,bmargin=3.5cm,lmargin=3.5cm,rmargin=3.5cm,nomarginpar}
+
+%%
+%% Hyperlink configuration.
+%%
+
+\hypersetup{%
+	pdftitle={ $page_title },
+	pdfauthor={},
+	pdfsubject={},
+	pdfkeywords={},
+	plainpages=false,
+	pdfpagelabels,
+	hyperindex,
+	colorlinks=true}
+
+\hypersetup{linkcolor=RoyalBlue,urlcolor=RoyalBlue}
+
+\everymath{\displaystyle}
+
+%%
+%% Main.
+%%
+
+
+\begin{document}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\title{ $page_title }
+\author{C.Kibleur} 
+\date{dernière version:\\\today}
+\maketitle
+\tableofcontents
+\newpage
+$to_tex
+\end{document}

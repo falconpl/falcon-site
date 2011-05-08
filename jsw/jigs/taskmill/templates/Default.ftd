@@ -1,0 +1,63 @@
+<?
+import X
+
+/**
+ * Homepage login form.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.5.13
+ */
+?>
+
+<div align="center">
+	<br /> <br /> <br />
+	<form action="/jigsaw/index.ftd?jig=taskmill&action=postLogin" method="post">
+	<table class="container" style="width: 300px;">
+	<tr>
+		<th colspan="2">
+			<? >> Framework.officialName ?>
+			<? >> X.lang['loginTitle'] ?>
+		</th>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+			<label for="email"><? >> X.lang['email'] ?></label>
+		</td>
+		<td>
+			<input id="email" name="email" type="text" size="30" />
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+			<label for="password"><? >> X.lang['password'] ?></label>
+		</td>
+		<td>
+			<input id="password" name="password" type="password" size="30" />
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<input type="checkbox" name="remember" value="1" /> <? >> X.lang['remember'] ?>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td>
+			<input type="Submit" value="<? >> X.lang['loginButton'] ?>" />
+			<div style="float:right;">
+					<a href="#"><? >> X.lang['forgotPassword'] ?></a>
+			</div>
+		</td>
+	</tr>
+	</table>
+	</form>
+	<br /><br /><br />
+</div>

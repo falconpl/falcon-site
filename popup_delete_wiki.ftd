@@ -1,0 +1,66 @@
+<? // common prologue
+   load site_functions
+   load fmwiki.fmwiki
+   checkLogin()
+
+   // are we allowed to change things?
+   level = checkPrjRights( project_id )
+   // get clearance:
+   switch( level )
+      case "admin": clearance = 3
+      case "developer": clearance = 2
+      case "support": clearance = 1
+      default: clearance = 0
+   end
+
+   page_name = Request.getField( "wid" )
+   section = Request.getField( "prj_id" )
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Updating wiki Page "<?=page_name?>"</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon" style="padding:10px;">
+<!-- are we authorized to perform edit? -->
+<? if clearance > 0 ?>
+   <!--  ok, we can do things. Are we requested to update? -->
+   <? if Request.getField( "req" ) == "confirm" ?>
+      <h2>Confirm deletion of page "<?=page_name?>" (<?=section?>)</h2>
+      <form method="POST" action="?wid=<?=URI.encode(page_name)?>&amp;prj_id=<?=section?>">
+      <input type="hidden" name="req" value="delete"/>
+      <input type="submit" value="DELETE!"/>&nbsp;&nbsp;
+      <input type="button" name="cancel" value="Cancel" onclick="javascript:window.close()"/>
+      </form>
+   <? else ?>
+      <h2>Deleted page "<?=page_name?>" (<?=section?>)</h2>
+      <?
+         wiki = FMWiki(
+         connectDB(),
+         clearance,
+         "",
+         section )
+
+         try
+            wiki.removePage( page_name )
+         catch DBIError in dbe
+            > "<h3>Error while querying the DB.</h3><pre>"
+            > dbe.toString()
+            > "</pre>"
+         catch FMWikiError in we
+            > "<h3>Error while performing a wiki operation.</h3><pre>"
+            > we.toString()
+            > "</pre>"
+         end
+      ?>
+      <p> Deletion of page <?=page_name?> is complete. You can <a href="javascript:window.close()">close this window</a>
+            and return to the main site.</p>
+   <? end ?>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to alter a page here.</p>
+<? end ?>
+</body>
+</html>

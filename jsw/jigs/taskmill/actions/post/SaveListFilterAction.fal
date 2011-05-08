@@ -1,0 +1,141 @@
+load library.File
+/**
+ * Saves a user's task list filter.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.10
+ */
+class SaveListFilterAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	//! Set the allowed request type.
+	static requestMethod = 2 // Action.POST
+
+	/**
+	 * Verify this action.
+	 *
+	 * Check the form fields of the task page.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		filter = Model.statically('TaskListFilter')
+
+		// Check assigned id.
+		if toInt(self.arg('assigned'), true) == nil
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'assigned')))	
+		end
+
+		// Check priority id.
+		if toInt(self.arg('priority'), true) == nil
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'priority')))	
+		end
+
+		// Check category id.
+		if toInt(self.arg('category'), true) == nil
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'category')))	
+		end
+
+		// Check status id.
+		if toInt(self.arg('status'), true) == nil
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'status')))	
+		end
+
+		// Check status id.
+		if toInt(self.arg('release'), true) == nil
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'release')))	
+		end
+
+		// Check reporter id.
+		if toInt(self.arg('reporter'), true) == nil
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'reporter')))	
+		end
+
+		// Check filter name.
+		if not filter.validateName(self.arg('filterName'))
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'filterName')))	
+		end
+
+		// Check primary sort.
+		if not filter.validateSortType(self.arg('primarySort'))
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'primarySort')))	
+		end
+
+		// Check secondary sort.
+		if not filter.validateSortType(self.arg('secondarySort'))
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'secondarySort')))	
+		end
+
+		// Check sort direction.
+		if self.arg('sortDir') != 'asc' and self.arg('sortDir') != 'desc'
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'sortDir')))	
+		end
+
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+		self.redirect('ajaxResult', ['code' => 'errorAjax', 'msg' => Mistake.pop()])
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * Saves the task information and redirects to result page.
+	 * 
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		filter = Model.instance('TaskListFilter', self.arg('filterId'))
+
+		if not self.arg('filterId')
+			// Only set this for newly created filters.
+			filter.ownerId = Session.get('user.uid') 
+			project = Model.instance('Project', Session.get('user.uid'))
+			filter.projectId = project.id
+		end
+
+		filter.assignedId 		= nilOnEmpty(self.arg('assigned'))
+		filter.priorityId		= nilOnEmpty(self.arg('priority'))
+		filter.categoryId		= nilOnEmpty(self.arg('category'))
+		filter.statusId			= nilOnEmpty(self.arg('status'))
+		filter.releaseId		= nilOnEmpty(self.arg('release'))
+		filter.reporterId		= nilOnEmpty(self.arg('reporter'))
+		filter.closedPolicy		= toInt(self.arg('closedPolicy'))	
+		filter.primarySort		= self.arg('primarySort')
+		filter.secondarySort	= self.arg('secondarySort')
+		filter.sortDir			= self.arg('sortDir')
+		filter.name				= self.arg('filterName')
+
+		err = nil
+		try
+			filter.commit()
+		catch in e
+			err = e.toString()
+		end
+
+		if err == nil 
+			self.redirect('resultAjax', ['code' => 'successAjax'])
+		elif Config.debug
+			self.redirect('resultAjax', ['code' => 'errorAjax', 'msg' => err])
+		else
+			self.redirect('resultAjax', ['code' => 'errorAjax'])
+		end
+
+	end
+end

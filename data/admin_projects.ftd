@@ -1,0 +1,96 @@
+<h1>Project management</h1>
+<?
+   con = connectDB()
+   checkLogin();
+   if userLevel != "inner"
+      > "<p>Sorry, only inner committee members are allowed to edit this area.</p>"
+      return
+   end
+
+   // fulfill request
+   switch Request.getField( "req", "" )
+      case "add": addProject()
+      case "del": delProject( Request.getField( "prj_id") )
+   end
+
+   // reload the db
+   r = con.query( "select project_id, name, project_type, status from projects order by project_id" )
+
+   function addProject()
+      query = "insert into projects " + 
+         "(  project_id, name, project_type, status ) " +
+         "values( :1, :2, :3, :4 )"
+
+      con.query( query,
+         Request.getField( "prj_id" ),
+         Request.getField( "name" ),
+         Request.getField( "project_type" ),
+         Request.getField( "status" )
+      )
+   end
+
+   function delProject( prj_id )
+      con.query( "delete from projects where project_id=:1", prj_id )
+      con.query( "delete from project_members where project=:1", prj_id )
+      con.query( "delete from project_tasks where task_project=:1", prj_id )
+      con.query( "delete from project_dloads where project_id=:1", prj_id )
+      con.query( "delete from project_releases where project_id=:1", prj_id )
+      con.query( "delete from project_news where project=:1", prj_id )
+   end
+?>
+<script language="javascript">
+function editProject( id ) {
+   window.open("popup_edit_project.ftd?prj_id=" + id,
+      '_blank','scrollbars=yes,resizable=yes,width=700,height=650');
+}
+
+function delProject( id, n ) {
+   if (confirm( "Do you want to remove project \"" +n + "\"?" ))
+   {
+      window.location="?page_id=<?=page_id?>&req=del&prj_id=" + id;
+   }
+}
+</script>
+
+<form action="?page_id=<?=page_id?>" method="POST">
+<input type="hidden" name="req" value="add"/>
+<table width="100%" style="font-size:9pt">
+<tr><th>Project ID</th><th>Name</th><th>Type</th><th>Status</th><th>&nbsp;</th></tr>
+<tr>
+   <td><input type="text" size="20" maxsize="20" name="prj_id"></td>
+   <td><input type="text" size="30" maxsize="30" name="name"></td>
+   <td><? makeSelStatus() ?></td>
+   <td><? makeSelType() ?></td>
+   <td><input type="submit" value="Add"></td>
+</tr>
+<? while( data = r.fetchDict() ) ?>
+<tr>
+   <td><a href="?page_id=prjs&amp;prj_id=<?=URI.encode(data['project_id'])?>"><?=htmlEscape(data['project_id'])?></a></td>
+   <td><?=htmlEscape(data['name'])?></td>
+   <td><?=htmlEscape(data['status'])?></td>
+   <td><?=htmlEscape(data['project_type'])?></td>
+   <td style="font-size:8pt">
+      [<a href="javascript:editProject('<?=data['project_id']?>');">Edit</a>]
+      [<a href="javascript:delProject('<?=data['project_id']?>', '<?=htmlEscape(data['name'])?>');">Del</a>]
+   </td>
+</tr>
+<? end ?>
+</table>
+</form>
+
+<? function makeSelStatus( mode ) ?>
+<select name="status">
+<option value="active" <? if mode == nil or mode == "active": >> 'selected="selected"' ?>>Active</option>
+<option value="inactive" <? if mode == "inactive": >> 'selected="selected"' ?>>Inactive</option>
+</select>
+<? end ?>
+
+<? function makeSelType( mode )
+   levels = ['featured', 'internal', 'module', 'project']
+?>
+<select name="project_type">
+<? for l in levels ?>
+   <option value="<?=l?>" <? if mode == l: >> 'selected="selected"' ?>><?=l?></option>
+<? end ?>
+</select>
+<? end ?>

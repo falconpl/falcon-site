@@ -1,0 +1,302 @@
+//=================================
+// Falcon syntax highlighter.
+
+// some private globals:
+
+function highlight( smallprog )
+   global chr_quote, chr_white, chr_slash, chr_nl, chr_backslash, chr_white_or_sep, chr_ops
+
+   chr_singleQuote = ord( "'" )
+   chr_doubleQuote = ord( '"' )
+   chr_space = ord( " " )
+   chr_colon = ord( ":" )
+   chr_semicolon = ord( ";" )
+   chr_dot = ord( "." )
+   chr_tab = ord( "\t" )
+   chr_nl = ord( "\n" )
+   chr_cr = ord( "\r" )
+   chr_backslash = ord( "\\" )
+   chr_slash = ord( "/" )
+   chr_at = ord("@")
+   chr_sharp = ord("#")
+
+   chr_quote = [ chr_singleQuote, chr_doubleQuote ]
+   chr_white = [ chr_space, chr_tab, chr_nl, chr_cr ]
+   chr_white_or_sep = chr_white + .[chr_colon chr_semicolon chr_dot]
+   chr_ops = .[ chr_at chr_sharp ]
+
+   return highlighter.parse( smallprog )
+end
+
+object highlighter
+   _curParser = nil
+   _closeQuote = nil
+   pStart = -1
+   pEnd = 0
+   cachedLen = nil
+   _hiddenPos = nil
+
+   keywords = [
+      'break' => 0,
+      'continue'=> 0,
+      'dropping'=> 0,
+      'return'=> 0,
+      'launch'=> 0,
+      'from'=> 0,
+      'global'=> 0,
+      'const'=> 0,
+      'self'=> 0,
+      'sender'=> 0,
+      'catch'=> 0,
+      'raise'=> 0,
+      'give'=> 0,
+      'case'=> 0,
+      'default' => 0,
+      'pass'=> 0,
+      'lambda'=> 0,
+      'def'=> 0,
+      'directive'=> 0,
+      'load'=> 0,
+      'export'=> 0,
+      'loop'=> 0,
+      'while'=> 0,
+      'for'=> 0,
+      'function'=> 0,
+      'innerfunc'=> 0,
+      'init'=> 0,
+      'static'=> 0,
+      'attributes'=> 0,
+      'forfirst'=> 0,
+      'forlast'=> 0,
+      'formiddle'=> 0,
+      'enum'=> 0,
+      'try'=> 0,
+      'class'=> 0,
+      'switch'=> 0,
+      'select'=> 0,
+      'object'=> 0,
+      'if'=> 0,
+      'elif'=> 0,
+      'else'=> 0,
+      'end' => 0
+      ]
+
+   special = [
+      'and' => 0,
+      'or' => 0,
+      'not' => 0,
+      'in' => 0,
+      'notin' => 0,
+      'to' => 0,
+      'as' => 0,
+      'has' => 0,
+      'hasnt' => 0,
+      'provides' => 0,
+      'nil' => 0,
+      'Error' => 0,
+      'TraceStep' => 0,
+      'SyntaxError' => 0,
+      'CodeError' => 0,
+      'RangeError' => 0,
+      'MathError' => 0,
+      'IoError' => 0,
+      'TypeError' => 0,
+      'ParamError' => 0,
+      'ParseError' => 0,
+      'CloneError' => 0,
+      'InterruptedError' => 0,
+      'List' => 0,
+      'all' => 0,
+      'any' => 0,
+      'allp' => 0,
+      'anyp' => 0,
+      'eval' => 0,
+      'choice' => 0,
+      'xmap' => 0,
+      'iff' => 0,
+      'lit' => 0,
+      'cascade' => 0,
+      'dolist' => 0,
+      'eq' => 0
+   ]
+
+   // initialize parsing
+   function parse( smallprog )
+      // init
+      self._curParser = self._pNormal
+      pStart = -1
+      pEnd = 0
+      cachedLen = smallprog.len()
+
+      // proceed parsing
+      while pEnd < cachedLen
+         // has the parser got something?
+         if (action = self._curParser( $smallprog, $pStart, $pEnd ) )
+            smallprog[ pStart: pEnd ] = \
+                  '<span class="' + action + '">'+ \
+                  smallprog[ pStart: pEnd] +'</span>'
+            pStart = -1
+            // adjust position...
+            pEnd += smallprog.len() - cachedLen
+            // and length...
+            cachedLen = smallprog.len()
+            self._curParser = self._pNormal
+         else
+           // advance
+           ++pEnd
+         end
+      end
+
+      // see a last test:
+
+      if (action = self._curParser( $smallprog, $pStart, -1 ) )
+            smallprog[ pStart: pEnd ] = \
+                  '<span class="' + action + '">'+ \
+                  smallprog[ pStart: pEnd] +'</span>'
+      end
+
+      return smallprog
+   end
+
+   // parse in normal context
+   function _pNormal( smallprog, pStart, pEnd )
+      char = smallprog[* pEnd ]
+      // if this is a string...
+      if char == chr_slash
+         // may be a comment?
+         pStart = pEnd
+         self._curParser = self._pSlash
+      elif char in chr_quote
+         // set the string parser and the init position
+         pStart = pEnd
+         self._closeQuote = char  // ensure to search the same char
+         self._curParser = self._pString
+      elif char in chr_ops
+         pStart = pEnd
+         ++pEnd
+         return "falcon_op"
+ 
+      // if it's a word...
+      elif char notin chr_white_or_sep
+         pStart = pEnd
+         self._curParser = self._pToken
+
+      end
+
+      // no good
+      return false
+   end
+
+   // parse tokens
+   function _pToken( smallprog, pStart, pEnd )
+      char = smallprog[* pEnd ]
+      // if this is a string...
+      if char in chr_quote
+         // set the string parser and the init position
+         pStart = pEnd
+         self._closeQuote = char  // ensure to search the same char
+         self._curParser = self._pString
+
+      elif char in chr_ops
+         pStart = pEnd
+         ++pEnd
+         return "falcon_op"
+
+      elif char == chr_slash
+         // may be a comment?
+         pStart = pEnd
+         self._curParser = self._pSlash
+
+      // if it's a word, of if this wast the last char
+      elif pEnd == -1 or char in chr_white_or_sep
+         // is it a keyord?
+         word = smallprog[pStart:pEnd]
+         if word in self.keywords
+            return "falcon_keyword"
+         elif word in self.special
+            return "falcon_special"
+         end
+
+         // whitespace; reset
+         pStart = -1
+         self._curParser = self._pNormal
+      end
+
+      // no good
+      return false
+   end
+
+   // parse strings
+   function _pString( smallprog, pStart, pEnd )
+      char = smallprog[* pEnd ]
+      // if we have a backslash...
+      if char == chr_backslash
+         // change parser
+         self._curParser = self._pBackSlash
+
+      elif char == self._closeQuote
+         // we have found a closed string!
+         self._curParser = self._pCloseString
+      end
+
+      // no good
+      return false
+   end
+
+   function _pBackSlash()
+      // just re-enable strings
+      self._curParser = self._pString
+   end
+
+   function _pSlash(smallprog, pStart, pEnd )
+      switch smallprog[pEnd ]
+         case '/': self._curParser = self._pCommentEolStart
+         case '*': self._curParser = self._pComment
+         default: self._curParser = self._pNormal
+      end
+   end
+
+   function _pCloseString()
+      // just return the closed string
+      return "falcon_string"
+   end
+
+   function _pCommentEolStart( smallprog, pStart, pEnd )
+      if smallprog.len() > pEnd+5 and smallprog[pEnd:pEnd+5] == "HIDE:"
+         self._curParser = self._pHiddenFirstLine
+      elif smallprog[* pEnd ] == chr_nl
+         return "falcon_comment"
+      else
+         self._curParser = self._pCommentEol
+      end
+   end
+
+   function _pCommentEol( smallprog, pStart, pEnd )
+      if smallprog[* pEnd ] == chr_nl
+         return "falcon_comment"
+      end
+   end
+
+   function _pComment( smallprog, pStart, pEnd )
+      if smallprog[ pEnd-2:pEnd ] == "*/"
+         return "falcon_comment"
+      end
+   end
+
+   function _pHiddenFirstLine( smallprog, pStart, pEnd )
+      if smallprog[* pEnd ] == chr_nl
+         self._hiddenPos = pEnd + 1
+         self._curParser = self._pHidden
+      end
+   end
+
+   function _pHidden( smallprog, pStart, pEnd )
+      if smallprog.len() + 7 >= pEnd and smallprog[ pEnd:pEnd+7 ] == "//HIDE."
+         self._curParser = self._pCommentEol
+      else
+         if smallprog[* pEnd ] notin chr_white: smallprog[ pEnd ] = '.'
+      end
+   end
+end
+
+export highlight

@@ -1,0 +1,208 @@
+<?
+import X
+
+/**
+ * An empty template.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.6.2
+ */
+?>
+
+<script language="Javascript">
+	function onCancel() {
+		window.location.href = '<? >> X.link('details', 'taskId=' + X.taskId) ?>';
+	}
+
+	function onSubmit() {
+		// Remove any highlites from the form.
+		unhighliteForm('createForm');
+
+		var f = document.forms['createForm'];
+		var e = f.elements;
+
+		// Make sure category has a value.
+		if (e.category.value == '0') {
+			highliteFormElement('category');
+			alert('Please enter a value for Category.');
+			return false;
+		}
+
+		<? if X.taskId ?>
+			// Make sure status has a value.
+			if (e.status.value == '0') {
+				highliteFormElement('status');
+				alert('Please enter a value for Status.');
+				return false;
+			}
+		<? end ?>
+
+		// Make sure priority has a value.
+		if (e.priority.value == '0') {
+			highliteFormElement('priority');
+			alert('Please enter a value for Priority.');
+			return false;
+		}
+
+		// Make sure release has a value.
+		if (e.release.value == '0') {
+			highliteFormElement('release');
+			alert('Please enter a value for Release.');
+			return false;
+		}
+
+		// Make sure the task has been assigned.
+		if (e['assigned[]'].selectedIndex == -1) {
+			highliteFormElement('assigned[]');
+			alert('Please enter a value for Assigned.');
+			return false;
+		}
+
+		// Make sure summary has a value.
+		if (e.summary.value.length == 0) {
+			highliteFormElement('summary');
+			alert('Please enter a value for Summary.');
+			return false;
+		}
+
+		// Make sure there is a description.
+		if (e.description.value.length == 0) {
+			highliteFormElement('description');
+			alert('Please enter a value for Description.');
+			return false;
+		}
+
+		f.submit();
+	}	
+</script>
+
+<form name="createForm" id="createForm" action="<? >> X.link('post.createTask') ?>" method="post">
+<input type="hidden" name="taskId" value="<? >> X.taskId ?>" />
+<table width="100%" cellpadding="0" class="controls">
+<tr>
+	<th colspan="4">
+		<? if X.taskId ?>
+			<b>Update task</b>
+		<? else ?>
+			<b>Create task</b>
+		<? end ?>
+	</th>
+</tr>
+<tr>
+	<td width="110" class="label">
+		Category
+	</td>
+	<td class="value">
+		<select name="category" id="category">
+			<option value="0">-- Select --</option>
+			<? for val in X.project.categories ?>
+			<option value="<? >> val.id ?>" <? if X.category == val.id ?> selected="selected" <? end ?> >
+				<? >> val.name ?>
+			</option>
+			<? end ?>
+		</select>
+	</td>
+	<td class="label" valign="top" width="110">
+		Release
+	</td>
+	<td class="value" valign="top">
+		<select name="release" id="release">
+			<option value="0">-- Select --</option>
+			<? for val in X.project.releases ?>
+			<option value="<? >> val.id ?>" <? if X.release == val.id ?> selected="selected" <? end ?> >
+				<? >> val.name ?>
+			</option>
+			<? end ?>
+		</select>
+	</td>
+</tr>
+
+<? if X.taskId ?>
+	<tr>
+		<td class="label" valign="top">
+			Status
+		</td>
+		<td class="value" valign="top">
+			<select name="status" id="status">
+				<option value="0">-- Select --</option>
+				<? for val in X.project.statuses 
+						if val.closedContext == 1 : continue
+				?>
+					<option value="<? >> val.id ?>" <? if X.status == val.id ?> selected="selected" <? end ?> >
+						<? >> val.name ?>
+					</option>
+				<? end ?>
+			</select>
+		</td>
+		<td class="label" valign="top" width="110">
+			???
+		</td>
+		<td class="value">
+			XXX
+		</td>
+	</tr>
+<? end ?>
+
+
+<tr>
+	<td class="label" valign="top">
+		Priority
+	</td>
+	<td class="value" valign="top">
+		<select name="priority" id="priority">
+			<option value="0">-- Select --</option>
+			<? for val in X.project.priorities ?>
+			<option value="<? >> val.id ?>" <? if X.priority == val.id ?> selected="selected" <? end ?> >
+				<? >> val.name ?>
+			</option>
+			<? end ?>
+		</select>
+	</td>
+	<td class="label" valign="top" width="110">
+		Assignment
+	</td>
+	<td class="value">
+		<select name="assigned[]" id="assigned[]" size="3" multiple="multiple">
+			<? for val in X.project.users  ?>
+			<option value="<? >> val.userId ?>" 
+				<? for v in X.assigned
+					if v == val.userId ?> 
+						selected="selected"
+					<? break; end ?> 
+				<? end ?> 
+				>
+				<? >> val.fullname ?>
+			</option>
+			<? end ?>
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="label">
+		Summary
+	</td>
+	<td class="value" colspan="3">
+		<input  name="summary" id="summary" type="text" style="width: 800px;" value="<? >> X.summary ?>" />
+	</td>
+</tr>
+<tr>
+	<td class="label" valign="top">
+		Description	
+	</td>
+	<td class="value" colspan="3">
+		<textarea name="description" id="description" style="width: 800px;" rows="10"><? >> X.description ?></textarea>
+	</td>
+</tr>
+<tr>
+	<td align="right" style="border-top: 2px solid #CCC; padding-right: 35px;">
+		<input type="button" value="Cancel Update" onclick="onCancel()" />
+	</td>
+	<td align="right" style="border-top: 2px solid #CCC; padding-right: 35px;" colspan="3">
+		<input type="button" value="Submit Changes" onclick="onSubmit()" />
+	</td>
+</tr>
+</table>
+</form>
+

@@ -1,0 +1,34 @@
+<h1>Official Falcon SVN</h1>
+<p>From this section, the official Falcon SVN main repository can be
+accessed.</p>
+<p>Currently, our main development areas can be accessed only through
+an anonymous SVN server; we're working at setting up snapshots and
+web browsing.</p>
+<h2>SVN structure</h2>
+<p>The Falcon Project is organized in several parts, each with its own
+internal organization, rules and interdependency with the other elements.</p>
+<p>When checking out one of the repositories, the local sandboxes
+should be placed under a common root.</p>
+<p>Anonymous svn access is available at through the following command:</p>
+<pre>
+  $ svn co svn://falconpl.org/falcon/&lt;repository&gt;/trunk <repository>
+</pre>
+<p>where repository is one of the followings:
+   <ul>
+   <li><b>tools</b>: the compilation, installation and build environment tools. This is necessary if developing core and falcon main modules.</li>
+   <li><b>core</b>: The main Falcon source code. It contains the engine, the RTL and the main command line tools.</li>
+   <li><b>docs</b>: Documentation and relative support files.</li>
+   <li><b>modules/feathers</b>: the collection of the modules that are crucial to Falcon.</li>
+   <li><b>modules/*</b>: other modules that are developed under the Falcon Source Project hood.</li>
+   <li><b>projects/*</b>: embeddings that are hosted under the hood of the Falcon Source Project.</li>
+   </ul>
+</p>
+<p>These are the commands needed to prepare a minimal build environment:
+<pre>
+  $ mkdir falcon
+  $ cd falcon
+  $ svn co svn://falconpl.org/falcon/tools/trunk tools
+  $ svn co svn://falconpl.org/falcon/core/trunk core
+  $ svn co svn://falconpl.org/falcon/modules/feathers/trunk modules/feathers
+</pre>
+</p>

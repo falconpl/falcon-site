@@ -1,0 +1,249 @@
+/*
+Wikiparser: Markup Engine for Falcon PL
+
+Kibleur Christophe April 15, 2009.
+
+[Kib² http://thewikiblog.appspot.com/]
+
+-- Test with TeX engine
+*/
+
+import Regex from regex as Regex
+
+class texHandler(sitelink)
+    parent = nil
+    sitelink = sitelink ? sitelink : ""
+    /* BLOCK RULES HANDLING */
+    function makeToc()
+        return ""
+    end
+          
+    function makePara(text)
+        // Each rule will decide if it needs escaping
+        // because there are so many special chars in TeX 
+        if text
+            return self.inline( self.esc(text, false)) + "\\par \n"
+        else
+            return ""
+        end
+    end
+    
+    function makeCode(text, lang)
+        // Maybe we will have to use the listing package because verbatim
+        // does not wrap.
+        return '\begin{CodeInline}' + "\n" + self.parent.tilda(text) + "\n" + '\end{CodeInline}' + "\n"
+    end
+    
+    function makeHeader(title, level)
+        head_levels = [
+        "1" => '\chapter',
+        "2" => '\section',
+        "3" => '\subsection'
+        ]
+        title = self.esc(title)
+        
+        if level > 3 : level = 3
+        head = head_levels[toString(level)]    
+        return head + "{" + title + "}"
+    end
+
+    function makeHrule()
+        return '\hrulefill'
+    end
+    
+    function makeList(text)
+        items = self.parent.itemMaker(text)
+        return self.tex_makeList(items)
+    end
+    
+    function tex_makeList(items)
+        out = []
+        cumul = 1
+        old_lev = nil
+        
+        indent = function(c)
+            return strReplicate("    ",c-1)
+        end
+        
+        for lev,content in items
+            if not old_lev
+                out += indent(cumul) + '\begin{itemize}'
+                out += "\\item " + content
+            elif lev == old_lev
+                out += indent(cumul) + "\\item " + content
+            elif lev > old_lev
+                cumul += 1
+                out += indent(cumul) + '\begin{itemize}'
+                out += indent(cumul) +  "\\item " + content
+            elif lev < old_lev
+                diff = old_lev - lev
+                sortie = indent(cumul) + "\\end{itemize}" + "\n"
+                out += strReplicate( sortie, diff)
+                cumul -= diff
+                //out += indent(cumul+1) + "\\end{itemize}"
+                out += indent(cumul) + "\\item " + content
+            end
+            
+            old_lev = lev
+        end
+    
+        sortie = "\\end{itemize}" + "\n"
+        
+        out += strReplicate( sortie, cumul)
+        return joinStr(out, "\n")
+    end
+    
+    /* 
+        INLINE RULES HANDLING 
+        When given, the m parameter is an array returned by
+        a Regex object, so that it is possible to manipulate it later on. 
+        The array is like [group-0, group-1, etc] where group-n is the
+        captured Regex group (group-0 means the all match).
+    */ 
+    function esc(s,noWikiBreak)
+        /*
+        
+        */
+        s = strReplace( s, "&", '\&')
+        s = strReplace( s, "$", '\$')
+        s = strReplace( s, "%", '\%')
+        s = strReplace( s, "#", '\#')
+        if noWikiBreak
+            s = strReplace( s, "_", '\_')
+            s = strReplace( s, "{", '\{')
+            s = strReplace( s, "}", '\}')
+        end
+        return s
+    end
+    
+    function _bold(m)
+        return '\textbf{\1}'
+    end
+    
+    function _italic(m)
+        return '\textit{\1}'
+    end
+    
+    function _underline(m)
+        return '\emph{\1}'
+    end
+    
+    function _stroked(m)
+        return '\sout{\1}'
+    end
+    
+    function _sup(m)
+        //return '^^{\1}'
+        return '\1'
+    end
+    
+    function _sub(m)
+        return '\1'
+    end
+    
+    function _monospace(m)
+        text = self.esc(m[1])
+        return @'\\verb=\1='
+    end
+    
+    function _linebreak(m)
+        return '\\\\' + "\n"
+    end
+    
+    function _quote(m)
+        return '\begin{quote}\1\end{quote}'
+    end
+    
+    function _url(m)
+        // Regex('\[(https?:.*?)(?:\|(.+?))](\[(.+?)\])?')
+        // \1           : adress
+        // \2           : replacement text
+        // \3[optional] : 
+        return '\href{\1}{\2}'
+    end
+    
+   function _wiki_url(m)
+        // '(?<!~)\[(.*?)(?:\|(.+?))]'
+        // \1           : adress
+        // \2           : replacement text
+
+        // self.sitelink must contain a $link variable to be expanded
+        link = URI.encode( m[1] )
+        text = @ self.sitelink
+        return '\href{' + text + '{\2}'
+    end
+
+    function _wiki_url_s(m)
+        // '(?<!~)\[(.*?)(?:\|(.+?))]'
+        // \1           : adress
+
+        // self.sitelink must contain a $link variable to be expanded
+        link = URI.encode( m[1] )
+        text = @ self.sitelink
+        return '\href{' + text + '{' + m[1] + '}'
+    end
+    
+    function _url(m)
+        // '(?<!~)\[[(.*?)(?:\|(.+?))]](\[(.+?)\])?'
+        // \1           : address
+        // \2           : Replacement text
+        // \3[optional] :
+        return '\href{\1}{\2}'
+    end
+
+     function _url_s(m)
+        // '(?<!~)\[[(.*?)(?:\|(.+?))]](\[(.+?)\])?'
+        // \1           : Address
+        return '\href{\1}{\1}'
+    end
+    
+    function _image(m)
+        // Regex("\[\[im (?.+?)\|(.+?)\|(.+?)\|(.+?)\]\]")
+        // \1           : url
+        // \2           : target
+        // \3           : pos (centered, etc)
+        // \4           : alternative text 
+        // (align, link, url, alt)
+        return '% no images handling for the moment !'
+    end
+    /* END OF INLINE RULES HANDLING */     
+
+    /*
+        Parse an inline paragraph.
+    */
+    
+    function inline(rawtext)
+        for rule_name, rule_reg in self.parent.inline
+            if rule_reg.match(rawtext) 
+                mo = rule_reg.grab(rawtext)
+                // Calls the methods dynamically
+                rawtext = rule_reg.subst( rawtext, (#("self._"+rule_name))(mo) )
+            end
+        end
+        
+        // no it's time to unescape tildes : ~
+        rawtext = strReplace( rawtext, "~~", "###@---") // i know, it's ugly !
+        rawtext = strReplace( rawtext, "~", "")
+        rawtext = strReplace( rawtext, "###@---", "~")
+        return rawtext
+    end
+       
+    function genPage(tex, title, Incltoc)
+        toc = ""
+        to_tex = tex
+        page_title = title
+        > to_tex
+        
+        fname = 'wikiParserFiles/tex_template.txt'
+        content = strBuffer(FileStat(fname).size)
+        f = InputStream( fname )
+        f.setEncoding("utf-8")
+        f.readText(content)
+        f.close()
+        
+        return @@'$content'
+    end
+    
+end
+
+export texHandler

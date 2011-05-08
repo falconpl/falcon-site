@@ -1,0 +1,90 @@
+<?
+
+   load fmwiki.fmwiki
+   import project_id
+   
+   wiki = FMWiki(
+      connectDB(),
+      0,
+      @"?page_id=$page_id&amp;prj_id=$project_id&amp;sect_id=wiki&amp;wid=$$link",
+      project_id )
+?>
+<? if wiki.hasPage( "Navi" ) ?>
+<style>
+#wiki_navi {
+   background:#EEF;
+   color: #039;
+   border:1px solid #000066;
+   margin:3px;
+   padding: 2px;
+}
+#wiki_navi p {
+   padding: 0 2px;
+   margin: 2px;
+   font-size: 70%;
+}
+
+#wiki_navi h5 {
+   padding: 2px;
+   margin: 4px;
+}
+</style>
+<div id="wiki_navi">
+<h5>Navigation</h5>
+<?= wiki.getPageText( "Navi" ) ?>
+</div>
+<? end ?>
+<style>
+#wiki_goto {
+   background:#EEF;
+   color: #039;
+   border:1px solid #000066;
+   margin:3px;
+   padding: 2px;
+}
+#wiki_goto p {
+   padding: 0 2px;
+   margin: 2px;
+   font-size: 70%;
+}
+#wiki_goto h5 {
+   padding: 2px;
+   margin: 4px;
+}
+</style>
+
+<div id="wiki_goto">
+<SCRIPT TYPE="text/javascript">
+<!--
+
+//-->
+</SCRIPT>
+
+<h5>Go To Page...</h5>
+<p><form name="wiki_form_gotopage">
+<input name="page" type="text" size="15" maxsize="80" onKeyPress="return submitenter(event)"/>
+<input type="button" value="go" onclick="javascript:gotopage()"/>
+</form></p>
+<script language="javascript">
+
+function submitenter(e) {
+   var keycode;
+   if (window.event) keycode = window.event.keyCode;
+   else if (e) keycode = e.which;
+   else return true;
+
+   if (keycode == 13) {
+      gotopage();
+      return false;
+   }
+   else {
+      return true;
+   }
+}
+
+function gotopage() {
+   if( document.wiki_form_gotopage.page.value != "" )
+      descend( document.wiki_form_gotopage.page.value );
+}
+</script>
+</div>

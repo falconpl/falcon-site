@@ -1,0 +1,68 @@
+<?
+import X
+?>
+
+<br /><br /><br />
+
+<div align="center">
+<table width="700" style="border: 1px solid #CCC" bgcolor="white" cellpadding="5">
+	<tr>
+		<th style="border-bottom: 1px solid #CCC" colspan="2">
+			Security Violation
+		</th>
+	</tr>
+	<tr>
+		<td>
+			<b>Message:</b>
+		</td>
+		<td>
+			<? > X.message ?>
+		</td>
+	</tr>
+	<? if X.jig.debug ?>
+	<tr>
+		<td>
+			<b>Code:</b>
+		</td>
+		<td>
+			<? > X.code ?>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<b>Line:</b>
+		</td>
+		<td>
+			<? > X.line ?>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<b>Module:</b>
+		</td>
+		<td>
+			<? > X.module ?>
+			<?
+				if X.symbol
+					> ' (', X.symbol, ')'
+				end
+			?>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">
+			<b>StackTrace:</b>
+		</td>
+		<td>
+			<br />
+				<div>
+					<pre>
+<? > X.stackTrace ?>
+					</pre>
+				</div>
+			<br />
+		</td>
+	</tr>
+	<? end ?>
+	</table>
+</div>

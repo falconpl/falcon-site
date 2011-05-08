@@ -1,0 +1,16 @@
+<h1>Development projects</h1>
+<p>This section homes projects based on Falcon or related to Falcon, and developed
+by our community members.</p>
+
+<ul>
+<?
+   query="
+      select project_id, name, description from projects
+      where project_type='project' order by name;"
+
+   r = connectDB().query( query )
+   while (adata = r.fetchArray() )
+   ?>
+   <li><a href="?page_id=prjs&prj_id=<?=adata[0]?>"><?=adata[1]?></a>: <?=adata[2]?></li>
+   <? end ?>
+</ul>

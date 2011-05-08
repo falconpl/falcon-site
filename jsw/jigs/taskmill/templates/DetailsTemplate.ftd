@@ -1,0 +1,164 @@
+<?
+import X
+
+/**
+ * Displays a task in detail.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.5.22
+ */
+?>
+<script language="Javascript">
+	function updateTask(loc) {
+		window.location.href = loc;
+	}
+
+	function closeTask() {
+		var f = document.forms['closeForm'];
+		var e = f.elements;
+		if (e['closeStatus'].value == '0') {
+			highliteFormElement('closeStatus');
+			alert('Please select a close status.');
+			return false;
+		}
+
+		if (confirm('Are you sure you want to close this task?')) {
+			f.submit()
+		}
+	}
+
+
+	function openTask() {
+		var f = document.forms['openForm'];
+		var e = f.elements;
+		if (e['openStatus'].value == '0') {
+			highliteFormElement('openStatus');
+			alert('Please select an open status.');
+			return false;
+		}
+
+		f.submit()
+	}
+</script>
+
+<table class="controls">
+	<tr>
+		<th colspan="4" align="left">
+			<div style="float: right">
+				<a href="#">Notification List</a> | 
+				<a href="#">History</a>
+			</div>
+			<b>Task: <? >> X.task.id ?></b>
+		</th>
+	</tr>
+	<tr>
+		<td nowrap="nowrap" class="label">
+			Category
+		</td>
+		<td width="50%" class="value">
+			<? >> X.task.category ?>
+		</td>
+		<td nowrap="nowrap" class="label">
+			Created on
+		</td>
+		<td width="50%" class="value">
+			<? >> X.task.dateCreated ?>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap="nowrap" class="label">
+			Status
+		</td>
+		<td width="50%" class="value" style="background-color: #<? >> X.task.statusColor ?>" >
+			<? >> X.task.status ?>
+		</td>
+		<td nowrap="nowrap" class="label">
+			Last updated 
+		</td>
+		<td width="50%" class="value">
+			<? >> X.task.dateUpdated ?>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap="nowrap" class="label">
+			Priority
+		</td>
+		<td width="50%" class="value">
+			<? >> X.task.priority ?>
+		</td>
+		<td nowrap="nowrap" class="label">
+			Reporter
+		</td>
+		<td width="50%" class="value">
+			<? >> X.task.reporter ?>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap="nowrap" class="label">
+			Release
+		</td>
+		<td width="50%" class="value">
+			<? >> X.task.release ?>
+		</td>
+		<td nowrap="nowrap" class="label">
+			Assigned
+		</td>
+		<td width="50%" class="value">
+			<? >> ', '.merge(X.task.assigned) ?>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap="nowrap" class="label">
+			Summary
+		</td>
+		<td class="value" colspan="3">
+			<? >> X.task.summary ?>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap="nowrap" class="label" valign="top">
+			Description	
+		</td>
+		<td class="value" colspan="3">
+			<? >> X.task.description ?>
+		</td>
+	</tr>
+	<tr>
+		<? if X.task.closed ?>
+			<td align="center" colspan="4"  style="border-top: 2px solid #CCC;">
+				<form name="openForm" method="post" action="<? >> X.link('post.openTask') ?>">
+				<input type="hidden" name="taskId" value="<? >> X.task.id ?>" />
+				<input type="button" value="ReOpen" onclick="openTask()" />
+				<select id="openStatus" name="openStatus">
+					<option value="0">--Select--</option>
+					<? for status in X.statuses 
+						if status.closedContext == 1 : continue	
+					?>
+						<option value="<? >> status.id ?>"><? >> status.name ?></option>
+					<? end ?>
+				</select>
+				</form>
+			</td>
+		<? else ?>
+			<td colspan="3" align="right" style="border-top: 2px solid #CCC;">
+				<input type="button" value="Update" onclick="updateTask('<? >> X.link('create', 'taskId=' + X.jig.request('taskId')) ?>')" />
+			</td>
+			<td align="right" style="border-top: 2px solid #CCC;">
+				<form name="closeForm" method="post" action="<? >> X.link('post.closeTask') ?>">
+				<input type="hidden" name="taskId" value="<? >> X.task.id ?>" />
+				<input type="button" value="Close" onclick="closeTask()" />
+				<select id="closeStatus" name="closeStatus">
+					<option value="0">--Select--</option>
+					<? for status in X.statuses 
+						if status.closedContext != 1 : continue	
+					?>
+						<option value="<? >> status.id ?>"><? >> status.name ?></option>
+					<? end ?>
+				</select>
+				</form>
+			</td>
+		<? end ?>
+	</tr>
+</table>

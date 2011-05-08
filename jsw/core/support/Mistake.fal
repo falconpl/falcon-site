@@ -1,0 +1,128 @@
+export Mistake
+
+/**
+ * Class for dealing with expected user mistakes.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.13
+ */
+class Mistake(info, elementName)
+	//! List of mistakes we have.
+	static mistakes_ = nil
+
+	//! A Lang instance with the mistake information.
+	_info = info
+
+	//! The name of form element with the bad data, if applicable.
+	_elementName = elementName
+
+	/**
+	 * Get the mistake info.
+	 *
+	 * @public
+	 * @return 	string
+	 */
+	function toString()
+		return self._info.toString()
+	end
+
+	/**
+	 * Get name of the form field we have on file for this mistake.
+	 *
+	 * @public
+	 * @return string
+	 */
+	function getElementName()
+		return self._elementName
+	end
+
+	/*************************** STATICS ***************************/
+
+	/**
+	 * Add a mistake to our mistakes list.
+	 *
+	 * @static
+	 * @public
+	 * @param	Lang info - Object which contains the mistake information.
+	 * @param	string elementName [optional] - The name of form element with the bad data, if applicable.
+	 * @return 	nil
+	 */
+	function push(info, elementName)
+		Mistake.ready_()
+		Mistake.mistakes_.push(Mistake(info, elementName))
+	end
+
+	
+	/**
+	 * Pops and returns the last error.
+	 *
+	 * @static
+	 * @public
+	 * @return 	Mistake
+	 */
+	function pop()
+		return Mistake.mistakes_.pop()
+	end
+
+	/**
+	 * How many errors do we have.
+	 *
+	 * @static
+	 * @public
+	 * @return	integer
+	 */
+	function len()
+		Mistake.ready_()
+		return Mistake.mistakes_.len()	
+	end
+
+	/**
+	 * See if we have no mistakes.
+	 *
+	 * @static
+	 * @public
+	 * @return	boolean
+	 */
+	function empty()
+		return Mistake.len() == 0
+	end
+
+	/**
+	 * Clear the list of all mistakes.
+	 *
+	 * @static
+	 * @public
+	 * @return nil
+	 */
+	function clearAll()
+		Mistake.mistakes_.clear()
+	end
+
+	/**
+	 * Get all the errors we have.
+	 *
+	 * @static
+	 * @public
+	 * @return	List
+	 */
+	function getAll()
+		Mistake.ready_()
+		return Mistake.mistakes_
+	end
+
+	/**
+	 * Make sure the object is in a ready state.
+	 *
+	 * @static
+	 * @private
+	 * @return nil
+	 */
+	function ready_()
+		if Mistake.mistakes_ == nil	
+			Mistake.mistakes_ = List()
+		end
+	end
+end
+

@@ -1,0 +1,20 @@
+// blessed - Turning dictionaries into objects (from 0.8.12)
+entity = bless([
+   "data" => "not initialized",
+
+   "sum_up" => function( counter );
+      if counter == 0: return;
+      self.data += counter;
+      self.sum_up( counter - 1 );
+   end
+])
+
+// it's still a dictionary...
+> "Initial data:", entity["data"]
+
+// but it's also more; make a new method
+entity["setup"] = function();self.data=0;end
+entity.setup()     // ... and call it
+entity.sum_up(10)  // then use the value
+
+> "Sum of 10 numbers: ", entity.data

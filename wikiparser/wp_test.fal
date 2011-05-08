@@ -1,0 +1,99 @@
+/*
+Wikiparser: Markup Engine for Falcon PL
+
+Kibleur Christophe April 15, 2009.
+
+[Kib² http://thewikiblog.appspot.com/]
+
+-- Test with HTML engine
+*/
+
+
+load .wikiparser
+load .handlers.htmlhandler
+/*
+================================================================================
+                            MAIN PROGRAM
+================================================================================
+*/
+
+
+/*
+    USE IT LIKE THIS WHEN WORKING WITH TEXT FILES
+*/
+
+
+// Read the contents of the input file, then save the output
+
+/* The old way
+
+fname = 'docs/main.wiki'
+my_test = strBuffer(FileStat(fname).size)
+f = InputStream( fname )
+f.setEncoding("utf-8")
+f.readText(my_test)
+f.close()
+
+// Create an handler, and a parser using it
+h = htmlHandler()
+lbsm = LBFSM(h)
+
+
+//inspect(lbsm.out)
+
+// Save all to a file
+f = OutputStream( 'docs/main.html' )
+f.setEncoding("utf-8")
+f.writeText( h.genPage( lbsm.parse(my_test), "FALCON PAGE", true) )
+f.close()
+
+*/
+
+doc = "main" // survival guide
+h = htmlHandler()
+lbsm = LBFSM(h)
+> @"Creating $(doc).html"
+
+f = OutputStream( @"docs/$(doc).html" )
+f.setEncoding("utf-8")
+f.writeText( h.genPage( lbsm.go("docs/", @"$(doc)"), @"$(doc)", true))
+f.close()
+
+/*
+    INLINE USAGE VERSION
+*/
+
+test = '
+= Level 1
+
+== Synonyms
+
+I just added _syn to the wiki syntax. This is **very convenient** way to
+avoid typing the same things several times.
+
+i.e I wrote a tutorial on Falcon, there are chances that I type
+{{~[[http://falconpl.org|FalconPL]]}} a lot in my text.
+
+Synonyms allow you to store a word as a shortcut for a wiki command.
+
+* _syn
+* _fal
+* _pyg
+* [[http://falconpl.org]]   << this should be a verbatim link
+* [Inner page|An inner page.]   << This should be a RENAMED link to an inner page.
+* [Inner page]   << This should be a link to an inner page.
+
+like {{monospaced > text}}
+
+[synon]
+_syn => //synonyms//
+_fal => [[http://falconpl.org|FalconPL]]
+_pyg => [[http://pygments.org/|Pygments]]
+[/synon]
+
+'
+
+h = htmlHandler("http://falconpl.org/?mode=wiki&address=$(link)")
+lbsm = LBFSM(h)
+> lbsm.parse(test)
+

@@ -1,0 +1,557 @@
+body  {
+   font: 100% Verdana, Arial, Helvetica, sans-serif;
+   background: #FFFFFF;
+   margin: 0; /* it's good practice to zero the margin and padding of the body element to account for differing browser defaults */
+   padding: 0;
+   text-align: center; /* this centers the container in IE 5* browsers. The text is then set to the left aligned default in the #container selector */
+   color: #000000;
+}
+
+.falcon {
+text-align:left
+}
+.falcon #container { /* -ofmine- falcon is the html element, #container is one of its rules */
+   width: auto;  /* this will create a container 80% of the browser width */
+   margin: 0; /* the auto margins (in conjunction with a width) center the page */
+   text-align: left; /* this overrides the text-align: center on the body element. */
+   background-color: #FFFFFF;
+}
+
+.falcon #header {
+   position: relative;
+   width: 100%;
+   height: 150px;
+   border-bottom-width: 3px;
+   border-bottom-style: solid;
+   padding: 0;  /* this padding matches the left alignment of the elements in the divs that appear beneath it. If an image is used in the #header instead of text, you may want to remove the padding. */
+   /*background-image: url(images/bkimage21.jpg);*/
+   border-bottom-color: #000000;
+}
+.falcon #header h1 {
+   margin: 0; /* zeroing the margin of the last element in the #header div will avoid margin collapse - an unexplainable space between divs. If the div has a border around it, this is not necessary as that also avoids the margin collapse */
+   padding: 10px 0; /* using padding instead of margin will allow you to keep the element away from the edges of the div */
+}
+
+.flacon_site_credit {
+   font-size:9pt;
+   font-style: italic;
+   font-family: "Times new roman" "Ninbus serif" serif;
+   text-align: right;
+   margin: 10px;
+   margin-right:100px;
+}
+
+.flacon_elapsed {
+   padding-top:20px;
+   margin-top: 5px;
+   font-size:8pt;
+   font-style: italic;
+   font-family: "Arial" "Nimbus sans" sans;
+   text-align: center;
+   border-top: thin black;
+   border-top-width: 50%;
+   margin-bottom:15px;
+
+}
+
+/* Tips for sidebar1:
+1. since we are working in percentages, it's best not to use padding on the sidebar. It will be added to the width for standards compliant browsers creating an unknown actual width.
+2. Space between the side of the div and the elements within it can be created by placing a left and right margin on those elements as seen in the ".twoColLiqRtHdr #sidebar1 p" rule.
+3. Since Explorer calculates widths after the parent element is rendered, you may occasionally run into unexplained bugs with percentage-based columns. If you need more predictable results, you may choose to change to pixel sized columns.
+*/
+.falcon #sidebar1 {
+   float: right; /* since this element is floated, a width must be given */
+   width: 17%; /* the background color will be displayed for the length of the content in the column, but no further */
+   padding-top: 15px; /* top and bottom padding create visual space within this div  */
+   padding: 12px;
+   background-color: #F3F8F7;
+}
+.falcon #sidebar1 h3, .twoColLiqRtHdr #sidebar1 p {
+   margin-left: 10px; /* the left and right margin should be given to every element that will be placed in the side columns */
+   margin-right: 10px;
+}
+
+/* Tips for mainContent:
+1. the space between the mainContent and sidebar1 is created with the right margin on the mainContent div.  No matter how much content the sidebar1 div contains, the column space will remain. You can remove this right margin if you want the #mainContent div's text to fill the #sidebar1 space when the content in #sidebar1 ends.
+2. to avoid float drop at a supported minimum 800 x 600 resolution, elements within the mainContent div should be 430px or smaller (this includes images).
+3. in the Internet Explorer Conditional Comment below, the zoom property is used to give the mainContent "hasLayout." This avoids several IE-specific bugs.
+*/
+.falcon #mainContent {
+   margin: 0 10px 0 175px; /* the left margin should mirror the margin on the header and footer for proper alignment. */
+   height: auto;
+   border-left-color: #CCCCCC;
+   border-left-style: solid;
+   border-left-width: thin;
+   width: auto;
+   z-index:15;
+   padding: 10px 20px 20px 20px;
+}
+
+.falcon #footer {
+   padding: 0 10px;
+}
+.falcon #footer p {
+   margin: 0; /* zeroing the margins of the first element in the footer will avoid the possibility of margin collapse - a space between divs */
+   padding: 10px 0; /* padding on this element will create space, just as the the margin would have, without the margin collapse issue */
+}
+
+/* Miscellaneous classes for reuse */
+.fltrt { /* this class can be used to float an element right in your page. The floated element must precede the element it should be next to on the page. */
+   float: right;
+   margin-left: 8px;
+}
+.fltlft { /* this class can be used to float an element left in your page. The floated element must precede the element it should be next to on the page. */
+   float: left;
+   margin-right: 8px;
+}
+.clearfloat { /* this class should be placed on a div or break element and should be the final element before the close of a container that should fully contain a float */
+   clear:both;
+    height:0;
+    font-size: 1px;
+    line-height: 0px;
+}
+#navigazione {
+   position:absolute;
+   left:varx;
+   top:vary;
+   width:164px;
+   z-index:3;
+   background-color: #FFFFFF;
+   color: #333333;
+   font-family: Verdana, Arial, Helvetica, sans-serif;
+   font-size: 0.8em;
+   font-weight: bold;
+   text-decoration: none
+}
+
+.programming { color: #BDDC76;
+}
+#falconPL { position: relative;
+   left: 70px;
+   top: -115px;
+   font-family: Geneva, Arial, Helvetica, sans-serif;
+   font-size: 1.3em;
+   color: #000000;
+}
+#logo_container {
+   position: absolute;
+   top: 7px;
+   z-index: 5;
+   float: left;
+   right: 40%;
+   height:50px;
+}
+#motto { position: relative;
+   left: 100px;
+   top: -100px;
+   font-size: 0.9em;
+   font-family: "Times New Roman", Times, serif;
+}
+
+H1 {  color: #000066;
+   font-family: Geneva, Arial, Helvetica, sans-serif;
+   font-weight: bolder;
+}
+H2 {
+   color: #E87442;
+   font-family: Verdana, Arial, Helvetica, sans-serif;
+   font-weight: bold;
+}
+
+h3 {  color: #E87442;
+   font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+#tree_location {
+   position:absolute;
+   left:30px;
+   top:123px;
+   height:18px;
+   z-index:21;
+   font-family: Verdana, Arial, Helvetica, sans-serif;
+   font-size: 8pt;
+   font-weight: bold;
+}
+
+.tree_location_leaf {color: #FFFFFF}
+
+.main_column {
+   width: 700px;
+   position: static;
+   z-index: 15;
+}
+
+.secondary_column {
+   position:absolute;
+   top:180px;
+   right:2px;
+   width: 200px;
+   padding: 4px;
+   z-index: 15;
+}
+
+#newslist {
+   padding-top: 50px;
+}
+
+.news_block {
+   margin-top: 40px;
+   margin-bottom: 15px;
+}
+
+.news {
+   /* Nothing for now */
+   position: relative;
+   margin-top:15px;
+   margin-bottom:30px;
+}
+
+.news_title {
+   width: 100;
+   height: 30px;
+   padding: 3px;
+   padding-left: 15px;
+
+   background-image: url(images/titlebg.jpg);
+   color: #E87442;
+   font-family: Verdana, Arial, Helvetica, sans-serif;
+   font-weight: bold;
+   font-size:16pt;
+}
+
+.news_signature {
+   font-family: "Times new roman", "Nimbus serif", serif;
+   font-style: italic;
+   font-size: 9pt;
+   padding: 3pt;
+   margin-left: 25px;
+   margin-top: 10px;
+   margin-bottom: 15px;
+}
+
+/* The heading under the news is in normal font */
+.news .news_heading {
+   margin-left: 15px;
+}
+
+.news .news_heading_part {
+   margin-bottom: 30pt;
+   font-style: italic;
+}
+
+.news .news_body {
+   margin-bottom: 10pt;
+   padding: 5pt;
+}
+
+.news_actions {
+   position: absolute;
+   float: right;
+   font-size:10px;
+   margin-right:15;
+   right:0;
+   top:1px;
+   font-weight: normal;
+}
+
+.news_more {
+   padding:15px;
+   text-align: right;
+   margin-right:15;
+   right:0;
+   font-size:10px;
+}
+
+.open_source a {
+   text-decoration: none;
+}
+
+.login_area {
+   position: absolute;
+   float: right;
+   right:0;
+   margin-right: 5px;
+   top:65px;
+   font-size: 9pt;
+}
+
+
+.falcon_official_release
+{
+   width: 70%;
+}
+
+.falcon_latest_release
+{
+   width: 70%;
+}
+
+.falcon_release {
+   width: 70%;
+}
+
+.falcon_official_release, .falcon_latest_release, .falcon_release {
+   /* the background color will be displayed for the length of the content in the column, but no further */
+   padding-left: 6px;
+   margin-top:20px;
+   margin-bottom:30px;
+   background-image: url(images/lc_corner.jpg);
+   background-repeat: no-repeat;
+}
+
+.falcon_official_release h1
+{
+   color: green;
+   font-style: italic;
+   font-size: 14pt;
+   font-weight: bold;
+}
+
+.falcon_latest_release h1, .falcon_release h1
+{
+   color: #000066;
+   font-style: italic;
+   font-size: 14pt;
+   font-weight: bold;
+}
+
+.falcon_official_release h2, .falcon_latest_release h2, .falcon_release h2 {
+   font-size: 12pt;
+   font-weight: bold;
+   padding: 4px;
+}
+
+.falcon_official_release td, .falcon_latest_release td, .falcon_release td {
+   font-size: 9pt;
+   padding: 1px;
+}
+
+.falcon_official_release hr, .falcon_latest_release hr, .falcon_release hr {
+   border: 0;
+   color: green;
+   background-color: green;
+   height: 1px;
+   width: 75%;
+   padding: 0px;
+   margin: 2px;
+}
+
+.falcon_official_release table, .falcon_latest_release table, .falcon_release table {
+   width:100%;
+}
+
+.falcon_release_open_changelog {
+   font-size: 9pt;
+   font-style: italic;
+   text-align: right;
+   margin-right:35px;
+}
+
+.falcon_downloads
+{
+}
+
+.falcon_prj_member_list
+{
+   float:right;
+   width:150px;
+   background-color:#F8F8FF;
+   border-style: solid;
+   border-width: 1px;
+   border-color: #B0B0F0;
+   padding:3px;
+   font-size:9pt;
+}
+
+.falcon_prj_member_list h3
+{
+   margin:0;
+   padding:0;
+   margin-bottom:8px;
+}
+
+.falcon_prj_member_list h4
+{
+   color:#9090D0;
+   margin:0;
+   padding:0;
+   margin-top:12px;
+   margin-bottom:4px;
+}
+
+.falcon_prj_member_list p
+{
+   padding:2px;
+   margin:2px;
+}
+
+
+
+
+/*********************************
+  KIB2'S WIKI SUPPORT
+*********************************/
+
+.center img{
+display:block;
+clear:both;
+margin-left:auto;
+margin-right:auto;
+border: none;
+}
+
+.left img{
+display:block;
+clear:both;
+margin-right:auto;
+border: none;
+}
+
+.right img{
+display:block;
+clear:both;
+margin-left:auto;
+border: none;
+}
+
+.toc{
+display:block;
+background-color: #D3D3D3;
+}
+
+.wikitable {
+border: 1px solid #000;
+border-spacing: 0;
+margin: 1.5em 2em 1.8em 2em;
+margin-left: auto;
+margin-right: auto;
+}
+
+.wikitable * tr th       { font-size: 100%;
+padding: .5em .7em .5em .7em;
+border: 1px solid #000;
+background-color: #8F2C2C;
+vertical-align: bottom;
+color: black;
+empty-cells: show;
+}
+
+.wikitable * tr td {
+font-size: 95%;
+color: black;
+border: 1px solid #000;
+background-color: #5F5F5F;
+padding: .4em .7em .45em .7em;
+vertical-align: top;
+empty-cells: show;
+}
+
+.wikitable * tr.odd td   {
+border: 1px solid #000;
+color: black;
+background-color: #BFB3B3;
+}
+
+pre.wiki_snippet {
+  color: #fff;
+  background-color: #000;
+}
+
+.fal{
+color: #fff;
+}
+
+.falShebang{
+color: #AEB3FF;
+font-style: italic;
+}
+
+.falBigComment{
+color: #fdca01;
+font-style: italic;
+}
+
+.falComment {
+color: #b3defd;
+font-style: italic;
+}
+
+.falLogic {
+color: #ad7fa8;
+font-weight: bold;
+}
+
+.className {
+color: #980101;
+background-color: #D9BB7A;
+font-weight: bold;
+font-style: italic;
+}
+
+.funcName {
+color: #8FA0BF;
+background-color: #2F2F2F;
+font-weight: bold;
+font-style: italic;
+}
+
+.falKeywords {
+color: #EFDD1D;
+font-weight: bold;
+}
+
+.falKeywords2 {
+color: #D01D33;
+font-weight: bold;
+}
+
+.falKeywords3 {
+color: #00C212;
+font-weight: bold;
+font-style: italic;
+}
+
+.falSpecial{
+color: #D01D33;
+}
+
+.falTypes {
+color: #00FF40;
+font-style: italic;
+}
+
+.falEntities {
+color: #F57900;
+font-weight: bold;
+}
+
+.falEntities2 {
+color: #F57900;
+font-weight: bold;
+}
+
+.falPars {
+color: #73D216;
+font-weight: bold;
+}
+
+.falOperators{
+color: #98FC66;
+font-weight: bold;
+}
+
+.falSingleString {
+color: #4A8CDB;
+}
+
+.falDoubleString {
+color: #3465A4;
+}
+
+.falNumberInteger {
+color: #FFFF00;
+}
+
+.Integer {
+color: #49A5FF;
+}

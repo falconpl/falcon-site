@@ -1,0 +1,37 @@
+//==================================
+// The site data.
+//
+
+/*
+ This class holds the site data; the format is the following:
+ - pageID: a symbolic name for the page.
+ - pageName: Full name as it will be shown.
+ - pageProvider: an executable code that will pull the page in.
+ - parentID: The ID of the parent page in the nav tree.
+ - tabID: if not nil, a number indicating the navigation tab
+          to be opened when loading this page.
+ - side: provider for side data.
+*/
+
+class PageData( pageID, pageName, pageProvider, parentID, tabID, side )
+   pageID = pageID
+   pageName = pageName
+   pageProvider = pageProvider
+   parentID = parentID
+   tabID = tabID
+   sideProvider = side
+
+   init
+      SiteData.add( pageID, self )
+   end
+end
+
+object SiteData
+   pages = [=>]
+
+   function add( pageID, page )
+      self.pages[ pageID ] = page
+   end
+end
+
+export

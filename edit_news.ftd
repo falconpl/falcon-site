@@ -1,0 +1,19 @@
+<div class="falcon_editnews">
+   <form method="POST" action="?page_id=<?=page_id?>&prj_id=<?=project_id?>&req=edit_news">
+   <input type="hidden" name="news_id" value="<?=news_id ?>"/>
+   <table border="0">
+   <tr><td>News title:</td><td>
+   <input type="text" size="30" maxsize="60" name="news_title"/>
+   </td></tr>
+   <tr><td colspan="2">News heading:</td></tr>
+   <tr><td colspan="2">
+   <textarea rows="6" cols="60" name="news_heading" value><?=news_heading?></textarea>
+   </td></tr>
+   <tr><td colspan="2">News content:</td></tr>
+   <tr><td colspan="2">
+   <textarea rows="12" cols="60" name="news_content"><?=news_content?></textarea>
+   </td></tr>
+   <tr><td><input type="submit" name="submit" value="Send"></td><td>&nbsp;</td></tr>
+   </table>
+   </form>
+</div>

@@ -1,0 +1,284 @@
+<h2>Falcon Facts Table</h2>
+<p>This is a simple comparative table of the differential features provided by
+various programming languages in the typeless/scripting class. Notice that none of these
+comaprisons is an indicator of the general suitability or overall power of any of the
+listed languages; after all, pretty powerful languages as C and LISP would score relatively
+bad in this table.</p>
+<p>Also, not all features are listed; only the most important/differential ones were included</p>
+
+<table border="2px" width="100%" cellpadding="2" cellspacing="2">
+<tr><th>&nbsp;</th><th>Falcon</th><th>Python*</th><th>Ruby</th><th>PHP5</th><th>Lua</th><th>Perl</th></tr>
+<tr><td>Document Template</td><td>yes</td><td>no</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
+<tr><td>Native regular expressions</td><td>no</td><td>no</td><td>yes</td><td>no</td><td>no</td><td>yes</td></tr>
+<tr><td>Coroutines</td><td>yes</td><td>no | partial</td><td>yes</td><td>no</td><td>yes</td><td>no</td></tr>
+<tr><td>Multithreading</td><td>yes</td><td>partial</td><td>no</td><td>no</td><td>no</td><td>partial</td></tr>
+<tr><td>Embeddability</td><td>high</td><td>low</td><td>low</td><td>no</td><td>high</td><td>low</td></tr>
+<tr><td>C Dynamic Library Interface</td><td>yes</td><td>via ctypes</td><td>yes</td><td>no</td><td>partial</td><td>no</td></tr>
+<tr><td>Native internationalization</td><td>yes</td><td>no</td><td>no</td><td>no</td><td>no</td><td>no</td></tr>
+<tr><td>Compile-time Metaprogramming</td><td>yes</td><td>no</td><td>no</td><td>no</td><td>no</td><td>no</td></tr>
+<tr><td>Procedural programming</td><td>yes</td><td>partial</td><td>no</td><td>yes</td><td>yes</td><td>yes</td></tr>
+<tr><td>Object oriented</td><td>yes</td><td>partial</td><td>yes</td><td>yes</td><td>no</td><td>partial</td></tr>
+<tr><td>Prototype oriented</td><td>yes</td><td>partial</td><td>no</td><td>no</td><td>yes</td><td>partial</td></tr>
+<tr><td>Functional programming</td><td>yes</td><td>no</td><td>no</td><td>no</td><td>no</td><td>no</td></tr>
+<tr><td>Tabular programming</td><td>yes</td><td>no</td><td>no</td><td>no</td><td>no</td><td>no</td></tr>
+<tr><td>Message programming</td><td>yes</td><td>no</td><td>no</td><td>no</td><td>no</td><td>no</td></tr>
+<tr><td>Raw VM loop speed (2)</td><td>1023</td><td>442 | 340</td><td>116</td><td>670</td><td>1247</td><td>369</td></tr>
+<tr><td>Direct binary data access</td><td>yes</td><td>no</td><td>no</td><td>no</td><td>no</td><td>no</td></tr>
+<tr><td>Data sharing & reflection</td><td>yes</td><td>no</td><td>no</td><td>no</td><td>no</td><td>no</td></tr>
+<tr><td>Virtual filesystem</td><td>yes (from 0.9)</td><td>no</td><td>no</td><td>yes</td><td>no</td><td>no</td></tr>
+<tr><td>Library size</td><td>small</td><td>huge</td><td>large</td><td>Huge(3)</td><td>medium</td><td>huge</td></tr>
+<tr><td>License</td><td>FPLL or GPL</td><td>Python</td><td>Custom or GPL</td><td>PHP</td><td>MIT</td><td>ARTISTIC or GPL</td></tr>
+</table>
+<p>
+<br>(*) Differentiated by a "|" where python 2.x and 3 are different.
+<br>(2) In raw loops per seconds (thousands). See below for definition.
+<br>(3) Smaller than the other "huge" libraries but extensively covering the field of
+    network and server side applications.
+</p>
+
+<h3>Document Templating</h3>
+<p>This refers to a native language capability to embed script slices into text
+document. It's the base of server-side dynamic page generation, but it's not limited
+to that.</p>
+ 
+<h3>Native regular expressions</h3>
+<p>Specifies whether native regular expressions are part of the language specification or
+not. PERL and Ruby integrate regular expressions in the grammar of the language, providing
+compile-time regular expression compilation. All the other languages provide them as 
+library routines.</p>
+
+<h3>Coroutines</h3>
+<p>It's light parallelism, handled by the language virtual machine through time slices
+and context switches. While Python supports multithreading natively, it doesn't provide
+a native coroutine system. Some proposed extensions are available as separate library
+since the very latest versions of python, but it is not clear if they will be integrated
+in the 2.6 development, as the development effort is being moved to Python 3.</p>
+
+<h3>Multithreading</h3>
+<p>It's support for native OS parallel execution model. Python gets a "partial" here 
+because MutliThreading (MT) applications written in Python requires some compromises in term
+of scaling and portability. 2.x has a few unsolved concurrency problem with heavy
+multithreading, which weren't properly addressed in the early stage of Python3 development.</p>
+<p>Also, another half reason for the "partial" score of MT is the fact that MT applications
+using Python as a scripting engine need to hold global and extremely wide locks while exchanging 
+data with scripts, and many python VM running in an MT application may cause heavy contention
+on their own and slow down the whole application due to the memory model and sharing policies.</p>
+<p>While PERL has a native multithreading support, it is somewhat limited in terms of primitives
+and scalabilty.</p>
+<p>Mutlithreading is being introduced also in Ruby version 1.9, but the final model is still being
+debated.</p>
+<p>On the other hand, Falcon is explicitly designed to integrate as a scripting engine into MT applications without
+any compromise, providing 0 contention across different concurrently running scripts. Same 
+contention free approach is provided to Falcon applications through a newel programming
+model that doesn't require full visibility of variables and is 100% portable across platforms.</p>
+<p>Other scripting languages aren't suited for MT, not as scripting engines for MT applications
+nor as a base to write multithreaded applications themselves. On the scripting engine for application side, 
+Lua  scripts may be used concurrently inside an MT application, provided care is taken 
+(read: provided you rewrite part of the inner engine to fit your particular MT application, 
+or lock out every execution with big  contention areas).</p>
+
+<h3>Embeddability</h3>
+<p>Some scripting engines were clearly designed to integrate into foreign applications,
+while others were designed to be mainly stand-alone, and were eventually given an API
+that allows them to be used by third party applications. While Falcon and Lua engines relatively
+are slim but provide a very pervasive API that allows fine-control various aspects 
+of the script and of the virtual machine, Ruby and Python are more massive and closed to the
+outer world. To configure those two engines, it is often preferred to write small scripts
+inline in the embedding applications and run them rather than programming them directly; at times,
+this is also the only viable solution.</p>
+<p>PHP can be integrated into foreign applications through its internal
+API, but it was mainly meant to be a stand-alone engine, so it provides hardly any facility
+for a smooth integration.</p>
+
+<h3>C Dynamic Library Interface</h3>
+<p>A dynamic library interface allows a script to load and directly use a C shared module on the host
+system. Not all the scripting languages are equally suited to allow foreign code to be
+integrated and then called.</p>
+<p>Python provides a library called ctypes that "mimic" C through encapsulation in the
+Python concept. Although this solution is elegant and powerful, as it effectively allows
+interaction with any C library, no matter how complex are the calls and data structures it
+requires or provides, except than for relatively trivial integrations, this approach isn't anywhere
+less complex than writing a binding module for Python in C, and it's often not much more
+than that. On the other hand, writing the binding Python-side with Ctypes adds several layers of
+indirection and a relevant overhead in memory and performance.</p>
+<p>Falcon provides a library loading native shared objects and allowing relative complex interactions
+with it. While not complete as Ctypes, it's extremely efficient and simple to setup, and allows
+developers to cover any possible integration with native modules up to the point where a full binding
+becomes convenient in terms of complexity and performance. Integration with Falcon OOP and
+garbage collecting are also provided, and language structures mapping raw memory allows work
+on the shared data also at low level.</p>
+<p>From version 5, Lua provides a dynamic library loader interface, but it lacks some safety
+and integration features due to different language support for foreign data and function calls.</p>
+<p>Ruby provides a dynamic linker module (Ruby/DL) which is both complete and efficient, and
+slighly less complex to setup than ctypes.</p>
+
+<h3>Native Internationalization</h3>
+<p>While some language provide bindings for external libraries enabling automated translation
+of applications, those libraries are not always available on target platforms, and they don't
+always cope with language structures as i.e. polymorphic strings.</p>
+<p>Falcon provides an integrated language translation system which is aware of the language
+structures, and is always immediately available. The common language translation
+infrastructure is shared between sources, pre-compiled modules and binary (C/C++ native) modules.</p>
+<p>Other than that, Falcon is natively internationalized towards host systems and foreign libraries,
+as it virtualizes the underlying support for international strings and system resource identifiers.</p>
+<p>Even language identifiers (variables, function names, class names and so on) can be written in
+any known, unknown, or soon to be known language.</p>
+
+<h3>Compile-time Metaprogramming</h3>
+<p>Metaprogramming at compile time is the ability to interact with the compilation process and modify the program
+dynamically as it is being compiled. Examples are C macros and C++ templates. While every modern
+scripting language provides a facility to compile code built on the fly and then use it, Falcon also
+provides Macros and generic metaprogramming. The compiler itself can fire up a virtual machine
+and grab its output on the fly as a part of the program being compiled.</p>
+<p>This method allows, for example, the ability to perform some calculation at compile time, so that it's
+executed only once and then cached for the next executions.</p>
+
+<h3>Procedural programming</h3>
+<p>Procedural programming, a specialization of imperative programming, is one of the most ancient
+programming paradigms and focuses on the execution of code sequences organized into procedures.
+Although generally common throughout all the modern languages. Some (as Java) explicitly
+decided to limit or remove it; others limited its breadth and some of its feature, as, for example,
+the ability to pass arbitrary numbers of parameters to the procedures, or the ability to return
+values by modifying the procedure parameters.</p>
+<p>Falcon recovers/provides all of the procedural programming features integrating and merging it into
+more modern paradigms.</p>
+
+<h3>Object oriented</h3>
+<p>Most modern languages are designed or deeply integrated with Object Oriented design. Languages
+marked with yes here provide a wide and solid Object Oriented Programming model, complete with
+classes, instances, inheritance, class typing (i.e. seeing classes as sort of types), and so on.</p>
+<p>Languages marked as <b>partial</b> still support Object Oriented design, but derogate widely on
+several aspects.</p>
+
+<h3>Prototype oriented</h3>
+<p>Prototype oriented programming is akin to object oriented programming, but its focus it's on the
+interface exposed by items rather than on their type.</p>
+<p>Lua, that is based on this paradigm. It has demonstrated that prototype orientation is flexible and powerful enough
+to reproduce several fashion of object oriented architectures. However, it has some uneliminable
+drawbacks, as the inherent slowness in mapping underlying native data structures.</p>
+<p>Python has taken benefit from this model by allowing to change the definition of instances
+at runtime, and to intercept the access to instance elements so to modify the final outcome.</p>
+<p>Falcon provides two overlapping prototype oriented models, one very similar to those of Lua
+and Python, and the other integrating with functional programming and permeating tabular
+programming.</p>
+
+<h3>Functional programming</h3>
+<p>Functional programming is a programming paradigm focusing on the <i>processing of
+functions</i> rather than on the processing of pure data.</p>
+<p>Many modern programming languges, as Python, Lua, PERL and javascript offer
+some functional elements, but they are not considered "functional languages"
+in the strict sense of the term.</p>
+<p>Other than being a second order language (that is, being able to pass functions
+as parameters for other functions), Falcon provides a complete functional evaluation
+engine which integrates with the VM.</p>
+<p>So, other than offering just functional elements as closures, second-order functions,
+special out-of-band return values for monadic calculus and the like, Falcon provides
+also functional oriented flow-control.</p>
+<p>Falcon functional sequences looks somewhat similar to LISP programs, but they are
+also programmable at runtime as they can be manipulated as normal language arrays.</p>
+<p>Object oriented programming and functional programming are blended in Falcon and integrate
+each other seamlessly. Also, prototype oriented programming allows to simplify and extend
+the dynamicity of functional sequences and their interoperativity with the rest of the language.</p>
+
+<h3>Tabular programming</h3>
+<p>Tables are simple but powerful means to represent facts and to categorize the reality.
+Falcon tabular programming allows controling the overall program logic shaping it in the way
+business is often organized. Columns are properties, and row instances; a cell can contain
+any Falcon item, including OOP instances, classes, functions and even other tables. So,
+cells can be data, but also algorithms or even whole programs.</p>
+<p>Tables are also excellent means to select behaviors between a finite set of choices,
+or to mix behaviors and merge them, providing ready-made fuzzy logic engines.</p>
+<p>Also, tables can be applied more easily to categorize uncertain and shifting problems;
+for example, a simple structural modification to a problem may require the redesign of a class
+tree hierarchy, while adding a column that represents a new and formerly unknown aspect
+of a phenomenon can solve the problem altogether; and this can be done even at runtime,
+which is clearly not possible in the pure OOP model.</p>
+
+<h3>Message programming</h3>
+<p>Falcon provides the concept of object messaging. Instead of direct calls, objects can
+deliver messages to generic, foreign and unknown receivers. Delivered messages can be
+everything, including functions, functional sequences, tables, and in general data and/or
+algorithms.</p>
+<p>One spectacular usage of message programming is that of broadcasting a "subscription"
+token, where every participant willing to work on a problem posts an offer and the
+algorithm that should be performed if the offer wins. Or instead of being competitive,
+the participants may be cooperative and declare a step for which they intend to provide
+an algorithm.</p>
+<p>Part of this mechanism is known also under the name of "aspect oriented programming",
+but Falcon brings this concept a step forward, adding the ability to convey also
+functions, sequences and whole programs in the exchanged messages.</p>
+
+<h3>Raw VM loop speed</h3>
+<p>This is the time required to perform a simple "nearly empty" loop, with very elementary operations.
+It's measured having the scripting engines to run a program equivalent to this C code:</p>
+<pre>
+   int a = 0;
+   for( int i = 0; i < 100000000; i++ )
+      a = a + 1;
+</pre>
+<p>As scripting languages are designed to run mainly
+foreign code, and the vast part of their live execution time is in managing memory and
+complex structures on behalf of the user, this figure is not to be considered an overall speed indicator.
+This is just an indicator of the relative complexity of doing the simplest possible thing
+within the language boundaries, or in other words, the complexity of the fastest paths in the
+respective Virtual Machines.</p>
+
+<h3>Direct binary data access</h3>
+<p>Scripting languages are mainly designed to work with abstract data, as (floating point) numbers or strings.</p>
+<p>What the physical machine knows is just memory and its binary numeric contents; and along with the physical
+machine, this is generally what is known by native code interfacing the physical machine and the scripting
+language.</p>
+<p>Other than knowing abstract data, Falcon is also able to deal with low level representation of memory areas.
+This makes it much simpler and direct when dealing with binary content which is a common task in IT. For example,
+it is possible to see data streams from a local filesystem or from the network as both textual data and as
+binary sequences. You can access the bytes in files and memories directly, without wrapping libraries; and
+this is done safely, protected by the VM efficiently checking for correct usage of this power.</p>
+
+<h3>Data sharing & reflection</h3>
+<p>A scripting language is bound to receive and serve native data through modules and embedding applications.
+Falcon provides several mechanisms to efficiently encapsulate foreign data and integrate into the language;
+it is even possible to provide a physical mapping between native structures and Falcon objects, 
+or automatically call foreign methods reading and updating native data on property access at the script level.</p>
+<p>This model minimizes, and often removes, the need to transform language and VM aware items into native
+data and the other way around. In a sense, inner data coming from native modules can be considered opaquely
+managed by the VM and made available to the script only when needed.</p>
+<p>Combining this with the fact that all the modules in the Falcon project and satellite libraries are generated
+as native code, this makes room for high performance integrations.</p>
+<p>Time spent "rendering" foreign data into language specific data can often be larger than the time
+needed for program execution itself; and this time impacts binding applications and foreign modules,
+making it hard to track down and assign to the actual time-consuming-task activity to the script engine.</p>
+<p>Falcon cuts this time altogether, paying it only when explicitly necessary.</p>
+
+<h3>Virtual filesystem</h3>
+<p>Virtual filesystem allow to load resources, open streams towards and explore the contend of non-file
+data. When this mechanism is made available at script level, it is possible to consider a network
+resource or the contents of a compressed files as if they were local folders and files.</p>
+<p>For example, this makes it possible to load an application whose components are scattered through
+different nodes (local or remote) in a network, or to store a whole application and its related resources
+into a single compressed file.</a>
+
+<h3>Library size</h3>
+<p>This is our weak point; this is young project, still starting up, and while growing fast, we can't still match,
+not even remotely, the size of the libraries available for the other scripting languages. But we have two
+means to lessen this difference in a significant way.</p>
+<p>First, the dynlib module can do an excellent job in making foreign C code immediately and directly
+available to Falcon applications. The module also provides type safety and can be used to create
+simple bindings on the fly. Whenever simply in need of a C library which provides some functionality
+through direct calls and opaque data (handlers, managed opaque structures), dynlib is extremely
+usable for this type reqirement. Through direct memory management, it is also possible to configure
+input structures or read output structures as the foreign library may require.</p>
+<p>Second, the falbind project is able to automatically create a full binding from the .h
+definition of C libraries; we're currently extending falbind to also integrate C++ libraries
+as complex as QT, and C libraries with strong object orientation such as GTK. This will soon boost the number
+of modules available for immediate deployment making it possible for Falcon users to bind third party
+applications and libraries (or their own applications and libraries) automatically.
+
+<h3>License</h3>
+<p>Basically, all the licenses of this languages are stating more or less that you are free to use it
+commercially and in closed-source applications without any fee, provided
+you give proper credits and don't try to steal ideas from them. Ruby license is a bit
+mixed and articulated, and although granting the basic right to use the engine freely in various forms,
+it's a bit picky about what can be done with sources. Where dual licensing with GPL is provided,
+it is meant to ensure compatibility and integration with GPL licensed software.</p>
+
+

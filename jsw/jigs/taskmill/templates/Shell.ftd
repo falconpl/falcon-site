@@ -1,0 +1,207 @@
+<?
+import X
+
+/**
+ * Overall application template.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.4.15
+ */
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="<? >> X.jig.lang ?>">
+<head>
+	<title>
+		Hard coded.
+	</title>
+	<script language="Javascript" src="/jigsaw/assets/jquery.js"></script>
+	<script language="Javascript" src="<? >> X.jig.assetsPath ?>/colorbox/jquery.colorbox.js"></script>
+	<script language="Javascript" src="<? >> X.jig.assetsPath ?>common.js"></script>
+	<style type="text/css">
+		<?
+			// These styles need to be here because they make use
+			// of template variables.
+		?>
+		#_mainHeader {
+			width: 990px; 
+			height: 23px; 
+			background-image: url(<? >> X.jig.assetsPath ?>topBg.png);
+		}
+		#_mainContainer {
+			width: 990px;
+			background-image: url(<? >> X.jig.assetsPath ?>mainLeftEdge.gif);
+		}
+		#_mainFooter {
+			width: 990px; 
+			height: 48px; 
+			background-image: url(<? >> X.jig.assetsPath ?>bottomBg.png);
+		}
+	</style>
+	<link rel="stylesheet" type="text/css" href="<? >> X.jig.assetsPath ?>main.css" media="screen" />
+	<link rel="stylesheet" href="<? >> X.jig.assetsPath ?>/colorbox/colorbox.css" type="text/css" media="screen" />	
+</head>
+<body>
+
+<div align="center">
+<form>
+<table id="_specialHeader" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td width="300">
+		<select style="border: 1px solid #CBE1EF;">
+			<option>Default Project</option>
+		</select>
+	</td>
+	<td width="100%" align="right">
+		<? if X.LOGGED_IN ?>
+		Vlad :: Administrator
+		&nbsp;
+		<a href="/jigsaw/index.ftd?jig=taskmill&action=logout"><? >> X.lang['logout'] ?></a>
+		<? end ?>
+	</td>
+	<td width="10"></td>
+</tr>
+</table></form>
+<table border="0" cellpadding="0" cellspacing="0" id="_mainContainer">
+<tr><td>
+<div  id="_mainHeader">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td style="padding-left: 25px; padding-top: 9px;" align="left">
+		</td>			
+	</tr>
+	</table>		
+</div>
+<div align="center">
+	<div id="_mainControlsContainer">
+		<div id="_mainControls" align="left">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td width="120">
+					<img src="<? >> X.jig.assetsPath ?>logoSmall.png" border="0" />
+				</td>
+				<td valign="bottom">
+					<table cellpadding="0" cellspacing="0">
+					<tr>
+						<!-- List -->
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerLeft.png) no-repeat;">
+						</td>			
+						<td style="background: url(<? >> X.jig.assetsPath ?>menuCornerCenter.png);">
+							<a href="<? >> X.link('list') ?>">List</a>
+						</td>
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerRight.png) no-repeat;">
+						</td>			
+						<!-- End List -->
+						<td>&nbsp;</td>
+						<!-- Create -->
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerLeft.png) no-repeat;">
+						</td>			
+						<td style="background: url(<? >> X.jig.assetsPath ?>menuCornerCenter.png);">
+							<a href="<? >> X.link('create') ?>">Create</a>
+						</td>
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerRight.png) no-repeat;">
+						</td>			
+						<!-- End Create -->
+						<td>&nbsp;</td>
+						<!-- Stats -->
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerLeft.png) no-repeat;">
+						</td>			
+						<td style="background: url(<? >> X.jig.assetsPath ?>menuCornerCenter.png);">
+							<a href="#">Stats</a>
+						</td>
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerRight.png) no-repeat;">
+						</td>			
+						<!-- End Stats -->
+						<td>&nbsp;</td>
+						<!-- My Settings -->
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerLeft.png) no-repeat;">
+						</td>			
+						<td style="background: url(<? >> X.jig.assetsPath ?>menuCornerCenter.png);">
+							<a href="#">My Settings</a>
+						</td>
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerRight.png) no-repeat;">
+						</td>			
+						<!-- End My Settings -->
+						<td>&nbsp;</td>
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerLeft.png) no-repeat;">
+						</td>			
+						<td style="background: url(<? >> X.jig.assetsPath ?>menuCornerCenter.png);">
+							<a href="#">Administration</a>
+						</td>
+						<td style="width:10px; height: 31px; background: url(<? >> X.jig.assetsPath ?>menuCornerRight.png) no-repeat;">
+						</td>			
+					</tr>
+					</table>
+				</td>
+				<td align="right">
+					<input type="text" size="10" value="Search..." />
+				</td>
+				<td>
+					&nbsp;
+				</td>
+			</tr>
+			</table>
+		</div>
+	</div>
+</div>
+</td></tr>
+<tr>
+<td >
+	<div align="left" style="background: url(<? >> X.jig.assetsPath ?>bigWatermark.png) no-repeat 95% 100%">
+		<?
+			err = nil	
+			try : err = X.MISTAKES.len()
+			if err
+				X.include('snippets/Mistakes')
+			end
+		?>
+		<div id="_mainContent" align="left">
+			<?
+			// Include the sub template
+			if X['SUB_TEMPLATE']
+				X.include(X['SUB_TEMPLATE'])
+			else
+				> 'This template requires a sub template.'
+			end
+			?>
+		</div>
+	</div>
+</td></tr>
+<tr><td align="center">
+<div id="_mainFooterStrip" align="right" valign="middle">
+	<div style="padding-right: 20px;">
+		<? 
+		str = '<a href="' + Framework.officialURL + '" target="_blank">' + Framework.officialName + '</a>'
+		str = strReplace(X.lang['footerCopyright'], '$(1)', str) 
+		>> str
+		?>
+	</div>
+</div>
+</td></tr>
+<tr><td>
+<div  id="_mainFooter">
+	<br /><br /><br />
+	&nbsp;
+</div>
+</td></tr>
+</table>
+</div>
+
+
+<?
+if err
+	// Highlight the form elements with the errors.
+	for e in X.MISTAKES
+		if value = e.getElementName()
+			> @"
+			<script>
+				highliteFormElement(\"$value\")
+			</script>"
+		end
+	end
+end
+?>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+/**
+ * A page used to show results of Asynchronous operations.
+ *
+ * When POST actions execute, they can redirect here and pass the result code
+ * via GET params to show the user some result message.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.10
+ *
+ * @param Jig jig - The Jig that owns this view.
+ */
+class ResultAjaxView(jig) from View(jig)
+
+	/**
+	 * Constructor.
+	 */
+	init
+	end
+
+	/**
+	 * Process this view's logic.
+	 *
+	 * @return nil
+	 */
+	function process()
+		template = 'result/' + String.firstUpper(self.arg('code')) + 'Template'
+		if not Template.exists(self.getJig().getName(), template)
+			template = 'EmptyTemplate'
+		end
+
+		// Set the template this view will use.
+		self.setTemplate(template)
+	end
+end

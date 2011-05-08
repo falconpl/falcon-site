@@ -1,0 +1,92 @@
+<? // common prologue
+   load site_functions
+   load process
+   checkLogin()
+
+   // gather query data
+   project_name = Request.getField( "project_name" )
+   project_id = Request.getField( "project_id" )
+
+   // are we allowed to change things?
+   clearance = checkPrjRights( project_id )
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Edit release <?=project_name?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon" style="padding:10px;">
+<!-- are we authorized to perform edit? -->
+<? if clearance == "admin" or clearance == "developer" ?>
+<!--  ok, we can do things. Are we requested to update? -->
+
+   <? if Request.getField( "req", "" ) == "cleanup" ?>
+   <?
+      // Delete the record - then the file
+      > "<b>Cleanup log:</b>"
+      > "<pre>"
+      for sysres in Request.posts['assign']
+         >> "Removing file: ", sysres, "... "
+         file = SiteConfig.prjdir + "/" + project_id + "/" + sysres
+         if system( @ "rm -f $(file)" ) != 0
+            > "<b>Failed!</b>"
+            fail = true
+            break
+         else
+            > "Ok."
+         end
+      end
+      > "</pre>"
+      // if we had no error, we can tell the user we're done.
+   ?>
+   <h2>Project "<?=project_name?>" updated</h2>
+   <? if fail ?>
+      <p><b>Warning:</b> It has been impossible to complete the operation.
+      Check the log above and send it to the admins.</p>
+   <? else ?>
+      <p>Operation correctly completed.</p>
+   <? end ?>
+   <p>You can return to the main site.</p>
+   <hr/>
+   <p><a href="javascript:window.close()">Close this window</a></p>
+   <? else ?>
+   <?
+      dir = SiteConfig.prjdir + "/" + project_id
+      d = Directory( dir )
+
+      con = connectDB()
+      unrelated = []
+      while ( entry = d.read() )
+         if fileType( dir + "/"+ entry ) == FileStat.NORMAL
+            // is this file not listed in any download?
+            r = con.query( "select count(*) from project_dloads where project_id=:1 and sysres=:2",
+               project_id, entry )
+            if r.next() and r.asInteger(0) == 0
+               unrelated += entry
+            end
+         end
+      end
+   ?>
+      <h2>Cleaning up unneeded files in <?=htmlEscape(project_name) ?></h2>
+      <form method="POST" action="?req=cleanup&amp;project_id=<?=project_id?>&amp;project_name=<?=URI.escape(project_name)?>">
+      <div>
+      <p>Unused downloads:</p>
+      <ul>
+      <? for r in unrelated ?>
+         <li><input type="checkbox" name="assign[]" value="<?=r?>"/>
+            &nbsp;<b><?=r?></b></li>
+      <? end ?>
+      </ul>
+      </div>
+      <input type="submit" name="submit" value="Delete">&nbsp;<input type="button" value="Abort" onclick="javascript:window.close();">
+      </form>
+   <? end ?>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to edit this release.</p>
+<? end ?>
+</body>
+</html>

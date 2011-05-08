@@ -1,0 +1,16 @@
+// Calling methods - Different calling conventions, same results.
+
+// our function...
+function func( mode, p1, p2 )
+   > mode, ": ", p1, ", ", p2
+end
+
+// ... and different ways to call it
+func( "Traditional", "one", "two" )
+
+[func, "Fully cached", "one", "two"]()
+
+[func, "Partialy cached", "one" ]("two")
+
+deferred = [func, "Deferred", "one"]
+deferred("two")

@@ -1,0 +1,111 @@
+<?
+   load fmwiki.fmwiki
+   import project_id
+?>
+<style type="text/css" media="all">@import "styles/falcon_tabs.css";</style>
+<script type="text/javascript" src="/wikiparser/data/scripts/shCore.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushFal.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushPython.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushJScript.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushCpp.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushPlain.js"></script>
+<script type="text/javascript">
+   SyntaxHighlighter.all();
+</script>
+<?
+   page_name = Request.getField( "wid", "" )
+   level = checkPrjRights( project_id )
+
+   // get clearance:
+   switch( level )
+      case "admin": clearance = 3
+      case "developer": clearance = 2
+      case "support": clearance = 1
+      default: clearance = 0
+   end
+
+   if page_name
+      pwid = URI.encode( "&pwid=" + page_name )
+   else
+      pwid = ""
+      page_name = "Home"
+   end
+
+   page_name_esc = URI.encode( page_name )
+
+   wiki = FMWiki(
+      connectDB(),
+      clearance,
+      @"?page_id=$page_id&amp;prj_id=$project_id&amp;sect_id=wiki&amp;pwid=$page_name_esc&amp;wid=$$link",
+      project_id )
+
+   try
+
+      caller = Request.getField( "pwid", nil )
+      if (id = wiki.hasPage( page_name ) )
+
+         > "<ul class=\"secondary_tabs\">"
+         >> "<li"
+         if page_name == "Home"
+            > " class=\"active\""
+         end
+            > @"><a href=\"?page_id=$(page_id)&amp;prj_id=$(project_id)&amp;sid=wiki&amp;wid=Home\">Home</a></li>"
+
+         if clearance > 0
+            > "<li><a href=\"javascript:openModi()\">Edit this page</a></li>"
+            > "<li><a href=\"javascript:confirmDelete()\">Delete this page</a></li>"
+         end
+
+         if caller
+            caller = URI.encode( caller )
+            > @ "<li><a href=\"?page_id=$(page_id)&amp;prj_id=$(project_id)&amp;sid=wiki&amp;wid=$caller\">&lt;&lt;Back</a></li>"
+         end
+
+         > "</ul><br/>\n"
+         > wiki.getPageText( id )
+      else
+         if clearance > 0
+            > "<hr/><p>Page \"" + page_name + "\" not found; "
+            page_name = URI.encode( page_name )
+            > @"<a href=\"javascript:openAdd()\">Add the missing page</a>.</p>"
+         else
+            > "Page " + page_name + " not found."
+         end
+      end
+
+   catch DBIError in dbe
+      > "<h3>Error while querying the DB.</h3><pre>"
+      > dbe.toString()
+      > "</pre>"
+   catch FMWikiError in we
+      > "<h3>Error while performing a wiki operation.</h3><pre>"
+      > we.toString()
+      > "</pre>"
+   end
+?>
+<script language="javascript">
+function openAdd( )
+{
+   window.open("popup_edit_wiki.ftd?prj_id=<?=project_id?>&req=add&wid=" + "<?=page_name_esc?>",
+         '_blank','scrollbars=yes,resizable=yes,width=900,height=650');
+}
+
+function openModi()
+{
+   window.open("popup_edit_wiki.ftd?prj_id=<?=project_id?>&req=modi&wid=" + "<?=page_name_esc?>",
+         '_blank','scrollbars=yes,resizable=yes,width=900,height=650');
+}
+
+function confirmDelete()
+{
+   window.open("popup_delete_wiki.ftd?prj_id=<?=project_id?>&req=confirm&wid=" + "<?=page_name_esc?>",
+         '_blank','scrollbars=yes,resizable=yes,width=600,height=200');
+}
+
+function descend( page )
+{
+   document.location = "?page_id=<?=page_id?>&prj_id=<?=project_id?>&sid=wiki" +
+         "&pwid=" + "<?=page_name_esc?>" + "&wid=" + escape( page );
+}
+</script>
+<hr/>

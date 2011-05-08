@@ -1,0 +1,20 @@
+/*
+Wikiparser: Wiki Paraser HTML renderer
+*/
+
+
+load .wikiparser
+load .handlers.htmlhandler
+
+fname = args[0]
+
+my_test = strBuffer(FileStat(fname).size)
+f = InputStream( fname )
+f.setEncoding("utf-8")
+f.readText(my_test)
+f.close()
+
+h = htmlHandler()
+lbsm = LBSM(h)
+> lbsm.parseInl(my_test)
+

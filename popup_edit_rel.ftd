@@ -1,0 +1,64 @@
+<? // common prologue
+   load site_functions
+   checkLogin()
+
+   // gather query data
+   rel_id = int(Request.getField( "rel_id" ))
+   project_id = Request.getField( "project_id" )
+
+   // load the changelog text
+   query = "select * from project_releases where rel_id=:1"
+   r = connectDB().query( query, rel_id )
+   data = r.fetchDict()
+
+   // are we allowed to change things?
+   clearance = checkPrjRights( project_id )
+   
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Edit release <?=data['rel_name']?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon">
+<!-- are we authorized to perform edit? -->
+<? if clearance == "admin" or clearance == "developer" ?>
+<!--  ok, we can do things. Are we requested to update? -->
+
+   <? if Request.getField( "req", "" ) == "update_rel" ?>
+   <?
+      // perform the real update
+      query = "update project_releases set " +
+         "rel_name=:2, free_text=:3, changelog=:4 " +
+         "where rel_id=:1 "
+
+      connectDB().query( query,
+         rel_id,
+         Request.getField( "rel_name" ),
+         Request.getField( "free_text" ),
+         Request.getField( "changelog" )
+         )
+      // if we had no error, we can tell the user we're done.
+   ?>
+   <h2>Release updated</h2>
+   <p>You can return to the main site.</p>
+   <hr/>
+   <p><a href="javascript:window.close()">Close this window</a></p>
+   <? else ?>
+      <form method="POST" action="?req=update_rel&amp;rel_id=<?=rel_id?>&amp;project_id=<?=project_id?>">
+      <p>Release name: <input type="text" maxsize="30" size="30" name="rel_name" value="<?=htmlEscape( data['rel_name'] )?>"/></p>
+      <p>Release comments:</p>
+      <textarea rows="4" cols="60" name="free_text"><?=htmlEscape(data['free_text'])?></textarea>
+      <p>Changelog:</p>
+      <textarea rows="12" cols="60" name="changelog"><?=htmlEscape(data['changelog'])?></textarea>
+      <input type="submit" value="Update">&nbsp;<input type="button" value="Cancel" onClick="javascript:window.close();"/>
+      </form>
+   <? end ?>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to edit this release.</p>
+<? end ?>
+</body>
+</html>

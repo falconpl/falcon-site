@@ -1,0 +1,115 @@
+export Page
+
+load .Action
+load .Controller
+load .Jig
+load .View
+load .Template
+load .Service
+load .SecurityError
+load .support.Session
+load library.String
+
+/**
+ * Manages execution for the requested page.
+ *
+ * Use Page.factory() to instantiate jigs.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ *
+ * @param string jig - Jig object to execute.
+ */
+class Page(jig) from Service(jig)
+	//! How many times execute has been called.
+	//! To prevent infinite recursion if core Jig has problems.
+	static EXEC_COUNT = 0
+
+	/**
+	 * Execute the requested action.
+	 * 
+	 * @return nil
+	 */
+	function execute()
+		// Make sure we don't call this function recursivaly too many times.
+		if ++Page.EXEC_COUNT > 2 : return
+
+		try
+			controller 	= self.getJig().execute()
+			self.copyValuesTo(controller)
+			action 		= controller.execute()
+			view 		= action.execute()
+			template 	= view.execute()
+		catch Warp in w
+			// We're peforming a redirect.
+			return w
+		catch SecurityError in e
+			return self._handleSecurityViolation(e)
+		catch in e
+			return self._handleFatalError(e)
+		end
+
+		// Return the template.
+		return template
+	end
+
+	/**
+	 * Handle exception raised while processing Jig/Controller/Action or View.
+	 *
+	 * @private
+	 * @param 	Error e
+	 * @return	mixed
+	 */
+	function _handleFatalError(e)
+		// Make sure different Jigs don't share session data.
+		Session.rollback(Framework.fallbackJig)
+		DB.rollback()
+
+		page = Page.factory(Framework.fallbackJig, Framework.errorFatalAction)
+		page.setValue(Framework.keyError, e)
+		return page.execute()
+	end
+
+	/**
+	 * Handle basic security violation.
+	 *
+	 * @private
+	 * @param 	SecurityError e
+	 * @return	mixed
+	 */
+	function _handleSecurityViolation(e)
+		// Make sure different Jigs don't share session data.
+		Session.rollback(Framework.fallbackJig)
+		DB.rollback()
+
+		page = Page.factory(Framework.fallbackJig, Framework.errorSecurityAction)
+		page.setValue(Framework.keyError, e)
+		return page.execute()
+	end
+
+	/**************************** STATICS ********************************/
+
+	/**
+	 * Instantiate a Page object.
+	 *
+	 * @static
+	 * @public
+	 * @param string jigName - The name of the jig to run.
+	 * @param string actionName - The name of action in requested jig to exec.
+	 * @return Page
+	 */
+	 function factory(jigName, actionName)
+		// Convert the short URL action name to a valid action class name.
+		actionName = Action.toActionClassName(actionName)
+
+		// Create the jig.
+		jig = Jig.factory(jigName, actionName)
+
+		return Page(jig)
+	 end
+
+end
+
+

@@ -1,0 +1,19 @@
+// brigade - Advanced functional constructs (since 0.9.2)
+
+// Brigade pass its parameters to the functions
+// in the list it receives.
+looper = .[brigade
+   .[
+      // do things with the parameters
+      { val, text => printl( text, ": ", val ) }
+      // or even change them via out-of-band
+      { val, text => oob( [val+1, "Changed"] ) }
+      // and ask repetition via out-of-band
+      // or return something at the end.
+      { val, text =>
+         val < 10 ? oob(1): "Completed." }
+   ]
+]
+
+final = looper( 1, "Original" )
+> "Final value is: ", final

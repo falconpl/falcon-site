@@ -1,0 +1,64 @@
+<? // common prologue
+   load site_functions
+   load fmwiki.fmwiki
+   checkLogin()
+
+   // are we allowed to change things?
+   level = checkPrjRights( project_id )
+   clearance = level == "admin" ? 3 : \
+      level == "developer" ? 2 : \
+      level == "support" ? 1 : 0
+
+   page_name = Request.getField( "page_name" )
+   section = Request.getField( "section" )
+   content = Request.getField( "content" )
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Updating wiki Page "<?=page_name?>"</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon" style="padding:10px;">
+<!-- are we authorized to perform edit? -->
+<? if clearance > 0 ?>
+<!--  ok, we can do things. Are we requested to update? -->
+<h2>Updating page "<?=htmlEscape(page_name) ?>"</h2>
+   <?
+      wiki = FMWiki(
+      connectDB(),
+      clearance,
+      "javascript:descend(\"$link\")",
+      section )
+
+   try
+      pageEntry = [
+         "page_name" => page_name,
+         "section" => section,
+         "content" => content,
+         "creator" => userID ]
+         
+      wiki.updatePage( pageEntry )
+      ?>
+      <h3>Update complete</h3>
+      <p>Page "<?=page_name?>" has been updated in the database.</p>
+      <p>You may close this window and return to the main site.</p>
+   <?
+   catch DBIError in dbe
+      > "<h3>Error while querying the DB.</h3><pre>"
+      > dbe.toString()
+      > "</pre>"
+   catch FMWikiError in we
+      > "<h3>Error while performing a wiki operation.</h3><pre>"
+      > we.toString()
+      > "</pre>"
+   end
+   ?>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to alter a page here.</p>
+<? end ?>
+</body>
+</html>

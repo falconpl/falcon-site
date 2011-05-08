@@ -1,0 +1,32 @@
+/*
+   FALCON - Falcon Micro Wiki
+
+   FILE: wikiprovider.fal
+
+   Abstraction of the underlying wiki processing engine.
+   -------------------------------------------------------------------
+   Author: Giancarlo Niccolai
+   Begin: Sat, 18 Apr 2009 11:46:21 +0200
+
+   -------------------------------------------------------------------
+   (C) Copyright 2009: the FALCON developers (see list in AUTHORS file)
+
+   See LICENSE file for licensing details.
+*/
+
+class WikiProvider( drivername )
+   _driver = nil
+
+   init
+      uri = vmRelativePath( "provider_" + drivername + ".fal" )
+      symDict = ["processPage" => nil ]
+      include( uri , "utf-8", vmFalconPath(), symDict )
+      self._driver = symDict["processPage"]
+   end
+   
+   function processPage( link, pageEntry )
+      self._driver( link, pageEntry )
+   end
+end
+
+export WikiProvider

@@ -1,0 +1,25 @@
+<?
+import X
+
+/**
+ * Result page for when a task has been created.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.6.8
+ */
+?>
+
+The task has been created successfully.
+<br />
+<ul>
+<? if X.jig.request('taskId') ?>
+	<li>View 
+	<a href="<? >> X.link('details', 'taskId=' + X.jig.request('taskId')) ?>">
+		created task
+	</a>
+	</li>
+<? end ?>
+</ul>
+

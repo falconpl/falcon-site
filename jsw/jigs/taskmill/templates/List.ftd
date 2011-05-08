@@ -1,0 +1,534 @@
+<?
+import X
+
+/**
+ * Tasks list.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.5.13
+ */
+?>
+<script language="Javascript">
+
+// Whether we should reload the page.
+var gReloadMe = false;
+
+// Whether we should confirm overriding an existing filter.
+var gConfirmOverride = true;
+
+/**
+ * Perform an Ajax lookup on the data for a task.
+ */
+function quickview(taskId, elemId) {
+	data = {
+		taskId: taskId,
+		elemId: elemId
+	}
+	$.get('<? >> X.link('quickView') ?>', data, onQuickView, 'json');
+}
+
+/**
+ * Callback for the data lookup of a task (Ajax).
+ */
+function onQuickView(data) {
+	$('#' + data.elemId).html(data.description).addClass('quickview');
+}
+
+
+/**
+ * Apply a filter.
+ */
+function applyFilter() {
+	var f = document.forms['currentFilterForm'];
+	var e = f.elements;
+	var href  = '<? >> X.link('applyFilter') ?>';
+	href += '&filterId=' + e.currentFilter.value;
+	window.location.href = href;
+}
+
+/**
+ * The user has requested to delete a filter.
+ */
+function deleteFilter() {
+	var f = document.forms['currentFilterForm'];
+	var e = f.elements;
+
+	// The user has 'None' selected.
+	if (e.currentFilter.value == '0') {
+		alert('Please select a filter to delete.');
+		return false;
+	}
+
+	// Confirm the deletion.
+	if (!confirm('Are you sure you want to delete "' + e.currentFilter.options[e.currentFilter.selectedIndex].text + '"?')) {
+		return false;
+	}
+
+	var href  = '<? >> X.link('deleteFilter') ?>';
+	href += '&filterId=' + e.currentFilter.value;
+	window.location.href = href;
+}
+
+/**
+ * The user wants to save a filter from the filter editor window.
+ */
+function saveFilters() {
+	// Remove any highlites from the form.
+	unhighliteForm('filterForm');
+
+	var f = document.forms['filterForm'];
+	var e = f.elements;
+
+	// Make sure primary sort has a value.
+	if (e.primarySort.value == '0') {
+		highliteFormElement('primarySort');
+		alert('Please enter a value for Primary Sort.');
+		return false;
+	}
+
+	// Make sure secondary sort has a value.
+	if (e.secondarySort.value == '0') {
+		highliteFormElement('secondarySort');
+		alert('Please enter a value for Secondary Sort.');
+		return false;
+	}
+
+	// Make sure primary and secondary sort are not the same.
+	if (e.primarySort.value == e.secondarySort.value) {
+		highliteFormElement('primarySort');
+		highliteFormElement('secondarySort');
+		alert('Primary and Secondary Sort cannot be the same.');
+		return false;
+	}
+
+	// Make sure we have a sort direction.
+	if (e.sortDir.value == '0') {
+		highliteFormElement('sortDir');
+		alert('Please enter a value for Sort Direction.');
+		return false;
+	}
+
+	// Make sure we have a name.
+	if ($.trim(e.filterName.value).length == 0) {
+		highliteFormElement('filterName');
+		alert('Please enter a valid Name.');
+		return false;
+	}
+
+	// Check if the user want to override an existing filter.
+	var f2 = document.forms['currentFilterForm'];
+	var e2 = f2.elements;
+	for (var i = 0; i < e2.currentFilter.options.length; ++i) {
+		if (e2.currentFilter.options[i].text.toLowerCase() == e.filterName.value.toLowerCase()) {
+
+			// Only confirm the override if the user is not in edit mode
+			// or if what he is overriding is not what he originally 
+			// selected to edit.
+			var selectedFilter = e2.currentFilter.options[e2.currentFilter.selectedIndex].text.toLowerCase();
+			if (gConfirmOverride == true || selectedFilter != e.filterName.value.toLowerCase()) { 
+				if (!confirm('Filter "' + e.filterName.value + '" already exist.\nAre you sure you want to override it?')) {
+					return false;
+				}
+			}
+			break;
+		}
+	}
+
+	// The values to pass to the post form.
+	data = {
+		assigned: 		e.assigned.value,
+		priority: 		e.priority.value,
+		category: 		e.category.value,
+		status: 		e.status.value,
+		release: 		e.release.value,
+		reporter: 		e.reporter.value,
+		closedPolicy: 	e.closedPolicy.value,
+		primarySort: 	e.primarySort.value,
+		secondarySort: 	e.secondarySort.value,
+		sortDir:		e.sortDir.value,
+		filterName: 	e.filterName.value
+	}
+
+	// Post send the values to the server.
+	$.post('<? >> X.link('post.saveListFilter') ?>', data, onFilterSave, 'json');
+}
+
+/**
+ * Callback returned when the server has saved the filter.
+ */
+function onFilterSave(result) {
+	var isError = false;
+
+	// Basically, create a static variable in this function.
+	// This will allow the timeout in this function to find this object.
+	onFilterSave.obj = $('#resultMessage').html(result.message).removeClass('hidden');
+	var obj = onFilterSave.obj;
+
+	obj.show('fast');
+	if (result.isError !== undefined) {
+		if (result.isError) {
+			isError = true;
+			obj.addClass('errorResult');
+		}
+		else {
+			obj.addClass('successResult');
+		}
+	}
+	else {
+		obj.addClass('unknownResult');
+	}
+
+	// Add filter to the options list.
+	var f = document.forms['filterForm'];
+	var e = f.elements;
+	$('#currentFilter').append('<option>' + e.filterName.value + '</option>'); 
+
+	// Hide the message after 3 seconds.
+	if (!isError) {
+		setTimeout('onFilterSave.obj.hide(500)', 3000);
+	}
+
+	// Set this flag so that when the user closes the filter editor window
+	// the page reloads itself.
+	gReloadMe = true;
+}
+
+/**
+ * Callback when the filter editor window closes.
+ */
+function onFilterEditorClose() {
+	// Reset this to it's default.
+	gConfirmOverride = true;
+
+	$('#resultMessage').addClass('hidden').removeClass('successResult errorResult unknownResult');
+	if (gReloadMe) {
+		applyFilter();
+	}
+	else {
+		// Reselect the previous filter that was selected before the user
+		// opened the editor window.
+		var f = document.forms['currentFilterForm'];
+		var e = f.elements;
+		e.currentFilter.value = <? >> X.currentFilter ?>
+	}
+}
+
+/**
+ * Callback when the filter editor window is shown to create new filter.
+ */
+function onFilterEditorNew() {
+	// Reset the filter editor values.
+	resetFilterEditor();
+}
+
+/**
+ * Callback when the filter editor window is shown to edit a filter.
+ */
+function onFilterEditorEdit() {
+	// Don't ask the user for override confirmation.
+	gConfirmOverride = false;
+
+	// Reset the filter editor values.
+	resetFilterEditor();
+
+	// Grab the current filter id.
+	var f = document.forms['currentFilterForm'];
+	var e = f.elements;
+
+	data = {
+		filterId: e.currentFilter.value
+	}
+
+	// Make the Ajax call.
+	$.get('<? >> X.link('getFilterValuesAjax') ?>', data, onGetFilterValuesAjax, 'json');
+}
+
+/**
+ * Callback which happens when we receive the values of a filter.
+ */
+function onGetFilterValuesAjax(result) {
+	resetFilterEditor();
+	setFilterValues(result);
+}
+
+/**
+ * Reset the values of the filter editor window.
+ */
+function resetFilterEditor() {
+	// Remove any highlites from the form.
+	unhighliteForm('filterForm');
+	setFilterValues({})
+}
+
+/**
+ * Set the values of the filter editor window.
+ */
+function setFilterValues(filter) {
+	var f = document.forms['filterForm'];
+	var e = f.elements;
+
+	// Reset all the values.
+	e.assigned.value		= filter.assignedId 	|| '0';
+	e.priority.value		= filter.priorityId		|| '0';
+	e.category.value		= filter.categoryId		|| '0';
+	e.status.value			= filter.statusId		|| '0';
+	e.release.value			= filter.releaseId		|| '0';
+	e.reporter.value		= filter.reporterId		|| '0';
+	e.closedPolicy.value	= filter.closedPolicy	|| '0';
+	e.primarySort.value 	= filter.primarySort	|| '0';
+	e.secondarySort.value 	= filter.secondarySort	|| '0';
+	e.sortDir.value 		= filter.sortDir		|| '0';
+	e.filterName.value 		= filter.name			|| '';
+}
+
+</script>
+
+<form id="currentFilterForm" name="currentFilterForm">
+<table class="container" width="100%">
+<tr>
+	<td>
+		<label for="currentFilter">Current Filter:</label> &nbsp;
+		<select id="currentFilter" name="currentFilter">
+			<option value="0">- None -</option>
+			<? for filter in X.filters ?>
+			<option value="<? >> filter.id ?>" 
+				<? if filter.id == X.currentFilter : >> 'selected="selected"' ?> > 
+					<? >> filter.name ?> 
+			</option>
+			<? end ?>
+		</select>
+		<a href="javascript:void(0)" onclick="applyFilter()">Apply</a> | 
+		<a id="filterLinkEdit" href="javascript:void(0)" onclick="return false;">Edit</a> |
+		<a href="javascript:void(0)" onclick="deleteFilter()">Delete</a> |
+		<a id="filterLinkNew" href="javascript:void(0)">New</a> 
+		<script language="javascript">
+		$(document).ready(function(){
+			$('#filterLinkNew').colorbox({width:400, height:520, inline:true, href:'#filterOverlay', title:'Create Task Filter'}, onFilterEditorNew)
+
+			$('#filterLinkEdit').colorbox({width:400, height:520, inline:true, href:'#filterOverlay', title:'Edit Task Filter'}, onFilterEditorEdit)
+			$().bind('cbox_closed', onFilterEditorClose);
+		});
+
+		$('#filterLinkEdit').attr('disable', true);
+		</script>
+	</td>
+</tr>
+<tr><td></td></tr>
+</table>
+</form>
+
+<!-- ------------------------------------------------- -->
+
+<table width="100%" class="zebra" cellpadding="0" cellspacing="0">
+<tr>
+	<th>ID</th>
+	<th>Priority</th>
+	<th>Category</th>
+	<th>Status</th>
+	<th>Release</th>
+	<th>Assigned</th>
+	<th>Reporter</th>
+	<th>Summary</th>
+</tr>
+<? 
+for i in [0:X.tasks.len()]
+task = X.tasks[i]
+quickviewId = 'quickview' + i
+?>
+<tr style="background-color: #<? >> task.statusColor ?>">
+	<td width="1"><? >> task.id ?></td>
+	<td width="1" nowrap="nowrap"><? >> task.priority ?></td>
+	<td width="1" nowrap="nowrap"><? >> task.category ?></td>
+	<td width="1" nowrap="nowrap"><? >> task.status ?></td>
+	<td width="1" nowrap="nowrap"><? >> task.release ?></td>
+	<td width="1" nowrap="nowrap"><? >> ', '.merge(task.assigned) ?></td>
+	<td width="1" nowrap="nowrap"><? >> task.reporter ?></td>
+	<td><? >> task.summary ?></td>
+</tr>
+<tr style="background-color: #<? >> task.statusColor ?>;">
+	<td colspan="8">
+		<a href="javascript:void(0)" onclick="quickview('<? >> task.id ?>', '<? >> quickviewId ?>')">Quick View</a> | 
+		<a href="<? >> X.link('details', 'taskId=' + task.id)?>">Full View</a> 
+		<div id="<? >> quickviewId ?>"></div>
+	</td>
+</tr>
+<? end ?>
+
+<? if X.tasks.len() == 0?>
+	<td colspan="8">
+		<b>Current filter settings matched no tasks.</b>
+	</td>
+<? end ?>
+</table>
+
+<!-- ----------------------- Filter overlay ----------------------- -->
+
+<div style="display:none;">
+	<div id="filterOverlay">
+		<form id="filterForm" name="filterForm">
+		<table width="100%" cellpadding="5">
+		<tr>
+			<td>
+				<label for="assigned">Assigned</label>
+			</td>
+			<td>
+				<select id="assigned" name="assigned" style="width:100%;">
+					<option value="0">- Any -</option>
+					<? for val in X.project.users  ?>
+					<option value="<? >> val.userId ?>">
+						<? >> val.fullname ?>
+					</option>
+					<? end ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="priority">Priority</label>
+			</td>
+			<td>
+				<select id="priority" name="priority" style="width:100%;">
+					<option value="0">- Any -</option>
+					<? for val in X.project.priorities ?>
+					<option value="<? >> val.id ?>">
+						<? >> val.name ?>
+					</option>
+					<? end ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="category">Category</label>
+			</td>
+			<td>
+				<select id="category" name="category" style="width: 100%;">
+					<option value="0">- Any -</option>
+					<? for val in X.project.categories ?>
+					<option value="<? >> val.id ?>">
+						<? >> val.name ?>
+					</option>
+					<? end ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="status">Status</label>
+			</td>
+			<td>
+				<select id="status" name="status" style="width:100%;">
+					<option value="0">- Any -</option>
+					<? for val in X.project.statuses ?>
+						<option value="<? >> val.id ?>">
+							<? >> val.name ?>
+						</option>
+					<? end ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="release">Release</label>
+			</td>
+			<td>
+				<select id="release" name="release" style="width:100%;">
+					<option value="0">- Any -</option>
+					<? for val in X.project.releases ?>
+					<option value="<? >> val.id ?>">
+						<? >> val.name ?>
+					</option>
+					<? end ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="reporter">Reporter</label>
+			</td>
+			<td>
+				<select id="reporter" name="reporter" style="width:100%;">
+					<option value="0">- Any -</option>
+					<? for val in X.project.users  ?>
+					<option value="<? >> val.userId ?>">
+						<? >> val.fullname ?>
+					</option>
+					<? end ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="closedPolicy">Open/Closed</label>
+			</td>
+			<td>
+				<select id="closedPolicy" name="closedPolicy" style="width:100%;">
+					<option value="0">Open and Closed</option>
+					<option value="1">Only Open </option>
+					<option value="-1">Only Closed </option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="primarySort">Primary Sort</label>
+			</td>
+			<td>
+				<select id="primarySort" name="primarySort">
+					<option value="0">-----</option>
+					<option value="id">id</option>
+					<option value="priority">Priority</option>
+					<option value="category">Category</option>
+					<option value="status">Status</option>
+					<option value="release">Release</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="secondarySort">Secondary Sort</label>
+			</td>
+			<td>
+				<select id="secondarySort" name="secondarySort">
+					<option value="0">-----</option>
+					<option value="id">id</option>
+					<option value="priority">Priority</option>
+					<option value="category">Category</option>
+					<option value="status">Status</option>
+					<option value="release">Release</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="sortDir">Sort Direction</label>
+			</td>
+			<td>
+				<select id="sortDir" name="sortDir">
+					<option value="0">-----</option>
+					<option value="asc">Ascending</option>
+					<option value="desc">Descending</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><hr /></td>
+		</tr>
+		<tr>
+			<td>
+				<label for="name">Save As</label>
+			</td>
+			<td>
+				<input id="filterName" name="filterName" type="text" size="20" maxlength="30" />
+				<input type="button" value="Save" onclick="saveFilters()" />	
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><div id="resultMessage" class="hidden"></div></td>
+		</tr>
+		</table>
+		</form>
+	</div>
+</div>

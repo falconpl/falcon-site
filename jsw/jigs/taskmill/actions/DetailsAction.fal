@@ -1,0 +1,65 @@
+/**
+ * View a task in detail.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.22
+ *
+ * @param Jig jig - The Jig that owns this action.
+ */
+class DetailsAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	/**
+	 * Constructor
+	 */
+	init
+ 	end
+
+	/**
+	 * Verify this action.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		// Make sure we have a task id.
+		if not self.arg('taskId')
+			message = Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'taskId'))
+			Mistake.push(message)
+		end
+
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+		// Back to login screen.
+		self.setView('ListView')
+
+		self.setMistakes(Mistake.getAll())
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		// Set the view this action will use.
+		self.setView('DetailsView')
+	end
+end
+

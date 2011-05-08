@@ -1,0 +1,39 @@
+<div class="falcon_info">
+<script src="FalconJS/togglePanel.js" type="text/javascript"></script>
+
+<input id="RelInfoButton" type="button" value="Release help"
+   onclick="javascript:togglePanel( 'RelInfoPanel', 'RelInfoButton');"/>
+
+<div id="RelInfoPanel" style="display:none">
+<h3>How to release</h3>
+<p>Releases for a project are made of a list of downloads; each download
+points to a single file that can be uploaded into your account space, and
+can be handled spearately</p>
+<p>In example, a signle release may contain sources, documentation, pre-built
+packages for certain platforms or generic content files as the "changelog"
+and "readme".</p>
+<p>First, create a new download set (a release)
+opening the "Add Release" panel; once the release is created,
+"Manage downloads" to assign uploaded files to the new release.
+</p>
+<p>You can upload files via FTP, sending them in your private FTP user folder.
+the "Manage downloads" main page will allow to move the files you uploaded
+from your private directory into the project download area, simply by "adding"
+them to a release or as a "generic" (unassigned) download.</p>
+<p>Once the files are moved in the project area (both associated to a release
+or left non-associated, they can be moved to other release sets via the "edit"
+option of the "Manage download" section.</p>
+<p>Downloads (i.e. single files) can be also presented in this page without being
+explicitly linked to a certain release. They are marked as "standalone" if they
+have the "Relevant" (Rel) attribute set; their status can be inspected or changed
+through the "Manage downloads" panel.</p>
+<p>Deleting a download record (del option) doesn't delete the underlyng file. Once
+its download description is deleted, the file itself stays in the project area,
+and can be re-associated with other downloads record. To do this, create first
+an empty download record from the table view, edit it and associate a free file
+from the pulldown list in the edit mask.</p>
+<p>Don't forget to clean periodically your donwloads area from useless files by
+using the "Clanup downloads" dialog. In that dialog, files not currently bound with
+any download record will be shown and may be removed from the server disks.</p>
+</div>
+</div>

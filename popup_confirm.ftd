@@ -1,0 +1,48 @@
+<? // common prologue
+   load site_functions
+   checkLogin()
+
+   query = Request.getField( "query" )
+   project_id = Request.getField( "project_id" )
+   action = Request.getField( "action" )
+   confirmed = Request.getField( "confirmed", "none" )
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Confirm operation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon" style="padding:10px;">
+<?
+   // get clearance
+   clearance = checkPrjRights( project_id )
+?>
+<? if clearance == "admin" or clearance == "developer" or clearance == "support" ?>
+   <? if confirmed == "confirmed" ?>
+      <!-- Perform operation? -->
+      <? connectDB().query( query ) ?>
+      <h1>Operation completed</h1>
+      <p>The required operation has been completed. You may close this window</p>
+      <hr/>
+      <p><a href="javascript:window.close()">Close this window</a></p>
+   <? else ?>
+      <!-- Ask for confirmation? -->
+      <h1>Confirm operation</h1>
+      <p>Do you really want to perform the following operation?</p>
+      <p><? htmlEscape( action, true ) ?></p>
+      <form action="?project_id=<?=project_id?>" method="POST">
+      <input type="hidden" name="query" value="<? htmlEscape( query, true ) ?>"/>
+      <input type="hidden" name="action" value="<? htmlEscape( action, true ) ?>"/>
+      <input type="submit" name="confirmed" value="confirmed"/>&nbsp;&nbsp;&nbsp;
+      <input type="button" name="confirmed" value="abort" onclick="javascript:window.close()"/>
+      </form>
+   <? end ?>
+<? else ?>
+<h1>Clearance denied</h2>
+<p>Sorry, you are not allowed to perform this operation</p>
+<? end ?>
+</body>
+</html>

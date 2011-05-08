@@ -1,0 +1,97 @@
+export Project
+
+/**
+ * Create, Get or Set information for one project.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.2
+ */
+class Project(userId)
+	//! Task info
+	id 		 	  = ''
+	name		  = ''
+	enabled		  = 0
+	initialStatus = 0
+	categories    = []
+	priorities	  = []
+	releases	  = []
+	statuses	  = []
+	users		  = []
+
+	/**
+	 * Constructor.
+	 */
+	init
+		// Grab the user's current project id.
+		query  = 'SELECT currentProject '
+		query += 'FROM UserExt '
+		query += 'WHERE userId = ? '
+		query += 'LIMIT 1'
+		stmt = DB.prepare(query)
+		self.id = stmt.getOne(userId)
+
+		// Grab info from (Project) table.
+		query  = 'SELECT name, '
+		query += '		 enabled, '
+		query += '		 initialStatus '
+		query += 'FROM Project '
+		query += 'WHERE id = ? '
+		query += 'LIMIT 1'
+		stmt = DB.prepare(query)
+		row  = stmt.getRow(self.id)
+		self.name 		   	= row.name
+		self.enabled 		= row.enabled
+		self.initialStatus 	= row.initialStatus
+
+		// Select the categories of the current project.
+		query  = 'SELECT id, '
+		query += '		 name '
+		query += 'FROM TaskCategory '
+		query += 'WHERE projectId = ? '
+		stmt = DB.prepare(query)
+		self.categories = stmt.getRowArray(self.id)
+
+		// Select the priorities of the current project.
+		query  = 'SELECT id, '
+		query += '		 name '
+		query += 'FROM TaskPriority '
+		query += 'WHERE projectId = ? '
+		query += 'ORDER BY rank ASC '
+		stmt = DB.prepare(query)
+		self.priorities = stmt.getRowArray(self.id)
+
+		// Select the releases of the current project.
+		query  = 'SELECT id, '
+		query += '		 name '
+		query += 'FROM TaskRelease '
+		query += 'WHERE projectId = ? '
+		query += 'AND enabled   = ? '
+		query += 'AND scheduled > NOW() '
+		stmt = DB.prepare(query)
+		self.releases = stmt.getRowArray(self.id, 1)
+
+		// Select the statuses of the current project.
+		query  = 'SELECT id, '
+	    query += '		 name, '
+		query += '		 closedContext '
+		query += 'FROM TaskStatus '
+		query += 'WHERE projectId = ? '
+		query += 'ORDER BY rank DESC '
+		stmt = DB.prepare(query)
+		self.statuses = stmt.getRowArray(self.id)
+
+		// Select possible users on this project.
+		roles = ['admin', 'developer', 'reporter']
+		
+		query  = 'SELECT UserExt.fullname, '
+		query += '		 UserExt.userId '
+	    query += 'FROM LinkUserProject AS LUP '
+	    query += 'JOIN UserExt ON (LUP.userId = UserExt.userId) '
+		query += 'WHERE LUP.projectId = ? '
+		query += 'AND   LUP.role IN (' + DB.placeholders(roles) + ')'
+		stmt = DB.prepare(query)
+		self.users = stmt.getRowArray(self.id, roles)
+	end
+end

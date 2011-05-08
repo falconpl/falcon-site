@@ -1,0 +1,13 @@
+.svn
+*.fam
+/Nest_docs-1.0
+/db.config
+/chatlogs
+/meetings
+/docs
+/prjdata
+/project_dl
+/project_docs
+/fa
+/docs_preview
+/wiki

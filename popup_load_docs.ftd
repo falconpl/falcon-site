@@ -1,0 +1,163 @@
+<? // common prologue
+   load site_functions
+   load process
+   checkLogin()
+
+   // gather query data
+   project_id = Request.getField( "project_id" )
+   prj_name = Request.getField( "prj_name" )
+
+   // are we allowed to change things?
+   clearance = checkPrjRights( project_id )
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Load documentation for "<?=project_id?>"</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<script src="FalconJS/togglePanel.js" type="text/javascript"></script>
+
+
+<body class="falcon">
+<!-- are we authorized to perform edit? -->
+<? if clearance == "admin" ?>
+<!--  ok, we can do things. Are we requested to update? -->
+
+   <? if Request.getField( "req", "" ) == "update_docs" ?>
+   <?
+      > "<p><i>... Documentation update log ...</i></p>"
+      > "<pre>"
+
+      try
+         // Get the selected file.
+         file=Request.getField( "file" )
+         file = SiteConfig.ftpdir + "/" + userID + "/" + file
+
+         // cleanup target dir (nen no tame ni)
+         system( @ "rm -rf /tmp/$project_id" )
+         system( @ "mkdir -p /tmp/$project_id/docs" )
+
+         > @ "File: $file -> /tmp/$project_id/docs"
+         > @ "Calling tar -C /tmp/$project_id/docs -xzf $file"
+
+         // explode it depending on its extension
+         if file.endsWith( ".tar.gz" ) or file.endsWith( ".tgz" ) 
+            rv = pread( @ "tar -C /tmp/$project_id/docs -xzf $file" )
+         elif file.endsWith( ".tar.bz2" ) or file.endsWith( ".tbz" ) 
+            rv = pread( @ "tar -C /tmp/$project_id/docs -xjf $file" )
+         elif file.endsWith( ".zip", true )
+            rv = pread( @ "unzip $file -d /tmp/$project_id/docs" )
+         else
+            raise "Unrecognized file format in \"" + Request.getField( "file" ) +"\""
+         end
+
+         if rv: raise "failed to extract the file (exit code "+ rv.toString() + ")"
+
+         // Ok, find the (hopefully) only directory in the package and move it
+         // to the final position.
+         dirlist = Directory( @ "/tmp/$project_id/docs" )
+         while ( entry = dirlist.read() )
+            if fileType( @ "/tmp/$project_id/docs/" + entry ) == FileStat.DIR
+               // we found it?
+               if entry[0] != "."
+                  srcdir = "/tmp/" + project_id + "/docs/" + entry
+               end
+            else
+               // we have something different from a directory?
+               raise "The package doesn't contain a single topmost directory (" + entry + ")."
+            end
+         end
+         dirlist.close()
+
+         // have we an entry?
+         if not srcdir
+            raise "Can't find a topmost directory in the package."
+         end
+
+         // remove the original docs
+         targetdir = SiteConfig.docdir + "/" + project_id
+         > @ "Removing old doc files at $targetdir"
+         res = pread( "rm -rf " + targetdir )
+         if res: raise @"Can't remove the old directory: $res"
+
+         // and move the new ones there
+         > @ "Moving documentation $(srcdir) -> $(targetdir)"
+         if pread( @"mv $(srcdir) $(targetdir)" ) 
+            raise @"Can't move file $(srcdir) to destination $(targetdir)."
+         end
+
+         > @ "Removing $file"
+         pread( @ "rm -f $file" )
+
+      catch StringType in error
+         > "<b>Error:</b> ", error
+      end
+
+      > "</pre>"
+      pread( @ "rm -rf /tmp/$project_id" )
+      if error: return
+   ?>
+      <h2>Project "<?=prj_name?>" updated</h2>
+      <p>You can return to the main site.</p>
+      <hr/>
+      <p><a href="javascript:window.close()">Close this window</a></p>
+   <? else ?>
+      <h2>Updating documentation for project <?=prj_name?></h2>
+
+      <input id="ShowInstrButton" type="button" value="Show instructions"
+      onclick="javascript:togglePanel( 'ShowInstrPanel', 'ShowInstrButton');"/>
+
+      <div id="ShowInstrPanel" style="display:none">
+
+      <p>This utility updates or creates project documentation by
+         decompressing a file you have uploaded in your FTP space.</p>
+      <h3>How to upload documentation files</h3>
+      <ul>
+         <li>Create a .tar.gz, .tar.bz2 or .zip compressed files containing
+            a single directory that is the root for your documentation tree.
+            The name of the main directory is not relevant (it will be changed),
+            but it should contain at least an <b>index.html</b> or <b>index.ftd</b>
+            file. It is legal to provide a file that will redirect the navigator to
+            an external site.</li>
+         <li>Log in our FTP server at <a href="ftp://falconpl.org">ftp://falconpl.org</a>
+            using your Falcon site user ID and password.</li>
+         <li>Upload the file</li>
+         <li>Refresh this window</li>
+         <li>Select the file that contains your documentation from the form below.</li>
+         <li>Click "update documentation". Previous documentation will be removed.</li>
+      </div>
+
+      <h3>Files uploaded by <?=userID?></h3>
+      <?
+      // Load the project dir + user dir.
+      files = dirList( SiteConfig.ftpdir + "/" + userID,
+                        ["*.tgz", "*.tbz", "*.tar.gz", "*.tar.bz", "*.zip"] )
+      if not files
+         >  "<p>Your upload directory doesn't contain any suitable file. " +
+            "Please, upload a .tar.gz, .tar.bz2 or .zip file containing the " +
+            "documentation tree in a single directory, and refresh this page.</p>"
+      else
+      ?>
+         <p>These are the files loaded by you in your FTP space.</p>
+         <form action="popup_load_docs.ftd" method="POST">
+         <input type="hidden" name="project_id" value="<?=project_id?>"/>
+         <input type="hidden" name="prj_name" value="<?=prj_name?>"/>
+         <input type="hidden" name="req" value="update_docs"/>
+         <ul>
+         <? for file in files ?>
+            <li><input type="radio" name="file" value="<?=file?>"/><?=file ?></li>
+         <? end ?>
+         </ul>
+         <input type="submit" name="submit" value="Update docs"/>
+         </form>
+      <? end ?>
+      <p><a href="popup_load_docs.ftd?project_id=<?=project_id?>&prj_name=<?=URI.escape(prj_name)?>">Refresh this page</a></p>
+   <? end ?>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to edit this project.</p>
+<? end ?>
+</body>
+</html>

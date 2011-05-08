@@ -1,0 +1,21 @@
+<hr width="60%" alignment="center">
+<h2><i>Partners</i></h2>
+<table border="0" cellpadding="5">
+<tr>
+<td><a href="http://wiki.blastwave.org"><img border="0" src="images/blastwave.png"></a></td>
+<td>SunOS Open Source community distro. They help Falcon and many other Open Source projects
+in moving to the Sun platforms.</td></tr>
+<tr>
+<td><a href="http://kross.dipe.org"><img border="0" src="images/kross_logo.jpg"></a></td>
+<td>Kross scripting framework for KDE. Kross integrates Falcon and other scripting
+languages into KDE4; they are helping us in developing better bindings
+for foreign applications.</td></tr>
+<tr>
+<td><a href="http://www.auroraux.org/"><img border="0" src="images/aux.png"></a></td>
+<td>AuroraUX - Open source Solaris distro that has chosen Falcon as main scripting language.</td></tr>
+<tr>
+<td><a href="http://www.appcelerator.org/"><img border="0" src="images/GROUP_titanium_med.png"></a></td>
+<td>Appcelerator's Titanium - An application development framework that uses HTML for GUI and scripting
+engines to manage the application logic.</td></tr>
+</table>
+<hr width="60%" alignment="center">

@@ -1,0 +1,42 @@
+load core.View
+
+/**
+ * Default framework 404 handler.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ *
+ * @param Jig jig - The Jig that owns this view.
+ */
+class Error404View(jig) from View(jig)
+	/**
+	 * Constructor.
+	 */
+	init
+		self.setTemplate('Shell', 'Error404')
+	end
+
+	/**
+	 * Process this view's logic.
+	 *
+	 * @return nil
+	 */
+	function process()
+		// Set the color of the page.
+		self.setValue('pageColor', '#A283BE')
+
+		resource = Request.getField('jig', nil)
+		if strTrim(resource) 
+			resource = '/' + resource 
+		else
+			resource = '/' + '(nil)'
+		end
+
+		action = Request.getField('action', nil)
+		if action != nil : resource += '/' + action
+
+		self.setValue('resource', resource)
+	end
+end

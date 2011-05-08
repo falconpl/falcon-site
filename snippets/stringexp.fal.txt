@@ -1,0 +1,9 @@
+// Remparams - Variable expansion and formatting in strings.
+vector = []
+for i in [91:101]: vector += i
+
+// replying with format (right align)
+for i in [0:10]
+   > @ "Content of vector[$(i)]: " +
+       "$(vector[i]:r4)."
+end

@@ -1,0 +1,10 @@
+// Indirect - The indirect (#) operator with function calls.
+
+function test()
+   > "Hello world!"
+end
+
+nameOfFunction = "test"
+
+// calls test()
+(#nameOfFunction)()

@@ -1,0 +1,50 @@
+export JSON
+/**
+ * JSON helper functions.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.6.2
+ */
+class JSON
+
+	/**
+	 * Encode a something into JSON notation.
+	 *
+	 * @static
+	 * @param 	mixed it - The thing encode.
+	 * @return 	string
+	 */
+	function encode(it)
+		select it
+			case NilType
+				return 'false'
+			case BooleanType
+				return it ? 'true' : 'false'
+			case NumericType
+				return it
+			case StringType
+				it = strReplace(it, "\\", '\\\\')
+				it = strReplace(it, "/", '\/')
+				it = strReplace(it, "\\n", '\n')
+				it = strReplace(it, "\\t", '\t')
+				it = strReplace(it, "\\r", '\r')
+				it = strReplace(it, "\\b", '\b')
+				it = strReplace(it, "\\f", '\f')
+				it = strReplace(it, '"', '\"')
+				return '"' + it + '"'
+			case ArrayType
+				vals = []
+				for v in it : vals += JSON.encode(v)
+				return '[' + strMerge(vals, ',') + ']'
+			case DictionaryType
+				vals = []
+				for k, v in it : vals += JSON.encode(k) + ':' + JSON.encode(v)
+				return '{' + strMerge(vals, ',') + '}'
+		end
+		
+		return ''
+	end	
+end
+

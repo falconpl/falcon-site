@@ -1,0 +1,15 @@
+// Dynmethod - A dynamic method returned as a closure.
+class SomeClass( data )
+   data = data
+
+   function makeMethod()
+      // record self in a local variable
+      me = self
+      // and return a closure referencing it!
+      return { func => me.data }
+   end
+end
+
+x = SomeClass( "It's me here!" )
+func = x.makeMethod()
+> func()   // prints "It's me here!"

@@ -1,0 +1,14 @@
+/**
+ * English language file for user errors.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.14
+ */
+lang = [
+	'badLoginCredentials'	=>  'Invalid login credentials',
+	'notLoggedIn'			=>  'You must be logged in to access member resources',
+	'invalidValue'			=>  'A valid value for :1 is required'
+]
+

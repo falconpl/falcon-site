@@ -1,0 +1,32 @@
+export Warp
+
+/**
+ * Represents an HTTP redirect.
+ *
+ * When a Controller or Action handler uses self.redirect(), an 
+ * instance of this class is raised which contains the redirection info.
+ * Althought this class is raised, it is not an error class, but part of
+ * the framework's redirect mechanism. This class helps the framework
+ * complete the request, even when it's redirecting.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.5.14
+ */
+class Warp(url) 
+	//! The URL where to go.
+	_url = url
+
+	/**
+	 * Execute the redirection by manipulating the HTTP headers.
+	 *
+	 * @public
+	 * @return nil.
+	 */
+	function execute()
+		Reply.status  = 301
+		Reply.reason  = 'Permanently redirected'
+		Reply.headers = ['Location' => self._url.toAbs()]
+	end
+end

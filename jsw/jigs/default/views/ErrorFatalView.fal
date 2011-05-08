@@ -1,0 +1,46 @@
+load core.View
+
+/**
+ * View to display when a jig internal error happens.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.14
+ *
+ * @param Jig jig - The Jig that owns this view.
+ */
+class ErrorFatalView(jig) from View(jig)
+
+	/**
+	 * Constructor.
+	 */
+	init
+		self.setTemplate('Shell', 'ErrorFatal')
+	end
+
+	/**
+	 * Process this view's logic.
+	 *
+	 * @return nil
+	 */
+	function process()
+		// Set the color of the page.
+		self.setValue('pageColor', '#F16A6F')
+
+		// This value was set by the framework.
+		err = self.getValue(Framework.keyError)
+
+		msg = err.description
+		if not msg : msg = err.message
+		if not msg : msg = '(nil)'
+
+		// Pass the exception info to the template.
+		self.setValue('message', 	msg)
+		self.setValue('code', 		err.code)
+		self.setValue('line', 		err.line)
+		self.setValue('module', 	err.module)
+		self.setValue('symbol', 	err.symbol)
+		self.setValue('stackTrace', err.toString())
+	end
+end

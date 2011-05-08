@@ -1,0 +1,179 @@
+<? // common prologue
+   load site_functions
+   load fmwiki.fmwiki
+   
+   checkLogin()
+      
+   page_name = Request.getField( "wid" )
+   section = Request.getField( "prj_id" )
+   req = Request.getField( "req" )
+   send = Request.getField( "send", "" )
+   content = Request.getField( "content", "" )
+   // are we allowed to change things?
+   level = checkPrjRights( section )
+   
+   // get clearance:
+   switch( level )
+      case "admin": clearance = 3
+      case "developer": clearance = 2
+      case "support": clearance = 1
+      default: clearance = 0
+   end
+ 
+      
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Edit Wiki Page "<?=page_name?>"</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+    <link type="text/css" rel="stylesheet" href="/wikiparser/data/styles/shCore.css" />
+    <link type="text/css" rel="stylesheet" href="/wikiparser/data/styles/shThemeFalcon.css" />
+
+<script type="text/javascript" src="/wikiparser/data/scripts/shCore.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushFal.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushPython.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushJScript.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushCpp.js"></script>
+<script type="text/javascript" src="/wikiparser/data/scripts/shBrushPlain.js"></script>
+<script type="text/javascript">
+   SyntaxHighlighter.all();
+
+function insertText( text )
+{
+   obj = document.getElementById( "ta_content" );
+
+   /* IE */
+   if (document.all) {
+      obj.focus();
+      var sel=document.selection;
+      var rng=sel.createRange();
+      rng.colapse;
+      rng.text= text;
+   }
+   /* Mozilla/geko */
+   else if(obj.selectionEnd)
+   {
+      var lng=obj.textLength;
+      var from=obj.selectionStart;
+      var to=obj.selectionEnd;
+      obj.value=obj.value.substring(0,from)+ text +obj.value.substring(to,lng);
+   }
+   /* No idea */
+   else
+      obj.value+=text;
+
+  obj.focus();
+}
+</script>
+</head>
+<body class="falcon" style="padding:10px;">
+<!-- are we authorized to perform edit? -->
+<? if clearance > 0 ?>
+<!--  ok, we can do things. Are we requested to update? -->
+   <? if req=="save" ?>
+      <? if send == "Confirm" ?>
+         <!-- effective save request issued -->
+         <h2>Updating page "<?=htmlEscape(page_name) ?>"</h2>
+         <?
+            wiki = FMWiki(
+            connectDB(),
+            clearance,
+            "javascript:descend('$link')",
+            section )
+
+            try
+               pageEntry = [
+                  "page_name" => page_name,
+                  "section" => section,
+                  "content" => content,
+                  "creator" => userID ]
+
+               wiki.updatePage( pageEntry )
+
+            catch DBIError in dbe
+               > "<h3>Error while querying the DB.</h3><pre>"
+               > dbe.toString()
+               > "</pre>"
+            catch FMWikiError in we
+               > "<h3>Error while performing a wiki operation.</h3><pre>"
+               > we.toString()
+               > "</pre>"
+            end
+         ?>
+      
+         <p> You may now <a href="javascript:window.close()">close this window</a>
+         and return to the main site.</p>
+      <? else ?>
+            <!-- preview requested -->
+            <H1>Preview for page <?=htmlEscape(page_name) ?></h1>
+            <p>Remember that this is just a preview; you still need to save this page.</p>
+            <hr>
+            <?
+               wiki = FMWiki(
+                  nil,
+                  0,
+                  "#$link",
+                  section )
+
+               pageEntry = [
+                  "page_name" => page_name,
+                  "section" => section,
+                  "content" => content ]
+                  
+               wiki.preview( pageEntry )
+               > pageEntry["comp_cnt"]
+            ?>
+            <hr>
+            <p>Remember that this is just a preview; you still need to save this page.</p>
+            <hr>
+      <? end ?>
+   <? end ?>
+
+   <? if req != "save" or send != "Confirm" ?>
+   
+      <? if req=="add" ?>
+         <h2>Creating page <?=htmlEscape(page_name) ?></h2>
+      <? elif req == "modi" 
+         if not content
+            wiki = FMWiki(
+               connectDB(),
+               clearance,
+               "javascript:descend('$link')",
+               section )
+            content = wiki.getPageRaw( page_name )
+         end
+         // otherwise, we have already the content ready
+         ?>
+         <h2>Editing page <?=htmlEscape(page_name) ?></h2>
+      <? end ?>
+
+      <form name="form1" method="POST" action="popup_edit_wiki.ftd">
+      <input type="hidden" name="section" value="<?=section?>"/>
+      <input type="hidden" name="wid" value="<?=htmlEscape(page_name)?>"/>
+      <input type="hidden" name="prj_id" value="<?=section?>"/>
+      <input type="hidden" name="req" value="save"/>
+      <textarea id="ta_content" name="content" rows="25" cols="85"><? htmlEscape(content, stdOut() ) ?></textarea>
+      <hr>
+      <a target="_new" href="http://www.falconpl.org/index.ftd?page_id=prjs&prj_id=wikiparser&sid=wiki">Help</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <input type="button" name="addimg" value="Add Image" onclick="addMedia('image')"/> &nbsp;&nbsp;
+      <input type="button" name="addfile" value="Add File" onclick="addMedia('file')"/> &nbsp;&nbsp;
+      <input type="submit" name="send" value="Confirm"/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <input type="submit" name="send" value="Preview"/>
+      </form>
+   <? end ?>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to create a page here.</p>
+<? end ?>
+</body>
+<script type="text/javascript">
+function addMedia(type)
+{
+   var mediapopup = window.open('popup_addmedia.ftd?prj_id=<?=section ?>&type='+type,'media_name',
+      'status=yes,toolbar=no,scrollbars=yes,resizable=yes,width=500,height=450,top=0,left=0');
+}
+</script>
+</html>

@@ -1,0 +1,29 @@
+load core.View
+
+/**
+ * Default framework View.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ *
+ * @param Jig jig - The Jig that owns this view.
+ */
+class DefaultView(jig) from View(jig)
+	/**
+	 * Constructor.
+	 */
+	init
+		self.setTemplate('Shell', 'Default')
+	end
+
+	/**
+	 * Process this view's logic.
+	 *
+	 * @return nil
+	 */
+	function process()
+		self.setTemplate( "Default" )
+	end
+end

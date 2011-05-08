@@ -1,0 +1,87 @@
+<? // common prologue
+   load site_functions
+   checkLogin()
+
+   // gather query data
+   member_id = Request.getField( "member_id" )
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Edit member <?=member_id?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon">
+<!-- are we authorized to perform edit? -->
+<? if userLevel == "inner" ?>
+<!--  ok, we can do things. Are we requested to update? -->
+   <? if Request.getField( "req", "" ) == "update_user" ?>
+   <?
+      // perform the real update
+      query = "update members set " +
+         "password=:2, name=:3, surname=:4, email=:5, homesite=:6, status=:7, activity=:8, membership=:9 " +
+         "where member_id=:1 "
+
+      connectDB().query( query,
+         member_id,
+         Request.getField( "f_password" ),
+         Request.getField( "name" ),
+         Request.getField( "surname" ),
+         Request.getField( "email" ),
+         Request.getField( "homesite" ),
+         Request.getField( "status" ),
+         Request.getField( "activity" ),
+         Request.getField( "membership" )
+         )
+      // if we had no error, we can tell the user we're done.
+   ?>
+   <h2>Member "<?=member_id?>" updated</h2>
+   <p>You can return to the main site.</p>
+   <hr/>
+   <p><a href="javascript:window.close()">Close this window</a></p>
+   <? else
+      // load the changelog text
+      query = "select * from members where member_id=:1"
+      r = connectDB().query( query, member_id )
+      data = r.fetchDict()
+      ?>
+
+      <form method="POST" action="?req=update_user&amp;member_id=<?=member_id?>">
+      <table border="0">
+      <tr><td>Member ID:</td><td><?=member_id?></td>
+      <tr><td>Password:</td><td><input type="text" size="15" maxsize="15" name="f_password" value="<?=htmlEscape(data['password'])?>"/></td></tr>
+      <tr><td>Name:</td><td><input type="text" size="30" maxsize="40" name="name" value="<?=htmlEscape(data['name'])?>"/></td></tr>
+      <tr><td>Surname:</td><td><input type="text" size="30" maxsize="40" name="surname" value="<?=htmlEscape(data['surname'])?>"/></td></tr>
+      <tr><td>E-mail:</td><td><input type="text" size="20" maxsize="60" name="email" value="<?=htmlEscape(data['email'])?>"/></td></tr>
+      <tr><td>Home site:</td><td><input type="text" size="30" maxsize="80" name="homesite" value="<?=htmlEscape(data['homesite'])?>"/></td></tr>
+      <tr><td>Activity:</td><td><input type="text" size="39" maxsize="255" name="activity" value="<?=htmlEscape(data['activity'])?>"/></td></tr>
+      <tr><td>Status:</td><td><? makeSelStatus(data['status']) ?></td></tr>
+      <tr><td>Membership:</td><td><? makeSelLevel(data['membership']) ?></td></tr>
+      </table>
+      <input type="submit" value="Update"/>&nbsp;<input type="button" value="Abort" onClick="javascript:window.close()"/>
+      </form>
+   <? end ?>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to edit this user.</p>
+<? end ?>
+</body>
+</html>
+<? function makeSelStatus( mode ) ?>
+<select name="status">
+<option value="disabled" <? if mode == nil or mode == "disabled": >> 'selected="selected"' ?>>Disabled</option>
+<option value="enabled" <? if mode == "enabled": >> 'selected="selected"' ?>>Enabled</option>
+</select>
+<? end ?>
+
+<? function makeSelLevel( mode )
+   levels = ['inner', 'outer', 'developer', 'contributor', 'flanker', 'none']
+?>
+<select name="membership">
+<? for l in levels ?>
+   <option value="<?=l?>" <? if mode == l: >> 'selected="selected"' ?>><?=l?></option>
+<? end ?>
+</select>
+<? end ?>

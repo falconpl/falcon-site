@@ -1,0 +1,7 @@
+<?
+   import project_id
+   project_id = "_falcon_site"
+   page_name = Request.getField( "wid", "Home" )
+?>
+<h1>Falcon Wiki - <?=page_name?></h1>
+<? include( "data/wikidoc_core.ftd", "utf-8" ) ?>

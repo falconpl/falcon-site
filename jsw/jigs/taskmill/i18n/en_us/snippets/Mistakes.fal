@@ -1,0 +1,15 @@
+/**
+ * English language file for user error display chunk.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.14
+ */
+lang = [
+	'singleErrorHelp' => 'Please resolve the following error before continuing',
+
+	// $1 (integer) Error Count
+	'multiErrorHelp'  => 'Please resolve the following $1 errors before continuing'
+]
+

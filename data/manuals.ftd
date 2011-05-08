@@ -1,0 +1,59 @@
+<h1>Falcon official manuals</h1>
+<p>Falcon language official manuals are released in PDF format, while reference
+manuals are available on-line.</p>
+
+<H2>On-line references</H2>
+<p>
+<ul>
+<li><a href="http://falconpl.org/index.ftd?page_id=sitewiki&amp;prj_id=_falcon_site&amp;sid=wiki&amp;pwid=Home&amp;wid=Survival+Guide">The Survival Guide</a>:
+A cross between a tutorial and a reference guide, this is an entry level document
+aimed both to first time users and script specialists. There's also a 
+<a href="/docs/pdf/current/FalconSurvivalGuide.pdf">Dowloadable PDF</a>.
+</li>
+<li><a href="/project_docs/core/" target="_blank">The Falcon Language Function Reference</a>:
+   Function reference for the Core and RTL modules. This online guide covers the
+   main functions which are available to stand-alone scripts.
+</li>
+
+<li><a href="/project_docs/falcon_nest/" target="_blank">Nest web application framework</a>:
+ An application framework built around Falcon WOPI (Web Oriented Programming Interface).
+</li>
+</ul>
+</p>
+
+<h2>Developer documentation</h2>
+<p>This manuals are provided for developers willing to create new Falcon modules, embed Falcon in their applications or participate in the development.</p>
+<ul>
+<li><a href="http://falconpl.org/docs/engine/current/">Engine reference</a>: the reference of the API, containing both internal classes and the interface exposed to modules and embeddings.</li>
+<li><a href="http://www.falconpl.org/index.ftd?page_id=sitewiki&prj_id=_falcon_site&sid=wiki&pwid=Home&wid=Embedders+guide">Embedders guide</a>: shows how to write applications that use Falcon as a scripting engine.</li>
+<li><a href="http://www.falconpl.org/index.ftd?page_id=sitewiki&prj_id=_falcon_site&sid=wiki&pwid=Home&wid=Module+writing+guide">Module writing guide</a>: Guide to write new cross-platform binary modules in C++ to extend Falcon functionalities.</li>
+</ul>
+
+
+<H2>Older documentation for 0.8 versions</H2>
+<p>
+<ul>
+<li><a href="/docs/pdf/0.8.14/quickstart.pdf">The Quickstart</a>:
+   A crash course about the most useful conecpts and constructs available in Falcon.
+   It's suggested to start here to obtain an in-depth understanding of the most witty points of the
+   languages.
+</li>
+<li><a href="/docs/pdf/0.8.14/showdown.pdf">The Showdown</a>:
+   It's a brief intorduction to the language, and an exposition of the most
+   interesting and peculiar features of Falcon. This document has a wider range
+   than the quickstart, but doesn't go in depth. It is suggested to start here
+   if you want to have a generic idea of what Falcon is about, but you're not
+   feeling like putting your hands on the keyboard to follow some tutorial.
+</li>
+<li><a href="/docs/pdf/0.8.14/survival.pdf">The Survival Guide</a>:
+A cross between a tutorial and a reference guide, this is an entry level document
+aimed both to first time users and script specialists.
+</li>
+<li><a href="/docs/pdf/0.8.14/cmdline.pdf">The Command Line Tools (CLT) Guide</a>:
+A guide to the tools to run falcon scripts directly
+(i.e. outside embedding applications), to the external utilities.
+</li>
+</ul>
+</p>
+
+

@@ -1,0 +1,149 @@
+// Export the class.
+export Jig
+
+load .Action
+load .Controller
+load library.File
+
+/**
+ * Represents a Jigsaw Thingamajig, or just a Jig, for short.
+ *
+ * A Jig is an application built using Jigsaw web application framework.  
+ * An example of a Jig is the Taskmill tracker.
+ *
+ * Use Jig.factory() to instantiate jigs.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.5.11
+ *
+ * @param string name - The name of this Jig.
+ */
+class Jig(jigName, actionName) from Service
+	//! The name of the jig we're going to execute.
+	_name = jigName
+
+	//! The name of the action we're going to execute.
+	_actionName = actionName
+
+	//! The controller managing security.
+	_controller = nil
+
+	//! Instance of this class, so CAVT handlers can access it.
+	static singleton_ = nil
+
+	/**
+	 * Constructors.
+	 */
+	init
+		// Store an instance of myself.
+		Jig.singleton_ = self
+	end
+
+	/**
+	 * Returns the active Jig handler.
+	 *
+	 * @static
+	 * @public
+	 * @return	Jig
+	 */
+	function singleton()
+		return Jig.singleton_
+	end
+
+	/**
+	 * Get the Page's controller.
+	 *
+	 * @public
+	 * @return Controller
+	 */
+	function execute()
+		if not self._controller
+			// This one line is kinda weird, but a Jig is
+			// a Service, after all.
+			self.setJig(self)
+
+			// Instance the controller.
+			self._controller = Controller.factory(self, self._actionName)
+
+			// Set some common data in my value set.
+			self.setValue(Framework.keyJig, self._getCommonData())
+
+			// Copy those values to the controller.
+			self.copyValuesTo(self._controller)
+		end
+
+		return self._controller
+	end
+
+	/**
+	 * Get the name of this jig.
+	 *
+	 * @public
+	 * @return string
+	 */
+	function getName()
+		return self._name
+	end
+
+	/**
+	 * Get common Jig data to pass to the controller/action/view/template.
+	 *
+	 * This data represents things such as relative URL of public facing
+	 * directories, whether the framework is in debug mode, etc. This is
+	 * data that is common, though different, for all Jigs.
+	 *
+	 * @return Dictionary.
+	 */
+	function _getCommonData()
+		data = [
+			'lang'			=> Config.defaultLang,
+			'debug'			=> Config.debug,
+			'assetsPath' 	=> Config.relativeURL + '/' + Framework.dirJigs + self.getName() + '/' + Framework.dirAssets	
+		]
+
+		bless(data)
+		return data
+	end
+
+	/**************************** STATICS ********************************/
+
+	/**
+	 * Get a jig handler instance based on it's class name.
+	 *
+	 * @static
+	 * @public
+	 * @param 	string jigName - The name of the jig we want to instantiate.
+	 * @param string actionName - The name of action in requested jig to exec.
+	 * @return	Jig
+	 */
+	function factory(jigName, actionName)
+		if not Action.exists(jigName, actionName)
+			// The requested action does not exist.
+			actionName = Framework.error404Action
+
+			// Check if the requested jig has a NotFoundAction handler.
+			if not File.exists(Action.getFullPath(jigName, actionName))
+				// Use fallback 404 handler.
+				jigName	 = Framework.fallbackJig
+			end
+		end
+
+		// Return the jig instance.
+		return Jig(jigName, actionName)
+	end
+
+	/**
+	 * Get the full path to an Jig dir.
+	 *
+	 * @static
+	 * @param 	string jigName - Name of jig where to search to action class.
+	 * @return 	string
+	 */
+	function getFullPath(jigName)
+		return Service.getFullPath(jigName)
+	end
+end
+
+

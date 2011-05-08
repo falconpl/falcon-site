@@ -1,0 +1,173 @@
+= wikiParser quickref
+
+...TOC
+
+== Block formating
+
+=== Headers
+
+they start with one or more equal signs {{=}} followed by your title.
+
+ie {{=== My beautiful header}} will render an {{h3}} HTML header.
+ 
+=== Paragraphs
+
+By default, they need a new line before and after them, but this can be fixed
+to your needs.
+
+A paragraph is just a container with some non-blank lines of text inside.
+If you want to force a linebreak inside them, use {{\}} at the end of the line.
+
+==== Sample
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod 
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo 
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse 
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat 
+non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+=== Source Code
+
+Source code is are special zones wich will be rendered verbatim.
+They start with a {{~{~{~{}} followed by optionnal spaces, and an optionnal 
+langage-name, ending with {{~}~}~} }}. For example:
+
+{{{ plain
+
+~{{{ fal
+
+for i in [1,2,3,"a","b","c"]
+    > "i is now: ", i
+end
+~}}}
+}}}
+
+will render the following:
+
+==== Sample
+
+{{{ fal
+
+for i in [1,2,3,"a","b","c"]
+    > "i is now: ", i
+end
+}}}
+
+=== Horizontal line
+
+Just put 3 or more minus signs (dashes) {{-}} on a line.
+
+==== Sample
+
+----
+
+=== Lists
+
+Lists contains list items. A list item starts with the {{*}} sign, followed by
+optionnal spaces and your text.
+A list item is ended when a new one starts.
+A list is ended when there's a newline.
+
+List items can also be nested, {{*}} signs indicate the nesting level.
+
+==== Sample
+
+* Coffee
+* Tea
+** Green tea
+** Black tea
+* Milk
+
+=== Table Of Contents
+
+Just write {{...}} optionnaly followed by some spaces and the word {{TOC}}.
+
+==== Sample
+
+You already got it at the top of the page.
+
+== Inline formatting
+
+Inside each paragraph or list, you can use inline rules.
+
+Thoses rules can be mixed, and may expend on several lines.
+
+=== Escaping
+
+Use the tilde char "~~" to escape an inline rule, and write two tildes signs to
+obtain one.
+
+=== Bold
+
+Like this : ~**bolded text**
+
+==== Sample
+
+Like this : **bolded text**
+
+=== Italics
+
+Like this : ~//italic text// (note that it is not recommanded end a line with 
+italic markup, as it may be interpreted as a line break.)
+
+==== Sample
+
+//italic text//
+
+=== Underline
+
+Like this : ~__underlined text__
+
+==== Sample
+
+Like this : __underlined text__
+
+=== Stroke
+
+Like this : ~--stroked text--
+
+==== Sample
+
+Like this : --stroked text--
+
+=== Sup and Sub text
+
+Like this : sup~^^text^^ or sub~..text..
+
+==== Sample
+
+Like this : sup^^text^^ or sub..text..
+
+=== Monospace
+
+Like this : ~{{monospaced text}}
+
+==== Sample
+
+Like this : {{monospaced text}}
+
+=== URLs
+
+Like this : ~[http://www.falconpl.org|FalconPL]
+
+==== Sample
+
+Like this : [http://www.falconpl.org|FalconPL]
+
+=== Images
+
+Like this : ~[~[im http://falconpastebin.appspot.com/static/i/FalconIcon.png|http://falconpastebin.appspot.com/static/i/FalconIcon.png|center|Falcon logo]]
+
+==== Sample
+
+Like this : [[im http://falconpastebin.appspot.com/static/i/FalconIcon.png|http://falconpastebin.appspot.com/static/i/FalconIcon.png|center|Falcon logo]]
+
+=== Quotes
+
+Like this : ~[~~Falcon is GREAT~~]
+
+==== Sample
+
+Like this : [~Falcon is GREAT~]
+

@@ -1,0 +1,39 @@
+<?
+load dbi
+load bbexpand
+
+try
+   //HIDE: DB Connection code Hidden for security reasons.
+   dbh = DBIConnect( "
+      mysql:localhost,
+      falcon10,
+      VpWfvkJ,
+      falcon10_falconforums,
+      0,0,0," )
+   //HIDE.
+
+   query="select "
+      "phpbb_posts.post_id, topic_id, post_subject, post_text "
+      "from phpbb_posts join phpbb_posts_text on phpbb_posts.post_id=phpbb_posts_text.post_id "
+      "where forum_id = 11 order by topic_id desc limit 20"
+
+   r = dbh.query( query )
+   while r.next()
+      showNews( r )
+   end
+
+catch DBIError in error
+   > "Failed to connect to database: ", error
+end
+
+function showNews( recordset )
+   static
+      output = stdOut()
+   end
+
+   > "<p> SUBJECT: ", recordset.asString( 2 ), "</p>\n"
+   > "<p>"
+   bbExpand( recordset.asString( 3 ), output )
+   > "</p>\n"
+end
+?>

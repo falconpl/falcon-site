@@ -1,0 +1,44 @@
+/**
+ * Task list view.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ *
+ * @param Jig jig - The Jig that owns this view.
+ */
+class ListView(jig) from View(jig)
+
+	/**
+	 * Constructor.
+	 */
+	init
+		// Set the template this view will use.
+		self.setTemplate('Shell', 'List')
+	end
+
+	/**
+	 * Process this view's logic.
+	 *
+	 * @public
+	 * @return nil
+	 */
+	function process()
+		userId 	  	  = Session.get('user.uid')
+		projectId 	  = Session.get('user.currentProject')
+		currentFilter = Session.get('user.currentFilter')
+
+		// Get some objects.
+		tasks   = Model.instance('TaskList', userId, currentFilter)
+		project = Model.instance('Project', userId)
+
+		filters = tasks.filter.getAvailable(userId, projectId)
+
+		// Set data for the template.
+		self.setValue('tasks',   tasks);
+		self.setValue('project', project);
+		self.setValue('filters', filters)
+		self.setValue('currentFilter', currentFilter) 
+	end
+end

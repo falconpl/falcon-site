@@ -1,0 +1,16 @@
+<?
+import X
+
+/**
+ * Page used when Ajax action/view handlers need to result messages to caller.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.6.2
+ */
+?>
+<?
+// The values should already be encoded in ajax form.
+>> X.jsonValues
+?>

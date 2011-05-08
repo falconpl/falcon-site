@@ -1,0 +1,142 @@
+<? // common prologue
+   load site_functions
+
+   checkLogin()
+
+   if ( error = Request.getField( ":error", nil ) )
+      > "Sorry; your upload request couldn't be processed:"
+      > "<br/>", error
+      return
+   end
+
+   location = URI(Request.uri)
+   location.setFields([=>])
+   location = location.uri
+
+   section = Request.getField( "prj_id" )
+   media = Request.getField( "type" )
+   level = checkPrjRights( section )      
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Add Media to project</title>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon" style="padding:10px;">
+
+<script language="javascript">
+function choseFile( name, path )
+{
+   if( "<?=media?>" == "image" ) {
+      text = "[[im " + path + "|"+path+"|left|"+name+"]]";
+   }
+   else {
+      text = "[[" + path + "|" + name+"]]";
+   }
+   
+   window.opener.focus();
+   window.opener.insertText( text );
+   window.close();
+}
+
+</script>
+
+<? if not level ?>
+   <h1>Unauthorized</h1>
+   <p>Sorry, you're not authorized to upload media in this area</p>
+<? else ?>
+<?
+   
+   // has someone asked for an upload ?
+   if (upload = Request.getField( "TheFile", nil ) )
+      // move the uploaded file here.
+      > "<p>Storing uploaded file ", upload.filename, " ...</p>"
+      dirname = "prjdata/" + section + "/" + (media == 'image' ? 'images' : 'resources')
+      try
+         upload.store(  dirname + "/" + upload.filename )
+         > "<p>File ", upload.filename, " correctly uploaded."
+      catch Error in e
+         > "<p>Problem while uploading the file:</p>"
+         > "<pre>", e.toString(), "</pre>"
+      end
+   end
+
+   // has someone asked for a deletion
+   if ( df = Request.getField( "delete", nil ) )
+
+      if "../" in df
+         > "<p><b>WARNING</b>: Can't delete files containing '../'"
+         
+      elif Request.getField( "confirm", nil )
+         dirname = "prjdata/" + section + "/" + (media == 'image' ? 'images' : 'resources')
+         try
+            fileRemove( dirname + "/" + df )
+            > @"<p>Succesfully <b>deleted</b> file $df"
+         catch IoError in e
+            > @"<p>Error while trying to delete file $df"
+            > "<pre>"
+            > e
+            > "</pre>"
+         end
+         
+      else ?>
+         <form action="popup_addmedia.ftd" method="POST">
+            <?= Request.fwdPost(true) ?>
+            <p>Really want to delete file "<?=df?>"?&nbsp;&nbsp;<input type="submit" name="confirm" value="Confirm"/>
+         </form>
+      <?
+      end
+      > "<hr/>"
+      Request.gets.remove( "delete" )
+      Request.gets.remove( "confirm" )
+      Request.posts.remove( "delete" )
+      Request.posts.remove( "confirm" )
+   end
+?>
+
+<h2>Select media</h2>
+<form action="popup_addmedia.ftd" method="POST" enctype="multipart/form-data" accept-charset="utf-8">
+   <?= Request.fwdPost(true) ?>
+   <p>Upload a new file: <input type="file" name="TheFile"/>&nbsp;&nbsp;<input type="submit" name="sub_btn" value="Send"/>
+</form>
+<hr/>
+
+<?
+   dirname = "prjdata/" + section + "/" + (media == 'image' ? 'images' : 'resources')
+   dir = Directory( dirname )
+   stats = FileStat()
+   first = true
+
+   rows = [=>]
+   fwd = Request.fwdGet(true)
+   while (name = dir.read())
+      stats.read( dirname + "/" + name )
+      if stats.ftype == FileStat.NORMAL         
+         path = dirname + "/" + name
+         rows[ name ] = @'
+            <tr><td width="100%">$name</td><td>$stats.mtime</td>
+                <td><a href="#" onclick="choseFile(''$name'', ''$path'');" title="Select this file and close the window">Select</a></td>
+                <td><a href="$path" onclick="window.open( this.href ); return false;" title="View file (opens in new window)">View</a></td>
+                <td><a href="popup_addmedia.ftd?$fwd&delete=$name" title="Remove this file">Delete</a></td>
+            </tr>'
+      end
+   end
+
+   for name, row in rows
+      forfirst
+         > '
+         <p>Select a file to add:</p>
+         <table border="0" width="100%" cellspacing="2px" cellpadding="4px">
+         <tr><th>File</th><th>Date</th><th colspan="3">Actions</th></tr>'
+      end
+
+      > row
+      forlast: > "</table>"
+   end
+
+?>
+<? end ?>
+</body>
+</html>

@@ -1,0 +1,318 @@
+export TaskListFilter
+
+// Maximum length of a filter name.
+const _MAX_NAME_LEN = 30
+
+/**
+ * Filter which can be applied to the task list.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.10
+ */
+class TaskListFilter(filterId)
+	// This filter's settings.
+	id				= nil
+	ownerId			= 0
+	projectId		= 0
+	assignedId 		= 0
+	priorityId		= 0
+	categoryId		= 0
+	statusId		= 0
+	releaseId		= 0
+	reporterId		= 0
+	closedPolicy	= 0
+	globalContext	= 0
+	primarySort		= ''
+	secondarySort	= ''
+	sortDir			= ''
+	name			= ''
+
+	/**
+	 * Constructor.
+	 */
+	init
+		if filterId : self._fill(filterId)
+	end
+
+	/**
+	 * Load the data for this filter.
+	 *
+	 * @private
+	 * @return nil
+	 */
+	function _fill(filterId)
+		// Get this filter's information.
+		query  = 'SELECT ownerId, '
+		query += '		 projectId, '
+		query += '		 categoryId, '
+		query += '		 statusId, '
+		query += '		 priorityId, '
+		query += '		 releaseId, '
+		query += '		 assignedId, '
+		query += '		 reporterId, '
+		query += '		 primarySort, '
+		query += '		 secondarySort, '
+		query += '		 sortDir, '
+		query += '		 name, '
+		query += '		 closedPolicy, '
+		query += '		 globalContext '
+		query += 'FROM TaskListFilter '
+		query += 'WHERE id = ? '
+
+		stmt = DB.prepare(query)
+		row  = stmt.getRow(filterId)
+
+		if row.len() == 0
+			raise Error(0, 'Invalid filter id')
+		end
+
+		// Assign the values to the filter.
+		self.id 			= filterId
+		self.ownerId		= row['ownerId']
+		self.projectId		= row['projectId']
+		self.assignedId		= row['assignedId']
+		self.priorityId		= row['priorityId']
+		self.categoryId		= row['categoryId']
+		self.statusId		= row['statusId']
+		self.releaseId		= row['releaseId']
+		self.reporterId		= row['reporterId']
+		self.closedPolicy	= row['closedPolicy']
+		self.globalContext  = row['globalContext']
+		self.primarySort	= row['primarySort']
+		self.secondarySort	= row['secondarySort']
+		self.sortDir		= row['sortDir']
+		self.name			= row['name']
+	end
+
+	/**
+	 * Delete this filter.
+	 * 
+	 * @public
+	 * @return nil
+	 */
+	function deleteSelf()
+		query  = 'DELETE FROM TaskListFilter '
+		query += 'WHERE id = ? '
+		stmt = DB.prepare(query)
+		stmt.write(self.id)
+	end
+
+	/**
+	 * Determines if this filter is valid and its changes can be commited.
+	 * 
+	 * @public
+	 * @return RuntimeError on error(can be bool compared), true on success.
+	 */
+	function verify()
+		return true
+	end
+
+	/**
+	 * Fetch the ID.
+	 *
+	 * If we have a filter id, return that. Othewise, query based on
+	 * the name of the filter. This helps to update tasks that have 
+	 * the same name. 
+	 *
+	 * @private
+	 * @return	integer
+	 */
+	function _fetchId() 
+		if self.id : return self.id
+
+		query  = 'SELECT id '
+		query += 'FROM TaskListFilter '
+		query += 'USE INDEX (_TaskListFilter_opn) '
+		query += 'WHERE ownerId = ? '
+	   	query += 'AND projectId = ? '
+	    query += 'AND name 	    = ? '
+
+		stmt = DB.prepare(query)
+		return stmt.getOne(self.ownerId, self.projectId, self.name)
+	end	
+
+	/**
+	  * Commit the changes that have been made to filter.
+	  *
+	  * If this filter doesn't exist, a new filter will be created with the
+	  * values present in this filter. If this filter already exists, it's
+	  * values will be updated. We know if this is an existing filter if
+	  * it has a filter id.
+	  *
+	  * @public
+	  * @return nil
+	  */
+	function commit()
+		// Make sure this task is correct.
+		//if (result = self.verify()) == false : raise result
+
+		// Insert a new filter or update the current one.
+		if (self.id = self._fetchId()) != nil
+			self._update()
+		else
+			self._insert()
+		end
+	end
+
+	/**
+	 * Create a new filter.
+	 * 
+	 * @private
+	 * @return nil
+	 */
+	function _insert()
+		query  = 'INSERT INTO TaskListFilter (' 
+		query += '	ownerId, '
+		query += '	projectId, '
+		query += '	categoryId, '
+	   	query += '	statusId, '
+		query += '	priorityId, '
+		query += '	releaseId, '
+		query += '	assignedId, '
+		query += '	reporterId, '
+		query += '	primarySort,'
+		query += '	secondarySort, '
+		query += '	sortDir, '
+		query += '	name, '
+		query += '	closedPolicy, '
+		query += '	globalContext'
+		query += ') VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+
+		// Prepare the query.
+		stmt = DB.prepare(query)
+
+		// Insert the record.
+		stmt.write(
+			self.ownerId,
+			self.projectId,
+			self.categoryId,
+			self.statusId,
+			self.priorityId,
+			self.releaseId,
+			self.assignedId,
+			self.reporterId,
+			self.primarySort,
+			self.secondarySort,
+			self.sortDir,
+			self.name,
+			self.closedPolicy,
+			self.globalContext
+		)
+
+	 	// Get the last auto-increment id automatically inserted by the DB.
+		filterId = stmt.getLastAutoId()
+
+		// Load my db values.
+		self._fill(filterId)
+	end
+
+	 /**
+	  * Update the info of this filter.
+	  *
+	  * @private
+	  * @return nil
+	  */
+	 function _update()
+		query  = 'UPDATE TaskListFilter SET '
+		query += '		categoryId 		= ?, '
+		query += '		statusId 		= ?, '
+		query += '		priorityId 		= ?, '
+		query += '		releaseId 		= ?, '
+		query += '		assignedId 		= ?, '
+		query += '		reporterId		= ?, '
+	   	query += '		primarySort 	= ?, '
+		query += '		secondarySort	= ?, '
+	   	query += '		sortDir			= ?, '
+		query += '		name			= ?, '
+		query += '		closedPolicy	= ?, '
+		query += '		globalContext	= ? '
+		query += 'WHERE id = ?'
+
+		stmt = DB.prepare(query)
+		stmt.write(
+				self.categoryId, 
+				self.statusId, 
+				self.priorityId,
+				self.releaseId, 
+				self.assignedId,
+				self.reporterId,
+				self.primarySort,
+				self.secondarySort,
+				self.sortDir,
+				self.name,
+				self.closedPolicy,
+				self.globalContext,
+				self.id
+		)
+	 end
+
+	/**
+	 * Set this filter as the user's current.
+	 *
+	 * @public
+	 * @return	nil
+	 */
+	function setAsCurrent()
+		query  = 'UPDATE UserExt SET '
+		query += '	currentFilter = ? '
+		query += 'WHERE userId = ? '
+
+		stmt = DB.prepare(query)
+		stmt.write(self.id, self.ownerId)
+	end
+
+	/*********************** STATICS **********************/
+
+	/**
+	 * Get the available filters to a user.
+	 *
+	 * @static
+	 * @public
+	 * @param	integer userId
+	 * @param 	integer projectId
+	 * @return 	Dictionary
+	 */
+	function getAvailable(userId, projectId)
+		query  = 'SELECT id, '
+		query += '		 name, '
+		query += '		 globalContext '
+		query += 'FROM TaskListFilter '
+		query += 'WHERE ownerId = ? '
+		query += 'AND projectId = ? '
+
+		stmt = DB.prepare(query)
+		return stmt.getRowArray(userId, projectId)
+	end
+
+	/**
+	 * Validates a filter name.
+	 *
+	 * @static
+	 * @public
+	 * @param	string name - The filter name to validate.
+	 * @return 	boolean
+	 */
+	function validateName(name)
+		if name == nil 			: return false
+		if name.len() == 0 		: return false
+		if name.len() > _MAX_NAME_LEN : return false
+
+		return true
+	end
+
+	/**
+	 * Validates a filter sorting column.
+	 *
+	 * @static
+	 * @public
+	 * @param	string name - Name of column to sort by.
+	 * @return 	boolean
+	 */
+	function validateSortType(name)
+		vals = ['id', 'priority', 'category', 'status', 'release']
+		return (arrayFind(vals, name) != -1)
+	end
+end
+

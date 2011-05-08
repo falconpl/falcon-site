@@ -1,0 +1,64 @@
+<?
+	import X
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="<? >> X.jig.lang ?>">
+<head>
+	<title>
+		Jigsaw Web Application Framework
+	</title>
+	<style type="text/css">
+		BODY, TABLE {
+			font-family: "Helvetical", "Arial"; 
+			font-size: 12pt;
+		}
+		BODY {
+		/*
+		 	background-color: #8FA2C7;
+			*/
+			background-color: <? >> X.pageColor ?>;
+			padding: 10px;
+			margin:  0;
+		}
+		FORM {
+			margin: 0;
+			padding: 0;
+		}
+		A, A:visited {
+			color: #003471;
+			size: 10pt;
+		}
+		A:hover {
+			text-decoration: none;
+			color: #0a527c;
+		}
+		IMG {
+			border: 0;
+			padding: 0;
+			display: block;
+		}
+		#frameworkTag {
+			font-size: 8pt;
+			color: #777;
+			text-decoration: none;
+		}
+	</style>
+</head>
+<body>
+
+<div>
+	<?
+	// Include the sub template
+	if X.SUB_TEMPLATE
+		X.include(X.SUB_TEMPLATE)
+	end
+	?>
+	<div align="center" id="frameworkTag">
+		<br />
+		<a href="<? >> Framework.officialURL ?>"><? >> Framework.officialLongName ?></a>
+		
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,344 @@
+<? // common prologue
+   load site_functions
+   load process
+   checkLogin()
+
+   // gather query data
+   project_id = Request.getField( "project_id" )
+   project_name = Request.getField( "project_name" )
+
+   // are we allowed to change things?
+   clearance = checkPrjRights( project_id )
+
+   con = connectDB()
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Edit Downloads</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<script src="FalconJS/togglePanel.js" type="text/javascript"></script>
+
+<body class="falcon">
+<!-- are we authorized to perform edit? -->
+<? if clearance == "admin" ?>
+<!--  ok, we can do things. Are we requested to update? -->
+   <?
+   req = Request.getField( "req", "" )
+   showList=true
+   dloadName = ""
+   switch req
+      case "create"
+         createDload()
+      case "update"
+         updateDload()
+      case "remove"
+         removeDload()
+      case "edit"
+         editDload()
+         showList=false
+      case "confirm"
+         confirmRemove()
+         showList=false
+   end
+   ?>
+
+   <? if showList ?>
+   <h2>Downloads for "<?=project_name?>"</h2>
+   <? showDloadList() ?>
+   <? end ?>
+   <hr/>
+   <p><a href="javascript:window.close()">Close this window</a></p>
+
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to edit this project.</p>
+<? end ?>
+</body>
+</html><?
+
+
+function createDload()
+   // Get the selected file.
+   file = Request.getField( "sysres" )
+   if file
+      > "<p><i>... Download file creation log ...</i></p>"
+      > "<pre>"
+      file = SiteConfig.ftpdir + "/" + userID + "/" + file
+
+      targetdir = SiteConfig.prjdir + "/" + project_id
+      // Making the directory, if it doesn't exist.
+      >> @ "Checkig directory $targetdir: "
+      system( @"mkdir -p $(targetdir)" )
+
+      // Move the file to our directory
+      >> @ "Moving file $file -> $targetdir: "
+
+      if system( @"mv -f $(file) $(targetdir)" ) == 0
+         > " Ok."
+         go_on=true
+      else
+         go_on=false
+      end
+   else
+      go_on=true
+   end
+
+   if go_on
+      // now add the record to the db
+      >> "Adding the record to the DB: "
+      query = "insert into project_dloads " +
+         "( project_id, name, sysres, description, dl_type, relevant, rel_id ) " + 
+         "values( :1, :2, :3, :4, :5, :6, :7 )"
+
+      try
+         r = con.query( query,
+            project_id,
+            Request.getField( "name", "" ),
+            Request.getField( "sysres", "" ),
+            Request.getField( "description", "" ),
+            Request.getField( "dl_type", "none" ),
+            Request.getField( "relevant", "" ) == "yes" ? 1 : 0,
+            (rel_id = Request.getField( "rel_id", "" )) == "" ? nil : int(rel_id) )
+         > " Ok."
+      catch DBIError in err
+         > " Failed."
+         > err
+      end
+   else
+      > " Failed."
+   end
+   > "</pre>"
+end
+
+
+function updateDload()
+   > "<p><i>... Download entry update log ...</i></p>"
+   > "<pre>"
+
+   // now add the record to the db
+   >> "Updating the record to the DB: "
+   query = "update project_dloads " + 
+      "set name=:2, sysres=:3, description=:4, dl_type=:5, relevant=:6, rel_id=:7 " +
+      "where dload_id=:1"
+
+   try
+      r = con.query( query,
+         int(Request.getField( "dload_id" )),
+         Request.getField( "name", "" ),
+         Request.getField( "sysres", "" ),
+         Request.getField( "description", "" ),
+         Request.getField( "dl_type", "none" ),
+         Request.getField( "relevant", "" ) == "yes" ? 1 : 0, // no real boolean type in mysql
+         (rel_id = Request.getField( "rel_id", "" )) == "" ? nil : int(rel_id) )
+      > " Ok."
+   catch DBIError in err
+      > " Failed."
+      > err
+   end
+
+   > "</pre>"
+end
+
+
+function removeDload()
+   > "<p><i>... Download entry remove log ...</i></p>"
+   > "<pre>"
+
+   // now add the record to the db
+   >> "Removing the record to the DB: "
+   query = "delete from project_dloads " +
+      "where dload_id=:1"
+
+   try
+      r = con.query( query, Request.getField( "dload_id" ) )
+      > " Ok."
+   catch DBIError in err
+      > " Failed."
+      > err
+   end
+
+   > "</pre>"
+end
+
+
+function editDload()
+   global dloadName, con
+
+   // create the release dictionary
+   releases = [=>]
+   r = con.query( "select rel_name, rel_id from project_releases where project_id=:1",
+                  project_id )
+   while r.next(): releases[ r.asString(0) ] = r.asInteger(1)
+
+   // load this release
+   dload_id = Request.getField( "dload_id" )
+   r = con.query( "
+               select name, rel_id, sysres, description, dl_type, relevant
+               from project_dloads
+               where dload_id=:1",
+            int(dload_id) )
+   data = r.fetchDict()
+   dloadName = data[ 'name' ]
+?>
+   <h2>Edit Download <?= dloadName ?></h2>
+   <form action="popup_manage_dl.ftd" method="POST">
+   <input type="hidden" name="dload_id" value="<?=dload_id?>"/>
+   <input type="hidden" name="project_id" value="<?=project_id?>"/>
+   <input type="hidden" name="project_name" value="<?=htmlEscape(project_name)?>"/>
+   <input type="hidden" name="req" value="update"/>
+   <table border="0">
+   <tr><td>Name:</td><td><input type="text" size="30" maxsize="30" name="name" value="<?=htmlEscape( dloadName )?>"/></td></tr>
+   <tr><td>Resource:</td><td><? makeFileSelect( false, true, data[ 'sysres' ] ) ?></td></tr>
+   <tr><td>Description:</td><td><input type="text" size="30" maxsize="255" name="description" value="<?=htmlEscape(data[ 'description' ] ) ?>"/></td></tr>
+   <tr><td>Type:</td><td><? makeDloadType( data['dl_type'] ) ?></td></tr>
+   <tr><td>Assigned to:</td><td><? makeReleaseSelector( releases, data['rel_id'] ) ?></td></tr>
+   <tr><td>Relevant:</td><td><input type="checkbox" name="relevant" value="yes"<?=data['relevant'] ? ' checked="checked"' : '' ?>/></td></tr>
+   </table>
+   <input type="submit" name="submit" value="Update"/>
+   </form>
+<?
+end
+
+function confirmRemove()
+   global dloadName, con
+   dload_id=Request.getField( "dload_id" )
+
+   r = con.query( "select name from project_dloads where dload_id=:1", int(dload_id) )
+   r.next()
+   dloadName = r.asString(0)
+?>
+   <p>Confirm removal of the download named "<?= dloadName ?>?</p>
+   <form action="popup_manage_dl.ftd" method="POST">
+   <input type="hidden" name="dload_id" value="<?=dload_id?>"/>
+   <input type="hidden" name="project_id" value="<?=project_id?>"/>
+   <input type="hidden" name="project_name" value="<?=htmlEscape(project_name)?>"/>
+   <input type="hidden" name="req" value="remove"/>
+   <input type="submit" name="submit" value="Yes"/>
+   </form>
+   &nbsp;
+   <form action="popup_manage_dl.ftd" method="POST">
+   <input type="hidden" name="project_id" value="<?=project_id?>"/>
+   <input type="hidden" name="project_name" value="<?=htmlEscape(project_name)?>"/>
+   <input type="submit" name="submit" value="No"/>
+   </form>
+<?
+end
+
+function showDloadList()
+   global con
+
+   releases = [=>]
+   rel_ids = [=>]
+   r = con.query( "select rel_name, rel_id from project_releases where project_id=:1",
+                  project_id )
+   while r.next()
+      releases[ r.asString(0) ] = r.asInteger(1)
+      rel_ids[r.asInteger(1)] = r.asString(0)
+   end
+
+?>
+<form action="popup_manage_dl.ftd" method="POST">
+<input type="hidden" name="req" value="create"/>
+<input type="hidden" name="project_id" value="<?=project_id?>"/>
+<input type="hidden" name="project_name" value="<?=htmlEscape(project_name)?>"/>
+<table border="1">
+<tr><th>Name</th><th>Resource</th><th>Description</th><th>Type</th><th>Assigned to</th><th>Rel</th><th>Action</th></tr>
+<!-- Create the entry to add a new record. -->
+<td><input type="text" size="15" maxsize="30" name="name"/></td>
+<td><? makeFileSelect( true, false ) ?></td>
+<td><input type="text" size="20" maxsize="255" name="description"/></td>
+<td><? makeDloadType() ?></td>
+<td><?
+   // create the release dictionary
+   releases = [=>]
+   r = con.query( "select rel_name, rel_id from project_releases where project_id=:1",
+                  project_id )
+   while r.next(): releases[ r.asString(0) ] = r.asInteger(1)
+
+   makeReleaseSelector( releases ) ?></td>
+<td><input type="checkbox" name="relevant" value="yes"/></td>
+<td><input type="submit" value="Add"/></td>
+</tr>
+<?
+   r = con.query( "
+            select rel_id, dload_id, name, sysres, description, dl_type, relevant
+            from project_dloads
+            where project_id=:1",
+         project_id )
+
+   while (data = r.fetchDict())
+   ?>
+   <tr>
+      <td><?=data['name']?></td>
+      <td><?=data['sysres']?></td>
+      <td><?=data['description']?></td>
+      <td><?=data['dl_type']?></td>
+      <td><?=data['rel_id'] in rel_ids ? rel_ids[ data['rel_id'] ] : '--unassigned--'?></td>
+      <td><?=data['relevant'] ? 'Y' : '-'?></td>
+      <td>[<a href="?req=edit&amp;dload_id=<?=data['dload_id']?>&amp;project_id=<?=project_id?>&amp;project_name=<?=URI.encode(project_name)?>">Edit</a>]&nbsp;
+          [<a href="?req=confirm&amp;dload_id=<?=data['dload_id']?>&amp;project_id=<?=project_id?>&amp;project_name=<?=URI.encode(project_name)?>">del</a>]
+      </td>
+   </tr>
+   <?
+   end
+?>
+</table>
+</form>
+<?
+
+end
+
+function makeDloadType( current )
+?>
+<select name="dl_type">
+<option value="none" <? if not current or current=="none": >>'selected="selected"' ?>>none</option>
+<option value="source" <? if current=="source": >>'selected="selected"' ?>>source</option>
+<option value="docs" <? if current=="docs": >>'selected="selected"' ?>>docs</option>
+<option value="package" <? if current=="package": >>'selected="selected"' ?>>package</option>
+<option value="installer" <? if current=="installer": >>'selected="selected"' ?>>installer</option>
+<option value="prebuilt" <? if current=="prebuilt": >>'selected="selected"' ?>>prebuilt</option>
+</select>
+<?
+end
+
+// Loads the available resources
+function makeFileSelect( updir, prjdir, current )
+   ud_files = [=>]
+   pd_files = [=>]
+
+   fill_dir = function( dict, path )
+      dir = Directory( path )
+      while ( entry = dir.read() )
+         if entry[0] != "." and fileType( path + "/" + entry ) == FileStat.NORMAL
+            dict[ entry ] = (entry == current ? 'selected="selected"' : "")
+         end
+      end
+      dir.close()
+   end
+
+   if updir: fill_dir( ud_files, SiteConfig.ftpdir + "/" + userID )
+   if prjdir: fill_dir( pd_files, SiteConfig.prjdir + "/" + project_id )
+
+   > '<select name="sysres">'
+   > '<option value=""> -- None (select later)</option>'
+   for entry, sel in ud_files: > "<option value=\"", entry, "\" ", sel, ">", entry, "</option>"
+   for entry, sel in pd_files: > "<option value=\"", entry, "\" ", sel, ">", entry, "</option>"
+   > '</select>'
+end
+
+
+function makeReleaseSelector( reldict, rel_id )
+   > '<select name="rel_id">'
+   > '<option value=""> -- Free download</option>'
+   for name, rid in reldict
+       > "<option value=\"", rid, "\"", \
+          (rid == rel_id ? ' selected="selected"' : ""), \
+          ">", name, "</option>"
+   end
+   > '</select>'
+end
+
+?>

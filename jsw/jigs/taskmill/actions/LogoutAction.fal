@@ -1,0 +1,51 @@
+load core.Action
+
+/**
+ * Logs out a logged in user.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.12
+ */
+class LogoutAction(jig) from Action(jig)
+
+	//! Set the allowed request type.
+	static requestMethod = 1 // Action.GET
+
+	/**
+	 * Verify this action.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		// Logout by destroying the user's session.
+		Session.destroy()
+
+		// Show the login screen.
+		self.setView('DefaultView')
+	end
+end

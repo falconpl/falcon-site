@@ -1,0 +1,248 @@
+/*********************** HTML ELEMENTS **************************/
+
+BODY, TABLE {
+	font-family: 		"Helvetical", "Arial"; 
+	font-size: 	 		10pt;
+	color: 		 		#444;
+}
+BODY {
+	background-color: 	#678FC2;
+	padding: 		  	2px 0 0 0;
+	margin:  		  	0;
+	margin-top:			5px;
+}
+FORM {
+	margin:  			0;
+	padding: 			0;
+}
+FORM INPUT {
+	font-size: 			8pt;
+}
+A {
+	color: 				#003471;
+	size:  				10pt;
+}
+A:hover {
+	text-decoration: 	none;
+	color: 			 	#0ab2bc;
+	size: 			 	10pt;
+}
+IMG {
+	border:  			0;
+	padding: 			0;
+	display: 			block;
+}
+LABEL {
+	font-weight: 		bold;
+	font-style:  		italic;
+}
+
+/*********************** CLASSES **************************/
+
+/* Container table */
+TABLE .container {
+	background-color: 	#DBDBDB;
+	border-top:    		1px solid #AAA;
+	border-left:   		1px solid #AAA;
+	border-right:  		2px solid #888;
+	border-bottom: 		2px solid #888;
+	border-spacing: 	0;
+	border-collapse: 	collapse;
+}
+TABLE .container TH {
+	padding: 			5px;
+	background-color: 	#F5F5F5;
+	border-bottom: 		1px dashed #555;
+	font-size: 			11pt;
+	color: 				#333;
+	font-style: 		italic;
+}
+TABLE .container TD {
+	text-align: 		left;
+	padding: 			5px;
+}
+TABLE .container HR {
+	margin: 			0;
+	padding;			0;
+	color: 				#DDD;
+}
+
+/* Table with lots of controls and details */
+TABLE .controls {
+	background-color: 	#EEEEFF;
+	border-spacing: 	0;
+	border-collapse: 	collapse;
+	border-top: 		1px solid #999;
+	border-bottom: 		2px solid #999;
+}
+
+TABLE .controls TH {
+	padding: 			5px;
+	border-bottom: 		2px solid #999;
+}
+
+TABLE .controls TD {
+	padding: 			5px;
+	border-bottom: 		1px solid #FFF;
+}
+
+TABLE .controls .label {
+	background-color: 	#AAF;
+	font-weight: 		bold;
+}
+
+TABLE .controls .value {
+	background-color: 	#FDD;
+}
+
+/* For the results page. */
+TABLE .result {
+	background-color: 	#82ca9c;
+	border:				1px solid #999;		
+}
+
+TABLE .result TH {
+	border-bottom:		1px solid #999;
+}
+
+TABLE .result TD {
+	padding: 			10px;
+}
+
+/* Tables of many rows with similar values, AKA Zebra tables */
+TABLE .zebra {
+	border-spacing: 	0;	
+}
+TABLE .zebra TH {
+	font-weight: 		bold;
+	padding: 			6px;
+	background-color: 	#88A;
+}
+TABLE .zebra TD {
+	padding: 			6px;
+}
+
+/* User mistake display settings */
+UL.mistake {
+	margin:  			0;
+	padding: 			0 0 0 20px;
+}
+UL.mistake LI {
+	padding-top: 		6px;
+}
+SPAN.mistake  {
+	font-weight: 		bold;
+	padding: 			2px;
+	color: 				#af151a;
+}
+LABEL.mistake {
+	font-style: 		normal; 		
+	font-weight: 		bold;
+	padding: 			0;
+	color: 				#003471;
+	cursor: 			pointer;
+	border-bottom: 		3px double;
+}
+
+DIV .quickview {
+	border-bottom: 		1px solid #777;
+	border-left: 		1px solid #777;
+	border-right: 		1px solid #777;
+	background-color: 	#EEE;
+	padding:			5px;
+	margin-top:			5px;
+}
+
+
+/* Used to hightlight form elements that have errors. */
+.highliteFormElement {
+	background-color: 	#fff200;
+}
+
+/* Result messages; usually used for Ajax */
+.successResult {
+	background-color: 	#3cb878;
+	padding: 			5px;
+	font-weight: 		bold;
+	color: 				#000;
+}
+.errorResult {
+	background-color: 	#fff200;
+	padding: 			5px;
+	font-weight: 		bold;
+	color: 				#000;
+}
+.unknownResult {
+	background-color: 	#CCC;
+	padding: 			5px;
+	font-weight: 		bold;
+	color: 				#000;
+}
+
+
+/* Hide an element */
+.hidden {
+	display: none;
+}
+
+/*********************** SELECTORS **************************/
+
+#_mainControlsContainer {
+	width: 				970px;
+}
+#_mainControls {
+	padding-top: 		10px;
+	padding-left: 		10px;
+	border-bottom: 1px solid #CCC;
+}
+#_mainContent {
+	padding-left: 		11px;
+	padding-right: 		11px;
+}
+#_mainFooterStrip {
+	height: 			15px;
+	width: 				970px;
+	border-top: 		1px solid #a3bfe0;
+	border-bottom: 		1px solid #a3bfe0;
+	background-color: 	#d5e5fa;
+	line-height: 		15px;
+	vertical-align: 	middle;
+	font-size: 			7pt;
+	color: 				#555;
+}
+#_mainFooterStrip DIV A {
+	font-size: 			7pt;	
+}
+
+#_mainSearchBox {
+	width: 				80px;
+	font-size: 			8pt;
+	font-weight: 		bold;
+	color: 				#777;
+	vertical-align: 	baseline;
+}
+#_mainSearchButton {
+	vertical-align: 	center;
+	height: 			22px;
+}
+#_specialHeader {
+	width: 				940px;
+	font-size: 			9pt;
+	font-weight: 		bold;
+	color: 				#333;
+}
+#_specialHeader A {
+	text-decoration: 	none;
+	color: 			 	#fff;
+	font-size: 		 	8pt;
+}
+#_specialHeader A:hover {
+	text-decoration: 	underline;
+}	
+#_mistakesBox {
+	padding: 			10px;
+	width: 				950px; 
+	background-color: 	#fff200;
+	border-bottom: 		2px solid #f26522;
+}
+

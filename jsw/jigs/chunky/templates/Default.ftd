@@ -1,0 +1,8 @@
+<? import X ?>
+<html>
+<head><title>Hello World</title></head>
+</title>
+<body>
+Hello, World! <br />
+</body>
+</html>

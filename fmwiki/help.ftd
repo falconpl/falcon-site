@@ -1,0 +1,110 @@
+<h1>Falcon Micro Wiki</h1>
+
+<h2>Paragraphs</h2>
+<p>Just separate paragraphs with newlines.
+A newline, a new paragraph. Easy enough</p>
+
+<h2>Text effects</h2>
+<p>Bold is performed surrouding sentences with "*", <pre>*like this*</pre> which
+outputs "<b>like this</b>".</p>
+<p>Emphasis (or <em>italic</em>), is done surrounding a sentence with "_".</p>
+<p>Underline is done surrounding a sentence with "__".</p>
+
+<h2>Lists</h2>
+Starting a line with "#" creates ordered lists, while starting a line with
+a "-" creates unordered lists. Multiple levels can be opened using more
+than one "#" or "-" in a row, up to three. In example:
+
+<pre>
+   # first
+   # second
+   ## second and a bit
+   # third
+
+   - Item a
+   - Item b
+   -- Part of item b
+   -- Part of item b too
+   - Item c
+</pre>
+
+Will be rendered as:
+<ol>
+   <li>first</li>
+   <li>second </li>
+   <ol>
+      <li> second and a bit </li>
+   </ol>
+   <li>third</li>
+</ol>
+
+<ul>
+   <li> Item a</li>
+   <li> Item b</li>
+   <ul>
+   <li> Part of item b</li>
+   <li> Part of item b too</li>
+   </ul>
+   <li> Item c</li>
+</ul>
+
+<h2>Headings</h2>
+Create headings (section) surrouding paragraphs with equal amounts
+of "=". In example:
+<pre>
+=Main heading=
+
+==Makes an h2==
+
+===Makes an h3===
+... and so on
+</pre>
+
+
+<h2>Internal links</h2>
+<p>To link a page in the wiki, just surround a short page name (less than 80 chars)
+in "[]" square brackets. An alternative description may be given separated with a
+"|" pipe. In example:</p>
+<pre>
+   This line will contain a link to an [internal page].
+   This [internal page|too].
+</pre>
+
+<p>The name of the page won't be automatically displayed in the final rendering,
+so you don't have to use significative or display-friendly nouns.</p>
+
+<p>If a page with the given name doesn't exist, the authenticated user will be given
+a chance to create a new page; so to create a page, just make a new link to an internal
+page and then follow it.</p>
+
+<h2>External links</h2>
+<p>To link an external site or a complete URL, use "[[]]" double square brakcets. Again,
+a description of the link may be given adding a "|" pipe, like this:</p>
+<pre>
+A friend site: [[http://www.falconpl.org]].
+Always [[http://www.falconpl.org|a friend site]].
+</pre>
+
+<h2>Escapes</h2>
+<p>All the above special characters and sequences can be rendered to wiki
+by just having them prefixed with a back slash "\". A sequence of two
+backslashes will be rendered as a single back slash. In example:</p>
+<pre>
+To make a link, do \[like this|so\].
+To write a WIN directory, do like this: *C:\\file\\path\\fname.exe*.
+</pre>
+
+<h2>Literals</h2>
+<p>The sequence "^^" starts and ends a "preformatted" block; the pre-formatted
+block is rendered via the "&lt;pre&gt;" HTML tag. Everything inside a pre-block
+is parsed as usual, except for the fact that whitespaces and new-line are not
+ignored.</p>
+
+<p>The "^^^" sequence opens and closes a verbatim block. Verbatim parsing suspend
+any kind of wiki parsing, including the escaping of special HTML characters. In
+other words, this sequence allows also to send direct HTML codes.</p>
+
+<p>In both blocks, the special sequence "\^" will just send a single "^", and
+the double backslash "\\" will be parsed into a single backslash "\".</è>
+
+

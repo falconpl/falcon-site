@@ -1,0 +1,25 @@
+<?
+import X
+
+/**
+ * Result page for when a task has been closed.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.6.3
+ */
+?>
+
+The task has been closed.
+<br />
+<ul>
+<? if X.jig.request('taskId') ?>
+	<li>Return to 
+	<a href="<? >> X.link('details', 'taskId=' + X.jig.request('taskId')) ?>">
+		previous task
+	</a>
+	</li>
+<? end ?>
+</ul>
+

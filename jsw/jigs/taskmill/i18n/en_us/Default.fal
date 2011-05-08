@@ -1,0 +1,17 @@
+/**
+ * English language file for homepage.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.14
+ */
+lang = [
+	'email'					=>	'Email',
+	'forgotPassword'		=>	'Retrieve Password',
+	'loginButton'			=>	'Login',
+	'loginTitle'			=>	'Login',
+	'password'				=>	'Password',
+	'remember'				=>	'Remember me'
+]
+

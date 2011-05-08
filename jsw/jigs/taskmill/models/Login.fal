@@ -1,0 +1,38 @@
+export Login
+
+/**
+ * Handles User login
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.5.21
+ */
+class Login()
+
+	/**
+	 * Constructor.
+	 */
+	init
+		raise Error(0, 'This is a static only class.')
+	end
+
+	/**
+	 * See if the user's credentials are valid.
+	 *
+	 * @public
+	 * @param   string email
+	 @ @param   string password
+	 * @return 	boolean
+	 */
+	function validateCredentials(email, password)
+		query  = 'SELECT id '
+		query += 'FROM User '
+		query += 'WHERE email  = ? '
+		query += 'AND password = ? '
+		stmt = DB.prepare(query)
+
+		return stmt.getOne(email, password)
+	end
+
+end

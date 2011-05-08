@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="description" content="Official web site of the Falcon Programming Language" />
+<meta name="keywords" content="falcon, language, fast, embedding, scripting" />
+<title>The Falcon programming language</title>
+<link rel="stylesheet" type="text/css" href="falcon_site.css" />
+<link rel="stylesheet" type="text/css" href="falcon_snippet.css" />
+<link type="text/css" rel="stylesheet" href="/wikiparser/data/styles/shCore.css" />
+<link type="text/css" rel="stylesheet" href="/wikiparser/data/styles/shThemeFalcon.css" />
+<script src="SpryAssets/SpryCollapsiblePanel.js" type="text/javascript"></script>
+<link href="SpryAssets/SpryCollapsiblePanel.css" rel="stylesheet" type="text/css" />
+<script src="Drag.js"></script>
+<!--[if IE 6]>
+<style type="text/css">
+html { overflow-y: hidden; }
+body { overflow-y: auto; }
+#bg { position:absolute; z-index:-1; }
+#content { position:static; }
+</style>
+<![endif]-->
+</head>
+<body class="falcon">
+<? include( "navigation_tab.ftd" ) ?>
+
+<div id="container">
+
+ <div id="logo_container">
+      <img src="images/logo.png" alt="logo">
+
+      <div class="falconPL" id="falconPL">
+      The Falcon</span>
+      <span class="programming">Programming</span>
+      Language</span>
+      </div>
+
+      <div id="motto">
+      A fast, easy and powerful programming language</div>
+      </div> <!-- end "logo_container" -->
+
+  <div id="header">
+  <img src="images/bkimage2.jpg" alt="bgimage" width="100%" height="150px" >
+  <!-- end #header -->
+  </div>
+
+   <div id="tree_location">Location: <? makeNaviTree( "tree_location_leaf" ) ?></div>
+</div>
+<div id="mainContent">

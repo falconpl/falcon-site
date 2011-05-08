@@ -1,0 +1,16 @@
+<h1>Featured projects</h1>
+<p>Projects in this category are considered central to the development of Falcon,
+and are usually managed and developed by the Committee members.</p>
+
+<ul>
+<?
+   query="
+      select project_id, name, description from projects
+      where project_type='featured' order by name;"
+
+   r = connectDB().query( query )
+   while (adata = r.fetchArray() )
+   ?>
+   <li><a href="?page_id=prjs&prj_id=<?=adata[0]?>"><?=adata[1]?></a>: <?=adata[2]?></li>
+   <? end ?>
+</ul>

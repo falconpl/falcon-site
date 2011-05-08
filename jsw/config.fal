@@ -1,0 +1,91 @@
+/**
+ * Main application configuration file.
+ *
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ */
+
+// Configuration specific settings.
+enum Config
+	debug					= true
+	defaultAction			= 'default'
+	defaultJig				= 'Default'
+	defaultLang				= 'en_us'
+	installPath				= '/home/falcon10/newsite/jsw'
+	seoFriendlyURLs			= false	// Leave false for now.
+
+	// This must begin with a forward slash, unless the framework is located
+	// at the server's web-root directory; then the path is just '' (empty).
+	relativeURL				= '/jigsaw'
+
+	// Database.
+	dbDb   					= 'Jigsaw'
+	dbHost 					= 'localhost'
+
+	dbUser 					= 'falcon10_falsite'
+	dbPass 					= '09684kj'
+
+	// Session
+	sessionLifetime			= 60 	// Minutes
+	sessionGcChance			= 5		// Percent
+end
+
+// Framework Settings
+// These are standard and generally don't need to be changed.
+enum Framework
+	// Default Handlers
+	defaultAction			= 'DefaultAction'
+	defaultController		= 'DefaultController'
+	defaultTemplate			= 'Default'
+	defaultView				= 'DefaultView'
+
+	// Directories
+	dirActions				= 'actions/'
+	dirAssets				= 'assets/'
+	dirControllers			= 'controllers/'
+	dirJigs					= 'jigs/'
+	dirI18N					= 'i18n/'
+	dirModels				= 'models/'
+	dirTemplates			= 'templates/'
+	dirSessions				= 'volatile/sessions/'
+	dirTmp					= 'volatile/tmp/'
+	dirViews				= 'views/'
+
+	// Error handlers
+	error404Action			= 'Error404Action'
+	error404View			= 'Error404View'
+	errorFatalAction		= 'ErrorFatalAction'
+	errorFatalView			= 'ErrorFatalView'
+	errorSecurityAction		= 'ErrorSecurityAction'
+	errorSecurityView		= 'ErrorSecurityView'
+
+	// File extensions
+	extFalcon				= '.fal'
+	extTemplate				= '.ftd'
+	extSession				= '.sess'
+
+	// Last resort safety fallbacks	
+	fallbackJig				= 'default'
+
+	// Special template values access keys
+	keyI18N					= 'lang'
+	keyJig					= 'jig'
+	keyError				= 'FW_ERROR_KEY_'
+	keyMistake				= 'MISTAKES'
+	keySessionID			= 'JigsawSessID_'
+
+	// Propaganda
+	officialLongName 		= 'Jigsaw Web Application Framework'
+	officialName 			= 'Jigsaw'
+	officialURL				= 'http://falconpl.org/index.ftd?page_id=prjs&prj_id=Jigsaw'
+
+	// Framework Info
+	version					= '0.1.0'
+end
+
+// Export the configuration.
+export Config
+export Framework
+

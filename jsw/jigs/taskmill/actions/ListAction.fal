@@ -1,0 +1,24 @@
+/**
+ * Task list action.
+ *
+ * @author 	Vladimir Florentino
+ * @package Actions
+ * @since 	0.1.0
+ * @begin 	2009.4.13
+ *
+ * @param Jig jig - The Jig that owns this action.
+ */
+class ListAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	/**
+	 * Constructor
+	 */
+	init
+		// Set the view this action will use.
+		self.setView('ListView')
+ 	end
+end
+

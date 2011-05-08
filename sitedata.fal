@@ -1,0 +1,108 @@
+//============================================
+// Site data definition
+//
+load sitedata_def
+import SiteData
+
+function makeSiteData()
+   // PageData will automatically add themselves to the site data.
+   PageData( "Home", "Home page", [xinclude, "data/home.ftd"], nil, 1 )
+   PageData( "about", "about", [xinclude, "data/about.ftd"], "Home", 1 )
+   PageData( "authors", "People", [xinclude, "data/authors.ftd"], "about", 1 )
+   PageData( "facts", "Facts file",
+             [xinclude, "data/facts.ftd"], "Home", 1 )
+   PageData( "whatsdifferent", "What's different",
+             [xinclude, "data/whatsdifferent.ftd"], "Home", 1 )
+
+   PageData( "official_download", "Official download",
+             [xinclude, "data/official_download.ftd"], "Home", 2 )
+   PageData( "bleeding_dl", "Bleeding edge",
+             [xinclude, "data/bleeding_dl.ftd"], "Home", 2 )
+   PageData( "svn_dl", "Development resources",
+             [xinclude, "data/svn_dl.ftd"], "Home", 2 )
+   PageData( "older_dl", "Older releases",
+             [xinclude, "data/older_dl.ftd"], "Home", 2 )
+
+   PageData( "licensing", "Licensing",
+             [xinclude, "data/licensing.ftd"], "Home", 1 )
+
+   PageData( "license_1_1", "FPLL license",
+             [xinclude, "data/license_1_1.ftd"], "licensing", 1 )
+
+   PageData( "login", "Login", [xinclude, "data/login.ftd"], "Home", 0 )
+   PageData( "join", "Join now!", [xinclude, "data/join_now.ftd"], "Home", 0 )
+   PageData( "start_prj", "Start a project", [xinclude, "data/start_prj.ftd"], "Home", 0 )
+   PageData( "login", "Login", [xinclude, "data/login.ftd"], "Home", 0 )
+
+   //=========================================================
+   // Documentation
+   /*
+   PageData( "Documents", "About documentation",
+             [xinclude, "data/documents.ftd"], "Home", 3 )
+   */
+   PageData( "manuals", "Manuals",
+             [xinclude, "data/manuals.ftd"], "Home", 3 )
+
+   PageData( "sitewiki", "Falcon wiki",
+             [xinclude, "data/sitewiki.ftd"], "Home", 3,
+             [xinclude, "data/wiki_navi.ftd"] )
+
+   PageData( "onl_docs", "Online Documentation",
+             [xinclude, "data/onl.ftd"], "Documents", 3 )
+
+   //=====================================================
+   // Development
+
+   PageData( "devel_home", "Developers community",
+             [xinclude, "data/develop.ftd"], nil, 4 ) // no parent
+
+   PageData( "devel_about", "About",
+             [xinclude, "data/devel_about.ftd"], "devel_home", 4 ) // no parent
+
+   PageData( "feat_prj", "Featured projects",
+             [xinclude, "data/featured.ftd"], "devel_home", 4 )
+
+   PageData( "prj_list", "Projects",
+             [xinclude, "data/projects.ftd"], "devel_home", 4 )
+
+   PageData( "mod_list", "Modules",
+             [xinclude, "data/modules.ftd"], "devel_home", 4 )
+   PageData( "socil", "Development ideas",
+             [xinclude, "data/idealist.ftd"], nil, 4 ) // no parent
+
+   prj_sections = .[
+         .[ 'main' 'Main' .[xinclude "data/project_home.ftd"] ]
+         .[ 'dloads' 'Downloads' .[xinclude "data/project_dloads.ftd"] ]
+         .[ 'wiki' 'Wiki docs' .[xinclude "data/wikidoc.ftd"]  .[xinclude "data/wiki_navi.ftd"] ]
+         .[ 'bugs' 'Bug Tracker' .[xinclude "data/project_bugs.ftd"] ]
+      ]
+
+   PageData( "prjs", [getProjectName],
+            .[ sections prj_sections ],
+            .[ section_tree prj_sections 'prjs' 'devel_home' ], 4,
+            .[ {=> sid=="wiki" and xinclude( "data/wiki_navi.ftd" )}] )
+
+   //=====================================================
+   // Contacts
+
+   PageData( "contacts", "How to contact", [xinclude, "data/contacts.ftd"], "Home", 5 )
+   PageData( "IRC", "IRC channel", [xinclude, "data/irc.ftd"], "contacts", 5 )
+
+   PageData( "showsource", "Site sources...", [xinclude, "showsource.ftd"], "Home", 6 )
+
+   //=========================================================
+   // Users
+   PageData( "member_home", [getMemberName], [xinclude, "data/member_home.ftd"], "authors", 1 )
+
+   //=========================================================
+   // Admin
+   PageData( "admin", "Admin area", [xinclude, "data/admin.ftd"], "Home", 1 )
+   PageData( "admin_users", "Admin users", [xinclude, "data/users.ftd"], "admin", 1 )
+   PageData( "admin_prjs", "Admin projects", [xinclude, "data/admin_projects.ftd"], "admin", 1 )
+
+   return SiteData
+end
+
+function xinclude( file )
+   return include( file, "utf-8" )
+end

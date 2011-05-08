@@ -1,0 +1,50 @@
+/*
+   FALCON - Falcon Micro Wiki
+
+   FILE: pagedata.fal
+
+   Object reflecting a single page entity in database.
+   -------------------------------------------------------------------
+   Author: Giancarlo Niccolai
+   Begin: Sun, 12 Apr 2009 20:28:25 +0200
+
+   -------------------------------------------------------------------
+   (C) Copyright 2009: the FALCON developers (see list in AUTHORS file)
+
+   See LICENSE file for licensing details.
+*/
+
+class _IdxEntry( name, type, using )
+   name = name
+   type = type
+   using = using
+end
+
+_idx = _IdxEntry( "page_name_idx", "UNIQUE" )
+_idxdt = _IdxEntry( "page_upd_idx" )
+_idxcreator = _IdxEntry( "page_creator_idx" )
+
+T_PageData = Table(
+   [ "field",      "datatype",               "defval",  "index" ],
+   //===============================================================
+   ["page_id",    "BIGINT NOT NULL AUTO_INCREMENT primary key",         nil,   nil ],
+   ["section" ,   "varchar(15) charset utf8",   "",    _idx ],
+   ["page_name",  "varchar(80) charset utf8",   nil,   _idx ],
+   ["content" ,   "TEXT character set utf8",    nil,   nil ],
+   ["comp_cnt" ,  "TEXT character set utf8",    nil,   nil ],
+   ["creator" ,   "varchar(15) charset utf8",   nil,   _idxcreator ],
+   ["editor" ,    "varchar(15) charset utf8",   nil,   nil ],
+   ["created" ,   "datetime",                   "now", nil ],
+   ["last_edited","datetime",                   "now", _idxdt ],
+   ["read_lv" ,   "TINYINT",                    0,     nil ],
+   ["write_lv",   "TINYINT",                    1,     nil ],
+   ["lock_lv" ,   "TINYINT",                    1,     nil ],
+   ["locked" ,    "TINYINT",                    0,     nil ],
+   ["parent" ,    "BIGINT",                     -1,    nil ],
+   ["pnext",      "BIGINT",                     -1,    nil ],
+   ["pprev",      "BIGINT",                     -1,    nil ],
+   ["details",    "TEXT charset utf8",          nil,   nil ]
+   )
+
+
+export T_PageData

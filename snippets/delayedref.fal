@@ -1,0 +1,16 @@
+// Remparams - Changing parameters remotely.
+function test( parameter )
+   > "Parameter is: ", parameter
+end
+
+// a delayed call, taking the reference
+param = "none"
+delayed = [test, $param]
+
+for i in [0:10]
+   // changing the variable...
+   param = "called " + (i+1).toString()
+
+   // and doing the call.
+   delayed()
+end

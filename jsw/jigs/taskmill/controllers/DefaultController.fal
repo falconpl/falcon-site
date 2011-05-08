@@ -1,0 +1,43 @@
+export DefaultController
+
+load core.Controller
+
+/**
+ * Controller for when user is logged in.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.11
+ *
+ * @param Jig jig - The Jig that owns this controller.
+ * @param Action action - The action that summoned this controller.
+ */
+class DefaultController(jig, action) from Controller(jig, action)
+	/**
+	 * Verify this action.
+	 *
+	 * @return boolean
+	 */
+	function verify()
+		return true
+	end
+
+	/**
+	 * Called when verify() returns false.
+	 *
+	 * @return nil
+	 */
+	 function failure()
+	 end
+
+	/**
+	 * Called when verify() returns true.
+	 *
+	 * @return nil
+	 */
+	function success()
+		self.setValue('LOGGED_IN', false)
+	end
+end
+

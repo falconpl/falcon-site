@@ -1,0 +1,17 @@
+// International - Write your program in your language... or in all the languages!
+// International class; name and street
+class 国際( なまえ, Straße )
+   // set class name and street address
+   नाम = なまえ
+   شَارِع   =  Straße
+   // Say who am I!
+   function 言え！()
+     >@"I am $(self.नाम) from ",self.شَارِع
+   end
+end
+// all the people of the world!
+民族 = [ 国際( "高田　Friederich", "台湾" ),
+   国際( "Smith Σωκράτης", "Cantù" ),
+   国際( "Stanisław Lec", "południow" ) ]
+
+for garçon in 民族: garçon.言え！()

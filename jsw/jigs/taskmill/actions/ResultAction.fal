@@ -1,0 +1,52 @@
+/**
+ * A page used to show results of operations.
+ *
+ * When POST actions execute, they can redirect here and pass the result code
+ * via GET params to show the user some result message.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.3
+ *
+ * @param Jig jig - The Jig that owns this action.
+ */
+class ResultAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	/**
+	 * Verify this action.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		return true
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		// Set the view this action will use.
+		self.setView('ResultView')
+	end
+end
+

@@ -1,0 +1,118 @@
+<?
+   load bbexpand
+
+   // get project data
+   query="select name, description, details, svnloc from projects " + 
+         "where project_id=:1"
+
+   con = connectDB()
+   r = con.query( query, project_id )
+   r.next()
+   prj_name = r.asString(0)
+   prj_descr = r.asString(1)
+   prj_details = r.asString(2)
+   prj_svn = r.asString(3)
+
+   // read the clearance level
+   level = checkPrjRights( project_id )
+
+   // get the output stream
+   output=stdOut()
+
+   // we need to have all the admins, contributors and developers of this project
+   r = con.query( "select member, role from project_members where project=:1 order by member", project_id )
+   admins = []
+   developers = []
+   contributors = []
+   hasMembers = r.getRowCount() > 0
+   while (data = r.fetchArray())
+      switch data[1]
+         case 'admin': admins += data[0]
+         case 'developer': developers += data[0]
+         case 'support': contributors += data[0]
+      end
+   end
+
+   function showMembers( members )
+      for member in members
+         >> @ '<a href="?page_id=member_home&amp;member_id=$(member)">$member</a>'
+         formiddle: > "<br/>"
+         forlast: > ""
+      end
+   end
+?>
+<style type="text/css" media="all">@import "styles/falcon_tabs.css";</style>
+<script language="javascript">
+function editOverall()
+{
+   window.open('popup_edit_project.ftd?prj_id=<?=project_id?>',
+      "_blank",
+      "width=700, height=650" );
+}
+
+function loadDocs()
+{
+   window.open('popup_load_docs.ftd?project_id=<?=project_id?>&prj_name=<?=URI.encode(prj_name)?>',
+      "_blank",
+      "width=700, height=500" );
+}
+
+function modifyMembers()
+{
+   window.open('popup_prj_members.ftd?prj_id=<?=project_id?>&prj_name=<?=URI.encode(prj_name)?>',
+      "_blank",
+      "width=700, height=500" );
+}
+
+</script>
+<? if hasMembers or level == "admin" ?>
+<div class="falcon_prj_member_list">
+   <h3>Project members</h3>
+   <? if level == "admin" ?>
+      <p><a href="javascript:modifyMembers()">Modify members</a></p>
+   <? end ?>
+   <? if admins ?>
+      <h4>Admins</h4>
+      <p><? showMembers( admins ) ?></p>
+   <? end ?>
+   <? if developers ?>
+      <h4>Developers</h4>
+      <p><? showMembers( developers ) ?></p>
+   <? end ?>
+   <? if contributors ?>
+      <h4>Contributors</h4>
+      <p><? showMembers( contributors ) ?></p>
+   <? end ?>
+</div>
+<? end ?>
+<h1><?=prj_name?></h1>
+<? if level == "admin" ?>
+<p><a href="javascript:editOverall()">Edit project overall data</a></p>
+<? end ?>
+<p><? htmlEscape( prj_descr, true ) ?></p>
+
+<h2>Project outline</h2>
+
+<? if fileType( "project_docs/"+project_id ) == FileStat.DIR ?>
+<p>Project documentation: <a href="<?='project_docs/'+project_id ?>" target="_blank">online</a>.</p>
+<? end ?>
+<? if level == "admin" ?>
+<p><a href="javascript:loadDocs()">Update documentation files</a></p>
+<? end ?>
+
+<? if prj_svn ?>
+<p>Development trunk at: <? 
+   if not "://" in  prj_svn
+        > "svn://falconpl.org/falcon/", prj_svn
+   else
+	> prj_svn
+   end ?>
+<? end ?>
+
+<? if prj_details ?>
+<h2>Detailed description</h2>
+<p><? bbExpand( prj_details, output ) ?></p>
+<? end ?>
+
+<!-- news -->
+<? include( "load_prjnews.ftd" ) ?>

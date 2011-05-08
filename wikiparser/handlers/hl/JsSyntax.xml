@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rules>
+
+<rule from="default" pattern="\b(abstract|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with)\b" useStyle="falKeywords2" />
+
+<rule from="default" pattern="(\.|>|@|=|:|\+|-|\*|/|\^|\?|\!|%)" useStyle="falOperators" />
+<rule from="default" pattern="(,|;|>|\[|]|\(|\)|\{|\})" useStyle="falPars" />
+
+
+<rule from="default" pattern='^\s*#.*' useStyle="falPars" />
+<rule from="default" pattern='(")' useStyle="falDoubleString" push="falDoubleString" />
+<rule from="falDoubleString" pattern='(?<!\\)(")' useStyle="falDoubleString" pop="default" />
+<rule from="default" pattern="(')" useStyle="falSingleString" push="falSingleString" />
+<rule from="falSingleString" pattern="(?<!'|\\)(')" useStyle="falSingleString" pop="default" />
+<rule from="default" pattern="(/\*)" useStyle="falBigComment" push="falBigComment" />
+<rule from="falBigComment" pattern="(\*/)" useStyle="falBigComment" pop="default" />
+<rule from="default" pattern="(//.*$)" useStyle="falComment" />
+
+</rules>
+

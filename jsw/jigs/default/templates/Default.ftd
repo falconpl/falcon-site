@@ -1,0 +1,16 @@
+<?
+ import X
+?>
+
+This website is powered by
+<b><? >> X.frameworkName ?>,</b>
+Version  <? >> X.frameworkVersion ?>
+
+<br />
+<br />
+
+Get your own copy at 
+<a href="<? >> X.url ?>"><? >> X.url ?></a>
+
+
+

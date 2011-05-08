@@ -1,0 +1,14 @@
+<div class="login_area">
+   <? if loggedIn() ?>
+   Welcome, <?=userID?>.
+   <br/><a href="?prj_id=<?=Request.getField("prj_id","")?>&page_id=<?=Request.getField("origPageId", nil) ? Request.getField("origPageId") : page_id?>&req=logout"?>logout</a>
+   <? else ?>
+   <form action="?prj_id=<?=Request.getField("prj_id","")?>&origPageId=<?=Request.getField("origPageId", nil) ? Request.getField("origPageId") : page_id?>&page_id=login&req=login" method="POST">
+   <table border="0">
+   <tr><td>User ID:</td><td><input name="userID" type="text" size="15" maxsize="15"/></td></tr>
+   <tr><td>Password:</td><td><input name="password" type="password" size="15" maxsize="15"/></td></tr>
+   <tr><td><input type="submit" name="Login" value="Login"></td><td>&nbsp;</td></tr>
+   </table>
+   </form>
+   <? end ?>
+</div>

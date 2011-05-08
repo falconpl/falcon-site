@@ -1,0 +1,286 @@
+/*
+   FALCON - Falcon Micro Wiki
+
+   FILE: fmwiki.fal
+
+   Main interface module.
+   -------------------------------------------------------------------
+   Author: Giancarlo Niccolai
+   Begin: Sun, 12 Apr 2009 20:28:25 +0200
+
+   -------------------------------------------------------------------
+   (C) Copyright 2009: the FALCON developers (see list in AUTHORS file)
+
+   See LICENSE file for licensing details.
+*/
+
+
+load .wikiprovider
+
+const tablename = "fmwiki"
+
+const ec_clearance = 10001
+const ec_notfound = 10002
+const ec_semantic = 10003
+
+import T_PageData from .pagedata
+
+class FMWikiError( code, desc, extra ) from Error( code, desc, extra )
+   init
+      if desc  == nil
+         ed = [
+            ec_clearance => i"Clearance insufficient to complete this operation",
+            ec_notfound => i"Required data not found",
+            ec_semantic => i"Semantic error" ]
+         if code in ed: self.description = ed[code]
+      end
+   end
+end
+
+/*#
+   @message fmwiki_auth Authorization request.
+
+   This message is sent by update request, with a single
+   parameter being a user id by reference. The system must
+   reply by returning an integer value (the clearance level).
+*/
+
+/*#
+   @brief Interfaces the FVM wiki.
+   @param dbi_data An open connection with the database.
+   @param link The backlink to this site, where the "$link" variable is expanded in the page name.
+   @param clearance Clearance level of the current user (0 minimum)
+   @param section_id Subsite for this wiki page (defaults to "")
+   @optparam provider Wiki provider module name.
+
+   The @b dbi_data parameter must be an open database handle,
+   ready to receive DBI requests.
+*/
+class FMWiki( dbi_data, clearance, link, section_id, provider )
+
+   dbi_data = dbi_data
+   link = link
+   clearance = clearance
+   section_id = section_id == nil ? "" : section_id
+   provider = nil
+   
+   init
+
+      // Should we get the provider from configuration?
+      if provider == nil
+         config = vmRelativePath( "fmwiki.driver" )
+
+         if fileType( config )
+            try
+               s = InputStream( config )
+               provider = s.grabLine()
+            catch IoError
+               provider = "generic"
+            end
+            
+            s.close()
+         else
+            provider = "generic"
+         end
+      end
+
+      self.provider = WikiProvider( provider )
+   end
+   
+   /*#
+      @brief Returns the full record of the given page.
+      @param page_name The id of the page to be retreived.
+      @return The page text on success, nil on failure.
+   */
+   function getPage( page_name )
+      if page_name.typeId() == NumericType
+         pname = "page_id=:2"
+      else
+         pname = "page_name=:2"
+      end
+
+      sql =  "select * from " + tablename + " where section=:1 and "+ pname
+      > sql
+      r = self.dbi_data.query( sql, self.section_id, page_name )
+      if (res = r.fetchDict()) == nil
+         raise FMWikiError( ec_notfound, nil, "page_name=" + page_name )
+      end
+
+      if res["read_lv"] > self.clearance
+         raise FMWikiError( ec_clearance, nil, "page_name=" + page_name )
+      end
+      
+      return bless(res)
+   end
+
+   /*#
+      @brief Returns the contents of the given page.
+      @param page_name The id of the page to be retreived.
+      @return The page text on success, nil on failure.
+   */
+   function getPageText( page_name )
+      return self._inner_getPageText( page_name, "comp_cnt" )
+   end
+
+   function getPageRaw( page_name )
+      return self._inner_getPageText( page_name, "content" )
+   end
+
+   
+   function _inner_getPageText( page_name, inner )
+      if page_name.typeId() == NumericType
+         pname = "page_id=:2"
+      else
+         pname = "page_name=:2"
+      end
+      
+      sql =  "select "+inner+", read_lv from " + tablename + " where section=:1 and " + pname
+      r = self.dbi_data.query( sql, self.section_id, page_name )
+      if not r.next()
+         raise FMWikiError( ec_notfound, nil, "page_name=" + page_name )
+      end
+
+      if r.asInteger(1) > self.clearance
+         raise FMWikiError( ec_clearance, nil, "page_name=" + page_name )
+      end
+
+      return r.asString(0)
+   end
+
+   /*#
+      @brief Updates (or creates) a page with new contents.
+      @param pageEntry The page entry to be sent to the db.
+      @return true on success, false if the page cannot be created.
+
+      The function broadcasts a "fmwiki_auth" message (see semantic) to
+      see if it can insert/update the page.
+
+      if the pageEntry.comp_cnt value is not valorized, compiles automatically
+      the wiki content.
+
+      On success sends an "fmwiki_pupd" message.
+   */
+   function updatePage( pageEntry )
+      // first, check if the page exists; in that case we must have clearance to write it.
+      sql =  "select page_id, write_lv from " + tablename + " where section=:1 and page_name=:2"
+      r = self.dbi_data.query( sql, self.section_id, pageEntry["page_name"] )
+      found = r.next()
+
+      if found and r.asInteger(1) > self.clearance
+         raise FMWikiError( ec_clearance, nil, "page_name=" + pageEntry["page_name"] )
+      end
+
+      // must we translate the page?
+      if "content" in pageEntry and "comp_cnt" notin pageEntry
+         // parse the wiki syntax
+         self.provider.processPage( self.link, pageEntry )
+      end
+
+      // if we found it it's an update
+      if found
+         pageEntry[oob("page_id")] = r.asInteger(0)
+         if "creator" in pageEntry and "editor" notin pageEntry
+            pageEntry["editor"] = pageEntry["creator"]
+            pageEntry.remove("creator")
+         end
+         self.dbi_data.update( tablename, pageEntry )
+         return pageEntry["page_id"]
+      else
+         // new page.
+         // sets the defaults
+         for row in pagedata.T_PageData
+            // skip the primary key
+            if "key" in row.datatype: continue
+            // set default values
+            if row.defval != nil and row.field notin pageEntry
+               pageEntry[row.field] = row.defval
+            end
+         end
+         self.dbi_data.insert( tablename, pageEntry )
+         return self.dbi_data.getLastInsertedId()
+      end
+   end
+
+   function preview( pageEntry )
+      self.provider.processPage( self.link, pageEntry )
+   end
+
+   /*#
+      @brief Removes a page.
+      @param page_name The page to be removed.
+      @return true on success, false if the page cannot be created.
+   */
+   function removePage( page_name )
+      if typeOf( page_name ) == StringType
+         sql =  "delete from " + tablename + " where section=:1 and page_name=:2"
+         self.dbi_data.query( sql, self.section_id, page_name )
+      else
+         sql =  "delete from " + tablename + " where page_id=:1"
+         self.dbi_data.query( sql, page_name )
+      end
+   end
+
+
+   /*#
+      @brief Determines if a page exists or not.
+      @param page_name The id of the page to be retreives.
+      @return true on success, false if the page cannot be created.
+   */
+   function hasPage( page_name )
+      sql =  "select page_id from " + tablename + " where section=:1 and page_name=:2"
+      return self.dbi_data.queryOne( sql, self.section_id, page_name )
+   end
+
+   function makeEntity()
+      dict = [=>]
+      for row in pagedata.T_PageData
+         dict[row[0]] = nil
+      end
+      return bless( dict )
+   end
+
+   /*#
+      @brief Creates the wiki database.
+      @param page_name The id of the page to be retreives.
+      @return true on success, false if the page cannot be created.
+   */
+   function create()
+      sql = ""
+      indices = [=>]
+      for row in pagedata.T_PageData
+         forfirst: sql += "create table "+ tablename + " (\n"
+         // add the row
+         sql += row.field + " " + row.datatype
+         // add the index
+         if row.index
+            if row.index in indices
+               indices[row.index] += [row]
+            else
+               indices[row.index] = [row]
+            end
+         end
+         formiddle: sql += ",\n"
+         forlast: sql+=");"
+      end
+
+      > sql
+      >
+      self.dbi_data.query( sql )
+      // add the indices
+      for idx, rows in indices
+         sql = "create " 
+         if idx.type: sql += idx.type + " "
+         sql += "index "+ idx.name + " on " + tablename + " ( "
+         for row in rows
+            sql += row.field
+            formiddle: sql += ",\n"
+            forlast: sql += ");"
+         end
+         > sql
+         >
+         self.dbi_data.query( sql )
+      end
+   end
+end
+
+export

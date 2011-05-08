@@ -1,0 +1,88 @@
+<? // common prologue
+   load site_functions
+   checkLogin()
+
+   // gather query data
+   rel_id = int(Request.getField( "rel_id" ))
+   rel_name = Request.getField( "rel_name" )
+   project_id = Request.getField( "prj_id" )
+
+   // are we allowed to change things?
+   clearance = checkPrjRights( project_id )
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Edit release <?=rel_name?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon" style="padding:10px;">
+<!-- are we authorized to perform edit? -->
+<? if clearance == "admin" or clearance == "developer" ?>
+<!--  ok, we can do things. Are we requested to update? -->
+
+   <? if Request.getField( "req", "" ) == "update_rel" ?>
+   <?
+      con = connectDB()
+      // perform the real update
+      // first, clear the release
+      con.query( "update project_dloads set rel_id=null where rel_id=:1", rel_id )
+
+      // then set the rel_id to the required downloads
+      query = "update project_dloads set rel_id=:2 where dload_id=:1 "
+      for dlid in Request.posts['assign']
+         con.query( query, dlid, rel_id )
+      end
+      // if we had no error, we can tell the user we're done.
+   ?>
+   <h2>Release "<?=rel_name?>" updated</h2>
+   <p>You can return to the main site.</p>
+   <hr/>
+   <p><a href="javascript:window.close()">Close this window</a></p>
+   <? else ?>
+   <?
+      con = connectDB()
+      // load related and unrelated releases
+      query = "select dload_id, sysres, description from project_dloads where rel_id=:1"
+      r = con.query( query, rel_id )
+      related = []
+      while ( data = r.fetchDict() )
+         related += data
+      end
+
+      query = "select dload_id, sysres, description from project_dloads where project_id=:1 and rel_id is null and relevant=0"
+      r = con.query( query, project_id )
+      unrelated = []
+      while ( data = r.fetchDict() )
+         unrelated += data
+      end
+   ?>
+      <h2>Updating Contents of Release <?=htmlEscape(rel_name) ?></h2>
+      <form method="POST" action="?req=update_rel&amp;rel_id=<?=rel_id?>&amp;prj_id=<?=project_id?>&amp;rel_name=<?=URI.escape(rel_name)?>">
+      <div>
+      <p>Downloads in this release:</p>
+      <ul>
+      <? for r in related ?>
+         <li><input type="checkbox" name="assign[]" value="<?=r['dload_id']?>" checked="checked"/>
+            &nbsp;<b><?=r['sysres']?></b>&nbsp;-&nbsp;<?=r['description']?></li>
+      <? end ?>
+      </ul>
+      <p>Available downloads:</p>
+      <ul>
+      <? for r in unrelated ?>
+         <li><input type="checkbox" name="assign[]" value="<?=r['dload_id']?>"/>
+            &nbsp;<b><?=r['sysres']?></b>&nbsp;-&nbsp;<?=r['description']?></li>
+      <? end ?>
+      </ul>
+      </div>
+      <input type="submit" name="submit" value="Update">&nbsp;<input type="button" value="Abort" onclick="javascript:window.close();">
+      </form>
+   <? end ?>
+<? else ?>
+   <H2>Sorry!</H2>
+   <p>You're not authorized to edit this release.</p>
+<? end ?>
+</body>
+</html>

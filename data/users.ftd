@@ -1,0 +1,101 @@
+<h1>Member management</h1>
+<?
+   checkLogin();
+   if userLevel != "inner"
+      > "<p>Sorry, only inner committee members are allowed to edit this area.</p>"
+      return
+   end
+
+   con = connectDB()
+
+   // fulfill request
+   switch Request.getField( "req", "" )
+      case "add": addMember()
+      case "del": delMember( Request.getField( "member_id") )
+   end
+
+   // reload the db
+   r = con.query( "select * from members order by member_id" )
+
+   function addMember()
+      query = "insert into members " + 
+         "(  member_id, password, name, surname, email, status, membership ) " + 
+         "values( :1, :2, :3, :4, :5, :6, :7 )"
+
+      con.query( query,
+         Request.getField( "member_id"),
+         Request.getField( "f_password"),
+         Request.getField( "name"),
+         Request.getField( "surname"),
+         Request.getField( "email"),
+         Request.getField( "status"),
+         Request.getField( "membership")
+      )
+   end
+
+   function delMember( member_id )
+      con.query( "delete from members where member_id=:1", member_id )
+   end
+?>
+<script language="javascript">
+function editMember( id ) {
+   window.open("popup_edit_user.ftd?member_id=" + id,
+      '_blank','scrollbars=yes,resizable=yes,width=700,height=500');
+}
+
+function delMember( id ) {
+   if (confirm( "Do you want to remove member \"" +id + "\"?" ))
+   {
+      window.location="?page_id=<?=page_id?>&req=del&member_id=" + id;
+   }
+}
+</script>
+
+<form action="?page_id=<?=page_id?>" method="POST">
+<input type="hidden" name="req" value="add"/>
+<table width="100%" style="font-size:9pt">
+<tr><th>Member_id</th><th>Password</th><th>Name</th><th>Surname</th><th>E-mail</th><th>Status</th><th>level</th><th>&nbsp;</th></tr>
+<tr>
+   <td><input type="text" size="15" maxsize="15" name="member_id"></td>
+   <td><input type="text" size="15" maxsize="15" name="f_password"></td>
+   <td><input type="text" size="15" maxsize="40" name="name"></td>
+   <td><input type="text" size="15" maxsize="40" name="surname"></td>
+   <td><input type="text" size="20" maxsize="60" name="email"></td>
+   <td><? makeSelStatus() ?></td>
+   <td><? makeSelLevel() ?></td>
+   <td><input type="submit" value="Add"></td>
+</tr>
+<? while( data = r.fetchDict() ) ?>
+<tr>
+   <td><a href="?page_id=member_home&amp;member_id=<?=URI.encode( data['member_id'] )?>"><?=htmlEscape(data['member_id'])?></a></td>
+   <td><?=htmlEscape(data['password'])?></td>
+   <td><?=htmlEscape(data['name'])?></td>
+   <td><?=data['surname']?></td>
+   <td><?=htmlEscape(data['email'])?></td>
+   <td><?=htmlEscape(data['status'])?></td>
+   <td><?=htmlEscape(data['membership'])?></td>
+   <td style="font-size:8pt">
+      [<a href="javascript:editMember('<?=data['member_id']?>');">Edit</a>]
+      [<a href="javascript:delMember('<?=data['member_id']?>');">Del</a>]
+   </td>
+</tr>
+<? end ?>
+</table>
+</form>
+
+<? function makeSelStatus( mode ) ?>
+<select name="status">
+<option value="disabled" <? if mode == nil or mode == "disabled": >> 'selected="selected"' ?>>Disabled</option>
+<option value="enabled" <? if mode == "enabled": >> 'selected="selected"' ?>>Enabled</option>
+</select>
+<? end ?>
+
+<? function makeSelLevel( mode )
+   levels = ['inner', 'outer', 'developer', 'contributor', 'flanker', 'none']
+?>
+<select name="membership">
+<? for l in levels ?>
+   <option value="<?=l?>" <? if mode == l: >> 'selected="selected"' ?>><?=l?></option>
+<? end ?>
+</select>
+<? end ?>

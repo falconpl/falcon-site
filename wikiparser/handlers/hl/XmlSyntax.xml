@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rules>
+
+<rule from="default" pattern='(")' useStyle="falDoubleString" push="falDoubleString" />
+<rule from="falDoubleString" pattern='(?<!\\)(")' useStyle="falDoubleString" pop="default" />
+<rule from="default" pattern="(')" useStyle="falSingleString" push="falSingleString" />
+<rule from="falSingleString" pattern="(?<!'|\\)(')" useStyle="falSingleString" pop="default" />
+<rule from="default" pattern="(<!--)" useStyle="falBigComment" push="falBigComment" />
+<rule from="falBigComment" pattern="(-->)" useStyle="falBigComment" pop="default" />
+
+<rule from="default" pattern="([a-zA-Z0-9|:]+\s*[=])" useStyle="falShebang" />
+
+<rule from="default" pattern="(<[/]?)([a-zA-Z0-9|:]+)" fromGroups="fal-falTypes" />
+
+<rule from="default" pattern="(<!\[CDATA\[)" useStyle="falKeywords2" push="falKeywords2" />
+<rule from="falKeywords2" pattern="(\]\]>)" useStyle="falKeywords2" pop="default" />
+
+</rules>
+

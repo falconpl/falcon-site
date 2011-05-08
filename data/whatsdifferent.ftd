@@ -1,0 +1,395 @@
+<h1>What's different about Falcon?</h1>
+
+<o>With version 0.8, the development of Falcon has reached a good
+degree of maturity and stability in its overall shape. We now welcome
+developers bringing new ideas and extending the libraries.</p>
+
+<p>Falcon has an unique blend of strong OOP, functional programming,
+message oriented programming and freestyle procedural programming,
+presenting also some novel concepts in each one of these fields. The
+developers can chose the mix of elements they prefer, picking various
+constructs from each paradigm or sticking rigidly with anyone them.</p>
+
+<H2>The language</H2>
+
+<H3>Types</H3>
+<p><B>Numbers</B>: Integers 64 bits, floating point numbers (64 bits),
+bitwise math. We're planning arbitrary precision support.</p>
+
+
+<p><B>Strings</B>: Internationalized strings, natively transforming into
+the best buffer type to represent ASCII, Unicode and Unicode extended
+characters. Strings can also be accessed character-wise or byte-wise for
+binary operations.</p>
+
+<p><B>Dictionaries</B>: Dictionary interface with pluggable dictionary providers.
+Currently, linear key-value pairs ordered vector and memory based BTree dictionaries
+are implemented.</p>
+
+<p><B>Vectors</B>: Flat growable linear vector. Vector providers are planned.</p>
+
+<p><B>Classes</B>: Multiple inheritance, class-wide methods (similar to C++ static
+members), subclass accessors, protected members. Two levels of reflectivity
+are provided to allow smoother integration with embedding applications: class-wide
+reflectivity allows to configure each single property live, and property-wide
+reflectivity allows automatic and fast import-export of binary data from and to
+the script.</p>
+
+<p><B>Singleton objects</B>: Auto-initialization at module load, flexible
+name encapsulation.</p>
+
+<p><B>Memory buffers</B>: Fast binary data buffers for direct memory manipulation
+and fast trasmission of binary data to embedding applications and extension modules.</p>
+
+<p><B>Attributes</B>: Automatic categorizators of objects, they allow building
+dynamic sets of "similar" objects.  They can test for boolean properties that can be
+given to any instance of any class. Attribuetes are also the base for message
+programming in Falcon, as messages can be broadcast to the set of items having
+a certain attribute.</p>
+
+<p>And many more...</p>
+
+<H3>Overall structure</H3>
+
+<p>Falcon programs are organized in modules; each module
+has a global symbol table, which can be exported to the application
+global namespace partially or completely, and local symbol tables that
+are available for functions and methods. Variable scoping is loose:
+only global or local scopes are normally allowed. Inner functions allow inner
+scoping, while closures (nested functions and lambda expressions) inherit
+the parent's scope.</p>
+
+<P>Multiline Falcon statement automatically opens a block which is always
+closed with the word “end”. The need for extra words such as
+“begin” or extra symbols such as “{“ are removed, and the block
+is unambiguously open and active until the “end” word is
+encountered. At times it is useful to perform just one statement in
+those blocks, the “:” symbol allows to declare a one-line-only
+block which can be put right after the statement, like this:</P>
+
+<PRE>
+   if variable == value
+      ...
+      ... some statements here ...
+   end
+
+   if variable == value: only_one_thing_to_do_here
+</PRE>
+
+<P>Variable declaration is provided, but at the moment optional.</P>
+
+<P>Falcon supports item referencing (or aliasing). Pass-by-reference is
+supported via this mechanism.</P>
+
+<P>Function call supports variable parameter passing (similarly to PERL).
+The number and value of parameters that have been actually provided can
+be accessed with standard functions.</P>
+
+<P>One last element worthy of mention about the overall language
+structure is that symbol names can be expressed using any valid textual
+Unicode character; or in other words, they can be expressed in any
+language. For instance, variable names may be written in Arabic,
+function names in Chinese and class names in French.</P>
+
+
+<H3>Basic Constructs</H3>
+
+<P>Falcon basic constructs includes the most common ones: if-elif-else,
+while, and for/in loops. The for/in has both the features
+of the foreach PHP loop and the for/in Python loop, allowing for
+traversal of arrays, strings, ranges of integer values, matrices
+(arrays of fixed length arrays) and dictionaries. Other than that, it
+provides forfirst, forlast and forall blocks for easier special
+processing of first and last elements. Loops (including for/in) provide
+continue and break statements, and the for/in loop provides also
+continue, dropping (to remove the item currently considered from the
+collection being traversed) and dot assignment (to change the value of
+the current element).
+
+<P>Falcon has quite a powerful switch statement, which supersedes the
+switch/case statements offered by the mainstream languages (when they
+have one) and allows matching any Falcon variable.
+
+<P>In addition to that, Falcon provides a select statement that performs a
+switch on the variable type (e.g. Integer, String, class name etc).
+
+<P>Falcon supports error handling with try/catch blocks. Falcon script
+can raise any kind of item. As there isn't the need to create a full
+error frame and error representation object when a raise is issued, this makes room for
+exception based program flow control.
+
+<P>Falcon provides optional string expansion through the “string
+expansion operator”. For example:
+<PRE>
+   var = 100
+   > @ "value: $var"
+</PRE>
+
+<P>Another very useful feature that Falcon provides in this field is the
+indirect operator. When applied to a string (or a variable containing a
+string), it resolves into the variable whose name, complete of array
+indexes and/or object property access, is represented in the string. For
+example:
+<PRE>
+   var = [100,200,300]
+   name = "var[2]"
+   > #name   // prints 300
+</PRE>
+
+<H2>Functional programming support</H2>
+
+<P>In Falcon, it is possible to cache function calls, object method calls
+and even complete call structures for immediate or deferred execution.
+This makes room for a novel functional programming approach that
+revisits the traditional model adding the ability to merge OOP and
+imperative programming at will, inserting it above, below or between
+functional layers. Falcon "executable arrays" are very like Lisp lists,
+but they can be dynamically inspected or changed. The following code
+snippets are equivalent:
+<PRE>
+   func( a, b, c )
+   [func, a, b, c] ()
+   [func, a, b](c)
+   call = [func, a, b];  call(c)
+</PRE>
+Merging of OOP (i.e. method calls) and imperative programming (i.e.
+variable reference) allows spectacular effects as the following:
+
+<PRE>
+   function alpha(...)
+      ...
+   end
+
+   object beta
+      function gamma(...)
+         ...
+      end
+   end
+
+   // aliasing a function
+   var = alpha
+   call = [ $var, 1, 2, 3...]
+
+   iff( some_check(), call )  // if true -> calls alpha!
+   var = beta.gamma
+   iff( some_check(), call )  // if true -> calls beta.gamma!
+
+</PRE>
+
+<P>Similarly, it is possible to blend functional constructs with oop in
+the opposite direction:
+<PRE>
+   object beta
+      filter = nil
+   end
+
+   if shallFilterEven()
+      beta.filter = [filter, lambda x => x % 2 == 0]
+   else
+      beta.filter = [filter, lambda x => x % 2 == 1]
+   end
+</PRE>
+<P>In the above example, depending on the program condition, beta.filter()
+will receive a functional code removing either pair or impair elements
+from the array that may be fed as parameter.
+
+<H2>Object model</H2>
+
+<P>Falcon provides a full fledged object model that includes multiple
+inheritance. </P>
+
+<P>The Falcon class statement includes the initialization parameters
+directly in the class declaration; inheritance declaration includes
+subclasses initialization parameters, allowing for immediate and visual
+control of the way a class is initialized:</P>
+<PRE>
+class Derived( a, b ) from base1( 10, a ), base2( b, 20 )
+  ...
+  ...
+end
+</PRE>
+<P>Initialization parameters can be assigned (also through expressions) to
+class properties, obviating for the need of a constructor. It is
+possible to provide an initialization block which will assume control
+after all the automatic initializations are performed, and that will
+receive the class parameters as local variables.</P>
+
+
+<P>Despite the strong inheritance model, Falcon's object model is mainly
+based on the “interface” an object exposes to the callers. Dynamic
+checks for properties and methods being provided by objects allows
+responses to “object contracts”, that although not being formalized
+at language level, can be proficiently used by the script writers.</P>
+
+<P>Falcon presents a concept of “singleton objects” that
+are considered module-wide (or program-wide, if exported) resources.
+</P>
+
+<P>Other features of the object model are the presence of the
+attributes, which are boolean values that can be applied transversally
+to any object, independently from its class, and the “sender”
+register.</P>
+
+<P>Attributes given to live instances dynamically define a so called
+“attributed set”, which is the set of all the instances having a
+certain attribute. In this way, giving an attribute to an object has
+the meaning of categorizing it in sets that can be inspected and
+dynamically changed.</P>
+
+<H3>Falcon Basic Object Model and operator overloading</H3>
+
+<P>Falcon presents a generalized object oriented access to every item, be
+it an object (that is, an instance of a class) or a simpler item as
+strings, arrays or numbers. This layer is called FBOM (Falcon Basic
+Object Model). For example:
+<PRE>
+array = [ 1, 2, 3 ]
+myLen = array.len
+> myLen()                 // it's 3
+array += 'a'
+> myLen()                 // will be 4
+</PRE>
+
+Secondly, the presence of generic methods that may be applied to every
+class which makes room for customization of standard behaviors of VM
+operations. A Ruby-like regular expression check as
+switch branch may be performed as follows:
+
+<PRE>
+load Regex
+
+object myRe from Regex( 'ab\s*c' )
+   function compare( data )
+      if data.type() = StringType and self.match( data )
+          return 0 // equal
+      end
+      return nil      // asks the VM to use standard ordering criterion
+   end
+end
+
+switch something
+  ...
+  case myRe, ...      // will use myRe.compare()
+    ...
+  end
+end
+</PRE>
+
+<H2>Message oriented programming</H2>
+<P>Attribute signaling and event marshaling can be used to compose a novel
+message oriented system. Messages can be dynamically created and
+received by objects subscribed to the messaging system. Message
+signaling can be organized in priority lists, where every level can
+consume the signal or pass it to the next level. The signaled event can
+be automatically turned into a method call on the target object, or
+eventually inspected and modified by the receiving methods.
+
+<H2>Script templating</H2>
+
+<p>Falcon has a templating feature that allows seamless integration
+of dynamic server pages (or configurable layout documents) by normal
+falcon scipts and native (C/C++) modules.</p>
+
+<H2>Built-in internationalization</H2>
+
+<p>Falcon has a built-in support for application internationalization.
+Strings marked with a leading "i" are exported to a table where they
+can be extracted by the standard tools and stored in a template
+XML file. The strings are then translated into a target language by
+translators, and the resulting complete XML file is compiled into
+a machine-readable table. The engine, called directly from the system
+tools or from an embedding application, is then able to load
+the string table for a specified language and to apply it on the
+loaded module before runtime. This results in 0 cost at runtime
+for internationalized strings.</p>
+
+<p>Other than requiring no overhead i.e. dictionary lookups,
+the built-in internationalization mechanism obviates the need for
+external libraries, which may not always be readily available,
+or which may require a licensing scheme that is incompatible with
+some embedding applications.</p>
+
+<p>The internationalization system transparently supports also
+binary modules, and the language extension API provides simple means
+to take advantage of this feature in third-party modules.</p>
+
+<H2>Code dynamicity</H2>
+
+<P>Code dynamicity is achieved through four constructs:
+<ul>
+<li>Pass and pass/in statements
+<li>Indirect function calls
+<li>Indirect access operator
+<li>Reflexive compiler.
+</lu></P>
+
+<P>The pass statement redirects the active function call to
+the specified variable, which may contain any executable object
+(including methods).</P>
+
+<P>Indirect function and method calls are provided by the RTL library
+functions call() and methodCall(). </P>
+
+<P>Indirect operator allows to retreive a symbol by name.</P>
+
+<P>The reflexive compiler allows you to dynamically create new
+modules on the fly, or to compile and/or link existing ones (be it
+Falcon source code, pre-compiled bytecode modules or binary .so/.dlls)
+directly in the VM that is executing the script.</P>
+
+<P>Also, functional constructs allows storing complete closures
+with functions, their local variables and also pre-defined
+parameters for delayed calls.</P>
+
+<H3>Serialization</H3>
+<P>Falcon supports automated item serialization through simple RTL
+functions. Serialization can be performed on any Falcon stream, which
+include memory string streams, network streams and file streams. In
+other words, it is possible to serialize whole class instance
+hierarcies, compress them, send them through networks and transform
+them back into live Falcon items at peer application. This provides the framework
+for novel, extremely efficient and effective RPC services.
+
+<H2>The application model</H2>
+
+<P>From the Falcon compiler stand point, a module is a perfectly closed
+world. Both the language constructs and the compiler are never require
+to query any existing module; resolution of missing entities and
+imported objects is completely performed by the Virtual Machine and
+some of its helper classes.</P>
+
+<P>From a module standpoint, the nature of a sibling or parent module is
+unknown. Falcon scripts, precompiled modules and binary .dll/.so
+files are treated the same way. Every module is actually “blind”,
+and interacts with other modules either through symbols that are
+imported at link time (and thus, made as if they were local to the
+module), or through the ones that it defines and exports.</P>
+
+<H2>The embedding model</H2>
+
+<P>One of the main goals of Falcon is that of providing applications
+with a powerful, flexible, compact and fast scripting engine.
+The Falcon VM is designed to be kind with application and interoperate
+with them as gracefully as possible. This is achieved through the
+following points:<P>
+
+<UL>
+<LI>Cooperative memory management.</LI>
+<LI>Customization of error callbacks.</LI>
+<LI>Customization of VM streams.</LI>
+<LI>Customization of VM waits.</LI>
+<LI>Customization of VM loops.</LI>
+<LI>Module sharing.</LI>
+<LI>VM isolation.</LI>
+</UL>
+
+<P>Furthermore, the vast majority of engine classes can be derived to
+provide custom behavior.</p>
+
+<P>Falcon objects can also be provided with application data via a
+“reflection” system that will automatically translate property
+assignments and reads into C++ method calls.</p>
+
+<P>Although mainly aimed to work with C++, the Falcon engine can be
+embedded in pure C applications by providing an interaction layer.</P>
+

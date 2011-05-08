@@ -1,0 +1,61 @@
+<?
+load postMail
+
+if Request.getField( "req", "" ) == "send"
+   subject = "[Falcon-JOIN]"
+   sender = Request.posts[ "from" ]
+   content = \
+     "Name: " + Request.posts["name"] + "\r\n" +
+     "E-mail: " + Request.posts["from"] + "\r\n" +
+     "Site: " + Request.posts["site"] + "\r\n" +
+     "Interests: " + Request.posts["interests"] + "\r\n\r\n" +
+     Request.posts[ "content" ]
+
+   // perform the real update
+   query = "select email from members where membership='inner'"
+   r = connectDB().query( query )
+   try
+      while r.next()
+         email = r.asString(0)
+         postMail( sender, email, subject, content )
+      end
+      > "
+	<h2>Join Request - Receipt.</h2>
+	<p>Thanks for having contacted The Falcon Programming Language. We'll process your join
+	request as soon as possible and be back to you.</p>
+	<p>Please review your data and verify that it's correct:</p>"
+
+	> '<pre>', content.replace("<", "&lt;" ).replace('>',"&gt;")
+	> '</pre>'
+   catch StringType in raised
+      ?>
+      <h2>Sorry, mail send failed.</h2>
+      <p>The mail subsystem returned the following error:</p>
+      <pre>
+         <?=raised?>
+      </pre>
+   <? end ?>
+
+<? else ?>
+   <h2>Join Falcon</h2>
+   <p>At the moment, we're manually screening all the join requests manually;
+   please, write your name, e-mail, area of interest and reason why you want to join
+   the project.</p>
+   <p>If you have a web presence, a blog or a site, please be sure to add also your
+    home page.</p> 
+   <form action="/?page_id=join" method="POST">
+   <input type="hidden" name="req" value="send"/>
+   <table border="0">
+   <tr><td><b>Name:</b></td><td><input type="text" name="name" size="45" maxsize="99"/></td></tr>
+   <tr><td><b>E-mail:</b></td><td><input type="text" name="from" size="45" maxsize="99"/></td></tr>
+   <tr><td><b>Web-site:</b></td><td><input type="text" name="site" size="45" maxsize="128"/></td></tr>
+   <tr><td><b>Interests:</b></td><td><input type="text" name="interests" size="45" maxsize="128"/></td></tr>
+   <tr><td colspan="2"><b>Message:</b></td></tr>
+   <tr><td colspan="2">
+   <textarea name="content" rows="10" cols="70"></textarea>
+   </td></tr>
+   <tr><td colspan="2"><input type="submit" name="sub" value="Send"/>
+   </td></tr>
+   </table>
+   </form>
+<? end ?>

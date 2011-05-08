@@ -1,0 +1,25 @@
+/**
+ * English language file for common captions.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.22
+ */
+lang = [
+	'assignment'	=>	'assignment',
+	'assigned'		=>	'assigned',
+	'description'	=>	'description',
+	'filterName'	=>  'filter name',
+	'id'			=>  'ID',
+	'category'		=>  'category',
+	'primarySort'	=> 	'primary sort',
+	'priority'		=>  'priority',
+	'release'		=> 	'release',
+	'secondarySort'	=>	'secondary sort',
+	'sortDir'		=>	'sort direction',
+	'status'		=> 	'status',
+	'summary'		=> 	'summary',
+	'taskId'		=>  'task id'
+]
+

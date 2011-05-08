@@ -1,0 +1,540 @@
+//==================================
+// The Falcon site - functions
+//
+
+load compiler
+load dbi
+
+const default_header = "header.ftd"
+const default_footer = "footer.ftd"
+
+stdpath = ".;/usr/lib/falcon"
+
+enum SiteConfig
+   ftpdir = "/home/ftp-root"
+   docdir = "/home/falcon10/newsite/project_docs"
+   prjdir = "/home/falcon10/newsite/project_dl"
+end
+
+_short_ids = [
+   "bf"=>"page_id=sitewiki&prj_id=_falcon_site&sid=wiki&pwid=Home&wid=Building+Falcon"
+]
+_SiteData = nil
+
+//============================================
+// Global shared (and exported) data.
+//
+
+// Current (exported) page ID.
+page_id = ""
+
+// An instance of the compiler. Available to submodules and
+// stored here to have it created only once.
+compiler = nil
+
+// data for the currently displayed page
+// Will contain a PageData instance
+currentPage = nil
+
+// Will be the user ID if logged in
+userID = nil
+userLevel = nil
+userProjectLevel = nil
+
+// currently working on this project id:
+project_id = nil
+
+// currently active page section
+sid = nil
+
+// Shared dbi connection
+dbcon = nil
+
+//============================================
+// standard error reporting function.
+
+function reportError( warning, error )
+   warning = htmlEscape( warning )
+   > "<div class='falcon_error'><br/><b>FALCON site manager</b>: ", warning, "\n"
+   if error
+      > "<pre>\n", error, "\n</pre>\n"
+   end
+   > "</div>\n"
+end
+
+
+//============================================
+// Small shortcuts to include headers and footers
+
+function header( name )
+   if not name: name = default_header
+   return include( name, "utf-8" )
+end
+
+function footer( name )
+   if not name: name = default_footer
+   return include( name, "utf-8" )
+end
+
+//============================================
+// Creates a link to the site pages given the ID
+
+function makeSiteLink( pid, complete )
+   if strFind( pid, "ex:" ) == 0
+      if complete
+         return "<a href=\"" + pid[3:] + "\" target=\"_blank\">"
+      end
+      return pid[3:]
+   end
+
+   if complete
+      str = "<a href=\""
+   else
+      str = ""
+   end
+
+   str += "index.ftd?page_id=" + pid
+   if complete
+      return str += "\">"
+   end
+
+   return str
+end
+
+//============================================
+// Builts the Navigation Tree at page top
+// "Home -> about -> currentlocation..."
+
+function makeNaviTree( spanclass )
+
+   if page_id notin _SiteData.pages
+      reportError( "page_id \"" + page_id + "\" not defined." )
+      return
+   end
+
+   pid = page_id
+   list = []
+   while true
+      if isCallable( pid )
+         link, pageName, pid = pid()
+         list = [ [link, pageName] ] + list
+      else
+         page = _SiteData.pages[pid]
+         pid = page.parentID
+         if not isCallable( pid )
+            pageName = page.pageName.typeId() == StringType ? page.pageName : page.pageName()
+            list = [ [makeSiteLink(page.pageID), pageName] ] + list
+         end
+      end
+
+      // is the parent ID a function -- call it and get the new page ID?
+      if pid == nil: break
+   end
+   
+   for elem in list
+      formiddle
+         >> "<a href=\"", elem[0], "\">", elem[1], "</a>"
+         >> "&nbsp;>>&nbsp;"
+      end
+
+      forlast
+         > "<span class=\"", spanclass,"\">", elem[1], "</span>"
+      end
+   end
+end
+
+
+function ParseShortId()
+   if (short_id = Request.getField("s", nil))
+      if short_id in _short_ids
+         Reply.redirect( "/?" + _short_ids[short_id], 0 )
+         Reply.commit()
+         return true
+      else
+         raise "Unknown short id " + short_id
+      end
+   end
+
+   return false
+end
+
+//============================================
+// Sets the page ID and load the dynamic data
+// about this page.
+
+function setPageId( id )
+   global page_id, project_id, sid, compiler, _SiteData, currentPage
+
+   if id == nil
+      id = Request.getField( "page_id", nil )
+      project_id = Request.getField( "prj_id", nil )
+      sid = Request.getField( "sid", nil )
+   end
+
+   if id == nil
+      page_id = "Home"
+   else
+      page_id = id
+   end
+
+   if not compiler: compiler = Compiler()
+   compiler.sourceEncoding = "utf-8"
+
+   try
+      sitedata_mod = compiler.loadByName( "sitedata" )
+      siteDataMaker = sitedata_mod.get( "makeSiteData" )
+      _SiteData = siteDataMaker()
+   catch in error
+      reportError( "Site data setup procedure failed", error )
+   end
+
+   if page_id notin _SiteData.pages
+      reportError( "page_id \"" + page_id + "\" not defined." )
+      return
+   end
+
+   currentPage = _SiteData.pages[page_id]
+end
+
+//============================================
+// Calls the content provider of the current page
+
+function loadContent()
+   currentPage.pageProvider()
+end
+
+function loadRightCol()
+>'<div class="secondary_column">'
+   if currentPage.sideProvider
+      currentPage.sideProvider()
+   end
+
+>'
+<!-- Google Custom Search Element -->
+<div id="cse" >Loading</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load(''search'', ''1'', {style: google.loader.themes.ESPRESSO});
+  google.setOnLoadCallback(function(){
+    new google.search.CustomSearchControl(''011892735444422309429:qr6i2j-hwgy'').draw(''cse'');
+  }, true);
+</script>
+</div>
+'
+
+end
+
+//============================================
+// Performs login checks.
+//
+
+function loggedIn()
+   global userId
+
+   // if the userID is already given, then we're logged in
+   if userID: return true
+
+   // check if a userID + valid password is in the cookies.
+end
+
+function checkLogin()
+   // is a userID request set?
+   uID = Request.getField( "userID", nil )
+   if uID
+      password = Request.getField( "password", nil )
+      
+      try
+         db = connectDB()
+         r = db.query(
+            "select membership from members where member_id=:1 and password=:2 and status='enabled'",
+            uID, password )
+
+         if (data = r.fetchArray())
+            global userID, userLevel
+            userID = uID
+            userLevel = data[0]
+
+            // great, but set also the cookie that allows our user to relog-in at each page.
+            //if "userID" notin Request.cookies
+               Reply.setCookie( "userID", userID )
+               Reply.setCookie( "password", password )
+            //end
+         end
+
+      catch DBIError in dbie
+         > "Cannot connect with database to check login request: "
+         > dbie
+      end
+   end
+
+end
+
+// ===========================================
+// are we in a project?
+function checkPrjRights( prid )
+   global userID
+
+   // if we're not logged, we have no rights.
+   if not userID
+      return nil
+   end
+
+   // a committee member? -- always rightful
+   if userLevel == "inner" or userLevel == "outer"
+      return "admin"
+   end
+
+   // already fetched a userProjectLevel?
+   global userProjectLevel
+   if userProjectLevel
+      return userProjectLevel
+   end
+
+   r = connectDB().query(
+      "select role from project_members where member=:1 and project=:2",
+      userID, prid )
+   if ( data = r.fetchArray() )
+      userProjectLevel = data[0]
+   end
+
+   return userProjectLevel
+end
+
+
+// ===========================================
+// Performs logout and deregister cookies
+//
+function logout()
+   global userID
+   Reply.setCookie( "userID", "" )
+   Reply.setCookie( "password", "" )
+   userID = nil
+end
+
+//============================================
+// Fulfil requests at document load
+//
+function checkRequest()
+   req = Request.getField( "req", nil )
+
+   switch req
+      case "logout": logout()
+      case "add_news": add_news()
+      case "edit_news": edit_news()
+   end
+end
+
+//============================================
+// add a news
+//
+function add_news()
+   project = Request.getField( "prj_id" )
+   if checkPrjRights( project ) == "admin"
+      con = connectDB()
+      con.query( "insert into project_news " +
+         "(project, news_title, news_heading, news_content, news_poster, news_posted_on)" +
+         " values( :1, :2, :3, :4, :5, now())",
+         project,
+         Request.getField( "news_title" ),
+         Request.getField( "news_heading" ),
+         Request.getField( "news_content" ),
+         userID
+      )
+   else
+     reportError( @"Insufficient rights to add news to prject $(project)" )
+   end
+end
+
+//============================================
+// add a news
+//
+function edit_news()
+   con = connectDB()
+   // retreive rights on the current project
+   nid = Request.getField( "news_id" )
+   r = con.query( "select project from project_news where news_id=:1", nid )
+   if not r.next()
+      reportError( @"News id $(nid) not found" )
+      return
+   end
+
+   // get the project
+   prj_id = r.asString( 0 )
+   level = checkPrjRights( prj_id )
+   if  level == "admin" or level == "developer"
+      con = connectDB()
+      con.query( "update project_news where news_id=:1 set " +
+         "news_title=:2, news_heading=:3, news_content=:4" +
+         " values( :1, :2, :3, :4, :5, 'now')",
+         nid,
+         Request.getField( "news_title" ),
+         Request.getField( "news_heading" ),
+         Request.getField( "news_content" )
+      )
+   else
+      reportError( @"Insufficient rights to edit news $(nid)" )
+   end
+end
+
+function getProjectName()
+   prj = Request.getField( "prj_id" )
+   // get project data
+
+   r = connectDB().query( "select name from projects where project_id=:1", prj )
+   r.next()
+   return r.asString(0)
+end
+
+function getMemberName()
+   try
+      mid = Request.getField( "member_id" )
+   catch
+      return "(Invalid member)"
+   end
+   // get project data
+
+   r = connectDB().query( "select name, surname from members where member_id=:1", mid )
+   r.next()
+   return r.asString(1)+ ", "+ r.asString(0)
+end
+
+//===========================================
+// Page producer for sections (virtual pages)
+
+function sections( sectvect )
+   global sid
+
+   if sid == nil
+      sid = sectvect[0][0]
+   end
+
+   for sect in sectvect
+      forfirst: > '<ul class="primary_tabs">'
+      if sect[0] == sid
+         cls = ' class="active"'
+         sfunc = sect[2]
+      else
+         cls = ""
+      end 
+
+      >> @"<li$cls>"
+      >> makeSiteLink( @"$(page_id)&amp;prj_id=$(project_id)&amp;sid=$(sect[0])", true)
+      >> sect[1], "</a>"
+      > "</li>"
+      forlast: > "</ul>"
+   end
+
+   if sfunc: sfunc()
+end
+
+//===========================================
+// Tree parentship producer for sections (virtual pages)
+
+function section_tree( prj_sections )
+   // get the current name and the address.
+   global sid
+
+   for sect in prj_sections
+      forfirst
+         // discard the first
+         continue
+      end
+
+      if sect[0] == sid
+         // found
+         list = [ @ "?page_id=$(page_id)&amp;prj_id=$(project_id)&amp;sid=$(sid)", sect[1] ]
+         break
+      end
+   end
+
+   // now, if we have some other parameters, prepare next functions.
+   if paramCount() > 1
+      parent_call = [ sect_parent_tree ]
+      for r in [1:paramCount()]: parent_call += parameter( r )
+
+      // if we didn't found a page_id, then this is the main page;
+      // return directly the parent call.
+      if not list
+         return parent_call()
+      end
+      list += [parent_call]
+   else
+      raise @ "sid=$sid not found and no parent calls"
+      list += nil
+   end
+
+   return list
+end
+
+//======================================================
+// Service function for section_tree()
+
+function sect_parent_tree( pid )
+   // locate the parent
+   page = _SiteData.pages[pid]
+   pageName = page.pageName.typeId() == StringType ? page.pageName : page.pageName()
+   list = [makeSiteLink(page.pageID) +  @"&amp;prj_id=$(project_id)", pageName]
+   pid = page.parentID
+
+   // now, what else have we to send?
+   if paramCount() > 1
+      parent_call = [ sect_parent_tree ]
+      for r in [1:paramCount()]: parent_call += parameter( r )
+      list += [parent_call]
+   else
+      list += nil
+   end
+
+   return list
+end
+
+//============================================
+// Connecting with the db.
+// (throws the DB error)
+
+function connectDB()
+   global dbcon
+
+   if dbcon: return dbcon
+ 
+   cfgfile = InputStream("db.config")
+   data = cfgfile.grab(4096)
+   cfgfile.close()
+
+   dbcon = DBIConnect(data)
+   return dbcon
+end
+
+//============================================
+// Get the list of files in a directory
+// dir: directory to read
+// globs: array of globs to be returned.
+// Returns a list of dir or nil on error
+
+function dirList( directory, globs )
+   try
+      dir = Directory( directory )
+      files = []
+
+      while ( entry = dir.read() )
+         if entry != "." and entry != ".."
+            // check if the entry in one of the blogs
+            for glob in globs
+               if strWildcardMatch( entry, glob, true )
+                  files += entry
+               end
+            end
+         end
+      end
+
+      dir.close()
+      return files
+
+   catch IoError
+      if dir: dir.close()
+      > "<br/><b>Warning:</b> error while scanning directory ", directory
+      return nil
+   end
+end
+
+export

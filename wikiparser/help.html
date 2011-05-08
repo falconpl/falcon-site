@@ -1,0 +1,333 @@
+<h1><a name="wikiParser-quickref">wikiParser quickref</a></h1>
+
+<ul>
+<li><a href="#wikiParser-quickref">wikiParser quickref</a>
+    <ul>
+    <li><a href="#Block-formating">Block formating</a>
+        <ul>
+        <li><a href="#Headers">Headers</a></li>
+        <li><a href="#Paragraphs">Paragraphs</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Source-Code">Source Code</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Horizontal-line">Horizontal line</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Lists">Lists</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Table-Of-Contents">Table Of Contents</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+        </ul>
+    </li>
+            </ul>
+        </li>
+    <li><a href="#Inline-formatting">Inline formatting</a>
+        <ul>
+        <li><a href="#Escaping">Escaping</a></li>
+        <li><a href="#Bold">Bold</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Italics">Italics</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Underline">Underline</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Stroke">Stroke</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Sup-and-Sub-text">Sup and Sub text</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Monospace">Monospace</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#URLs">URLs</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Images">Images</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Quotes">Quotes</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        </ul>
+    </li>
+    </ul>
+</li>
+</ul>
+</li>
+<h2><a name="Block-formating">Block formating</a></h2>
+
+<h3><a name="Headers">Headers</a></h3>
+
+<p>they start with one or more equal signs <tt>=</tt> followed by your title.</p>
+
+<p>ie <tt>=== My beautiful header</tt> will render an <tt>=== My beautiful header</tt> HTML header.</p>
+
+<h3><a name="Paragraphs">Paragraphs</a></h3>
+
+<p>By default, they need a new line before and after them, but this can be fixed
+to your needs.</p>
+
+<p>A paragraph is just a container with some non-blank lines of text inside.
+If you want to force a linebreak inside them, use <tt>\</tt> at the end of the line.</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod 
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo 
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse 
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat 
+non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+<h3><a name="Source-Code">Source Code</a></h3>
+
+<p>Source code is are special zones wich will be rendered verbatim.
+They start with a <tt>{{{</tt> followed by optionnal spaces, and an optionnal 
+langage-name, ending with <tt>{{{</tt>.</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<pre class="brush:fal">
+for i in [1,2,3,"a","b","c"]
+    &gt; "i is now: ", i
+end</pre>
+
+<h3><a name="Horizontal-line">Horizontal line</a></h3>
+
+<p>Just put 3 or more minus signs (dashes) <tt>-</tt> on a line.</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<hr/>
+<h3><a name="Lists">Lists</a></h3>
+
+<p>Lists contains list items. A list item starts with the <tt>*</tt> sign, followed by
+optionnal spaces and your text.
+A list item is ended when a new one starts.
+A list is ended when there's a newline.</p>
+
+<p>List items can also be nested, <tt>*</tt> signs indicate the nesting level.</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<ul>
+<li>Coffee</li>
+<li>Tea
+    <ul>
+    <li>Green tea</li>
+    <li>Black tea</li>
+    </ul>
+</li>
+<li>Milk</li>
+</ul>
+</li>
+<h3><a name="Table-Of-Contents">Table Of Contents</a></h3>
+
+<p>Just write <tt><sub>.</tt> optionnaly followed by some spaces and the word <tt></sub>.</tt>.</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<ul>
+<li><a href="#wikiParser-quickref">wikiParser quickref</a>
+    <ul>
+    <li><a href="#Block-formating">Block formating</a>
+        <ul>
+        <li><a href="#Headers">Headers</a></li>
+        <li><a href="#Paragraphs">Paragraphs</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Source-Code">Source Code</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Horizontal-line">Horizontal line</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Lists">Lists</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Table-Of-Contents">Table Of Contents</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+        </ul>
+    </li>
+            </ul>
+        </li>
+    <li><a href="#Inline-formatting">Inline formatting</a>
+        <ul>
+        <li><a href="#Escaping">Escaping</a></li>
+        <li><a href="#Bold">Bold</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Italics">Italics</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Underline">Underline</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Stroke">Stroke</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Sup-and-Sub-text">Sup and Sub text</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Monospace">Monospace</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#URLs">URLs</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Images">Images</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        <li><a href="#Quotes">Quotes</a>
+            <ul>
+            <li><a href="#Sample">Sample</a></li>
+            </ul>
+        </li>
+        </ul>
+    </li>
+    </ul>
+</li>
+</ul>
+</li>
+<h2><a name="Inline-formatting">Inline formatting</a></h2>
+
+<p>Inside each paragraph or list, you can use inline rules.</p>
+
+<p>Thoses rules can be mixed, and may expend on several lines.</p>
+
+<h3><a name="Escaping">Escaping</a></h3>
+
+<p>Use the tilde char "~" to escape an inline rule, and write two tildes signs to
+obtain one.</p>
+
+<h3><a name="Bold">Bold</a></h3>
+
+<p>Like this : **bolded text**</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Like this : <strong>bolded text</strong></p>
+
+<h3><a name="Italics">Italics</a></h3>
+
+<p>Like this : //italic text// (note that it is not recommanded end a line with 
+italic markup, as it may be interpreted as a line break.)</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p><em>italic text</em></p>
+
+<h3><a name="Underline">Underline</a></h3>
+
+<p>Like this : __underlined text__</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Like this : <u>underlined text</u></p>
+
+<h3><a name="Stroke">Stroke</a></h3>
+
+<p>Like this : --stroked text--</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Like this : <strike>stroked text</strike></p>
+
+<h3><a name="Sup-and-Sub-text">Sup and Sub text</a></h3>
+
+<p>Like this : sup^^text^^ or sub..text..</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Like this : sup<sup>text</sup> or sub<sub>text</sub></p>
+
+<h3><a name="Monospace">Monospace</a></h3>
+
+<p>Like this : {{monospaced text}}</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Like this : <tt>monospaced text</tt></p>
+
+<h3><a name="URLs">URLs</a></h3>
+
+<p>Like this : [http://www.falconpl.org|FalconPL]</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Like this : <a href="">FalconPL</a></p>
+
+<h3><a name="Images">Images</a></h3>
+
+<p>Like this : [<a href="">http://falconpastebin.appspot.com/static/i/FalconIcon.png|center|Falcon logo</a>]</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Like this : <div class="center"><a href="http://falconpastebin.appspot.com/static/i/FalconIcon.png"><img src="http://falconpastebin.appspot.com/static/i/FalconIcon.png" alt="Falcon logo"></a></div></p>
+
+<h3><a name="Quotes">Quotes</a></h3>
+
+<p>Like this : [~Falcon is GREAT~]</p>
+
+<h4><a name="Sample">Sample</a></h4>
+
+<p>Like this : <blockquote>Falcon is GREAT</blockquote></p>
+

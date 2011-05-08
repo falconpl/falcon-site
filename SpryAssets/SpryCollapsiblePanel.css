@@ -1,0 +1,79 @@
+@charset "UTF-8";
+
+/* This is the selector for the CollapsiblePanelTab. This container houses
+ * the title for the panel. This is also the container that the user clicks
+ * on to open or close the panel.
+ *
+ * The name of the class ("CollapsiblePanelTab") used in this selector is not necessary
+ * to make the widget function. You can use any class name you want to style an
+ * CollapsiblePanel panel tab container.
+ */
+.CollapsiblePanelTab {
+        outline:none;
+	margin: 0px;
+	cursor: pointer;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	background-image: url(../images/normal_button.png);
+	height: 38px;
+	background-repeat: no-repeat;
+	width: 155px;
+	top: auto;
+	left: -2px;
+	-moz-border-left-colors: 0;
+	-moz-outline-color: 0;
+	-moz-user-focus: 0;
+	float: none;
+	padding-top: 5px;
+	padding-left: 5px;
+
+   font-size: 12pt;
+   font-weight: bold;
+}
+
+
+
+}
+/* This is the selector for a CollapsiblePanel's Content area. It's important to note that
+ * you should never put any padding on the content area element if you plan to
+ * use the CollapsiblePanel's open/close animations. Placing a non-zero padding on the content
+ * element can cause the CollapsiblePanel to abruptly grow in height while the panels animate.
+ *
+ * The name of the class ("CollapsiblePanelContent") used in this selector is not necessary
+ * to make the widget function. You can use any class name you want to style a
+ * CollapsiblePanel content container.
+ */
+.CollapsiblePanelContent {
+	margin: 0;
+	color: #37782E;
+	margin-top: -6px;
+   padding: 0;
+   padding-bottom: 5px;
+}
+
+.CollapsiblePanelContent p {
+   margin: 0;
+   padding: 2px;
+   font-size: 10pt;
+}
+
+/* This is an example of how to change the appearance of the panel tab that is
+ * currently open. The class "CollapsiblePanelOpen" is programatically added and removed
+ * from panels as the user clicks on the tabs within the CollapsiblePanel.
+ */
+
+/* This is an example of how to change the appearance of the panel tab as the
+ * mouse hovers over it. The class "CollapsiblePanelTabHover" is programatically added
+ * and removed from panel tab containers as the mouse enters and exits the tab container.
+ */
+.CollapsiblePanelTabHover,  .CollapsiblePanelOpen .CollapsiblePanelTabHover {
+   background-image: url(../images/hl_normal_button.png);
+   background-repeat: no-repeat;
+}
+
+/* This is an example of how to change the appearance of all the panel tabs when the
+ * CollapsiblePanel has focus. The "CollapsiblePanelFocused" class is programatically added and removed
+ * whenever the CollapsiblePanel gains or loses keyboard focus.
+ */
+.CollapsiblePanelFocused .CollapsiblePanelTab {
+}

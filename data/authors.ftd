@@ -1,0 +1,55 @@
+<P>The Falcon Programming Language has been created by <a href="http://www.niccolai.cc">Giancarlo Niccolai (jonnymind)</a>,
+who is the mentor, the lead developer and the President of the Falcon Committee.
+</P>
+<H2>Committee members</H2>
+<P>Contributors having an active role in the central/core projects related
+to Falcon development are part of the Committee.
+Committee membership is divided into <i>inner</i> and <i>outer</i>, depending on the
+amount of involvement they have in the overall organization of Falcon.</P>
+
+<h2>Inner committee:</h2>
+<P>Inner members are those actively
+developing strategic subprojects or taking care of the overall
+Falcon project organization.</P>
+<ul>
+<? makeUserList( 'inner' ) ?>
+</ul>
+
+<h2>Outer committee:</h2>
+<P>Outer members have been active in the past but have ceased their activity,
+or are providing a small contribution to the code but cooperate with the
+committee providing design, documentation, support, "public relations",
+cool ideas and so on, or provide relevant and continuous contributions
+but are not interested into the overall organization of the Falcon
+project.</P>
+<ul>
+<? makeUserList( 'outer' ) ?>
+</ul>
+
+<H2>Developers</H2>
+<p>Falcon developers not enlisted in the Committee are those that work
+officially on some Falcon extension or module, or that provided some code that
+has been integrted (patches, bugfixes, cool features, etc) on a sporadic basis.</p>
+<ul>
+<? makeUserList( 'developer' ) ?>
+</ul>
+
+<H2>Contributors</H2>
+<p>Contributors are members having hepled Falcon through non-code related
+activites, as packaging, marketing, bug hunting, reviewing and so on.</p>
+<ul>
+<? makeUserList( 'contributor' ) ?>
+</ul>
+<?
+function makeUserList( level )
+   con = connectDB()
+   r = con.query( "select member_id, name, surname, activity from members where membership=:1 order by surname", level )
+   while ( data = r.fetchDict() )
+      >> "<li>"
+      >> "<b><a href=\"?page_id=member_home&amp;member_id=", data['member_id'], "\">"
+      >> data['name'], " ", data['surname'], "</a></b>"
+      if data['activity']: >> " - ", data['activity']
+      > "</li>"
+   end
+end
+?>

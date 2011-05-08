@@ -1,0 +1,72 @@
+/**
+ * Sets a current task list filter as the user's current.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.6.11
+ */
+class ApplyFilterAction(jig) from Action(jig)
+
+	//! Set the controller this action will use.
+	static controller = 'MemberController'
+
+	_filter = nil
+
+	/**
+	 * Constructor.
+	 */
+	init
+		self.setView('ListView')
+	end
+
+	/**
+	 * Verify this action.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+
+		try
+			self._filter = Model.instance('TaskListFilter', toInt(self.arg('filterId'), true))
+		catch 
+			// Get an empty filter so the checks below can be consistent.
+			self._filter = Model.instance('TaskListFilter')
+		end
+
+		// Make sure this filter belongs to this user.
+		if self._filter.id and (self._filter.ownerId != Session.get('user.uid') and not self._filter.globalContext)
+			Mistake.push(Lang('MISTAKES', 'invalidValue', Lang('CAPTIONS', 'id')))
+		end
+
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+		self.setMistakes(Mistake.getAll())
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		// Mark this filter as the user's current.
+		self._filter.setAsCurrent()
+
+		// Update the sesion.
+		Session.set('user.currentFilter', toInt(self.arg('filterId')))
+	end
+end

@@ -1,0 +1,28 @@
+load core.Action
+
+/**
+ * Default framework 404 action.
+ *
+ * This action is executed when a requested resource could not be found and
+ * the requested Jig did not have a 404 handler, which is a file by the
+ * same name as this one.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Jigsaw
+ * @since 	0.1.0
+ * @begin 	2009.4.14
+ *
+ * @param Jig jig - The Jig that owns this action.
+ */
+class Error404Action(jig) from Action(jig)
+	//! Set the allowed request type.
+	static requestMethod = 3 // Action.GET_AND_POST
+
+	/**
+	 * Constructor.
+	 */
+	init
+		self.setView(Framework.error404View)
+	end
+end
+

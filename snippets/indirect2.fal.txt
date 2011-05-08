@@ -1,0 +1,7 @@
+// Indirect - Access to a named variable through indirect (#) operator.
+
+string = "Hello world!"
+variable_name = "string"
+
+// prints "Hello world!"
+> #variable_name

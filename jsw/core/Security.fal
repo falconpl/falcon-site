@@ -1,0 +1,34 @@
+export Security
+
+load .Action
+
+/**
+ * Provides basic security service.
+ *
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.13
+ */
+class Security
+	
+	/**
+	 * Verify the request method (post/get) can be handled by the action.
+	 *
+	 * @static
+	 * @public
+	 * @param	const validMethod - The action's valid request method.
+	 * @return 	boolean
+	 */
+	function verifyRequestMethod(validMethod)
+		if validMethod == Action.GET_AND_POST : return true
+
+		if Request.method == 'POST'
+			method = Action.POST
+		else
+			method = Action.GET
+		end
+
+		return method == validMethod
+	end
+end

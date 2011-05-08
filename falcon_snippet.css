@@ -1,0 +1,78 @@
+/* Snippet for falcon code. */
+.fornt_matter #front_saying {
+}
+
+.code_area {
+   font-family: "courier new", "courier 10 pitch", "courier", fixed;
+   font-size: 10pt;
+   border: solid 1px;
+   border-color:black;
+   background:#F5F5FF;
+   padding: 10px;
+   margin-top: 10px;
+   margin-bottom: 10px;
+}
+
+
+.snippet {
+   background-color: #000025;
+   border: 2px solid black;
+   padding: 2px;
+   margin:5px;
+   top:0px;
+   right:10px;
+   width: 350px;
+}
+
+.snippet_code {
+   font-family: "courier new", "courier 10 pitch", "courier", fixed;
+   font-size: 8pt;
+   color: white;
+   padding-left:4px;
+}
+
+.snippet_header {
+   font-family: "arial", "freesans", serif ;
+   font-size: 12pt;
+   font-style: italic;
+   color: #FFC0C0;
+   border-bottom: solid 1px gray;
+   padding: 2px;
+   padding-left: 12px;
+}
+
+.snippet_footer {
+   font-family: "times new roman", "times", "freeserif";
+   font-size: 10pt;
+   font-style: italic;
+   color: #FFC0C0;
+   border-top: solid 1px gray;
+   padding: 1px;
+   padding-left: 6px;
+}
+
+.falcon_comment {
+   font-style: italic;
+   color: gray;
+}
+
+.falcon_string {
+   color: #A04040;
+   font-weight: bold;
+}
+
+
+.falcon_keyword {
+   font-weight: bold;
+   color: #339033;
+}
+
+.falcon_special {
+   color: #33B033;
+}
+
+.falcon_op {
+   font-weight: bold;
+   color: yellow;
+}
+

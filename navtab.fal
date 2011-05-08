@@ -1,0 +1,77 @@
+//==================================
+// The Falcon site - navtab
+//
+
+import scriptName
+import userLevel
+
+function navtab()
+   global scriptName, userLevel
+
+   tree = .[
+      .[ 'Home' .[
+         .[ 'Home page' 'Home' ]
+         .[ 'Getting started' 'ex:http://www.falconpl.org/index.ftd?page_id=sitewiki&prj_id=_falcon_site&sid=wiki&pwid=Home&wid=Getting%20started' ]
+         .[ 'Facts Table' 'facts' ]
+         .[ 'About Falcon' 'about' ]
+         .[ 'People at work' 'authors' ]
+         .[ 'Licensing' 'licensing']
+         ]
+      ]
+
+      .[ 'Downloads' .[
+            .[ 'Official download' 'official_download']
+            .[ 'Bleeding edge' 'bleeding_dl']
+            .[ 'Direct SVN' 'svn_dl']
+            .[ 'Older releases' 'older_dl']
+            ]
+      ]
+
+      .[ 'Documents' .[
+            //.[ 'Documentation' 'Documents' ]
+            .[ 'Manuals' 'manuals' ]
+            .[ 'Wiki Root' 'sitewiki']
+            ]
+      ]
+
+      .[ 'Extensions' .[
+            .[ 'Community home' 'devel_home']
+            .[ 'Featured projects' 'feat_prj']
+            .[ 'Project list' 'prj_list']
+            .[ 'Module list' 'mod_list']
+            .[ 'Engine internals' 'ex:http://falconpl.org/docs/engine/current' ]
+            .[ 'Wiki documentation' 'ex:http://old.falconpl.org/wiki']
+            .[ 'Development ideas' 'socil']
+            ]
+      ]
+
+      .[ 'Contacts' .[
+            .[ 'How to contact' 'contacts']
+            .[ 'Newsgroup' 'ex:http://groups.google.com/group/falconpl']
+            .[ 'Chat now' 'IRC']
+            ]
+      ]
+
+      .[ 'Site source' .[
+            .[ 'Source to this page' 'showsource&file=' + scriptName ]
+            .[ 'Site functions' 'showsource&file=site_functions.fal' ]
+            .[ 'Header source' 'showsource&file=header.ftd' ]
+            .[ 'Navtab source' 'showsource&file=navigation_tab.ftd' ]
+            .[ 'Navtab defs' 'showsource&file=navtab.fal' ]
+            .[ 'Page definitions' 'showsource&file=sitedata.fal' ]
+            .[ 'Page types' 'showsource&file=sitedata_def.fal' ]
+            .[ 'Code snippets' 'showsource&file=load_snippet.ftd' ]
+            .[ 'Hi-lit parser' 'showsource&file=highlight.fal' ]
+            ]
+      ]
+   ]
+
+   if userLevel == 'inner'
+      tree[0][1] += .[.[ 'Admin' 'admin']]
+   end
+
+   return tree
+end
+
+export navtab
+

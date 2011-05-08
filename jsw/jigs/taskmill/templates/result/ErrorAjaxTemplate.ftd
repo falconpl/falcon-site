@@ -1,0 +1,25 @@
+<?
+import X
+
+/**
+ * Result page for when a successful Ajax operation.
+ *
+ * @author 	Vladimir Florentino
+ * @package	Taskmill
+ * @since	0.1.0
+ * @begin 	2009.6.10
+ */
+?>
+
+<? if X.jig.request('msg') ?>
+{
+	message: '<? >> X.jig.request('msg') ?>',
+	isError: true
+}
+
+<? else ?>
+{
+	message: 'An error has occurred.',
+	isError: true
+}
+<? end ?>

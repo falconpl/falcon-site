@@ -1,0 +1,73 @@
+load core.Action
+
+/**
+ * Handles the homepage login form.
+ * 
+ * @author 	Vladimir Florentino
+ * @package Taskmill
+ * @since 	0.1.0
+ * @begin 	2009.5.12
+ */
+class PostLoginAction(jig) from Action(jig)
+
+	//! Set the allowed request type.
+	static requestMethod = 2 // Action.POST
+
+	uid = nil
+
+	/**
+	 * Verify this action.
+	 *
+	 * @override
+	 * @public
+	 * @return boolean
+	 */
+	function verify()
+		// Grab the Login model.
+		login =	Model.statically('Login')
+
+		// Check credentials.
+		self.uid = login.validateCredentials(self.arg('email'), self.arg('password'))
+		if not self.uid
+			Mistake.push(Lang('MISTAKES', 'badLoginCredentials'), 'email')
+		end
+
+		return Mistake.empty()
+	end
+
+	/**
+	 * Handles a failed verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function failure()
+		// Back to login screen.
+		self.setView('DefaultView')
+
+		self.setMistakes(Mistake.getAll())
+	end
+	
+	/**
+	 * Handles a successful verification.
+	 *
+	 * @override
+	 * @public
+	 * @return nil
+	 */
+	function success()
+		// Set some common information about the user in his session.
+		user = Model.instance('User', self.uid)
+		Session.set('user.uid', self.uid)
+		Session.set('user.lang', user.lang)
+		Session.set('user.email', user.email)
+		Session.set('user.active', user.active)
+		Session.set('user.fullname', user.fullname)
+		Session.set('user.currentFilter', user.currentFilter)
+		Session.set('user.currentProject', user.currentProject)
+
+		// Redirect to list page.
+		self.redirect('list')
+	end
+end

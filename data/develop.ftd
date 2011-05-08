@@ -1,0 +1,19 @@
+<? import project_id; project_id = "_devel_site" ?>
+<h1>Falcon development community</h1>
+<p>We have just started the Falcon development community home site.
+At the moment, this page is rather empty, as we're setting up the
+site and the various services for the community members.</p>
+<p>If you think you can help in the development of this site,
+please, contact us through the "contacts" area.</p>
+<h2>General interest links:</h2>
+<ul>
+<li><a href="?page_id=devel_about">About Falcon Development</a></li>
+<li><a target="_blank" href="docs/engine/current">Engine source level docs</a></li>
+</ul>
+<?
+include( "load_prjnews.ftd" )
+?>
+
+
+
+

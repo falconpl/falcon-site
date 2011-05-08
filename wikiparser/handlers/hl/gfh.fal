@@ -1,0 +1,273 @@
+#!/usr/bin/falcon
+
+/*
+gfh.fal: a Generic Falcon Highlighter for Falcon PL
+
+Kibleur Christophe May 06, 2009.
+[Kib² http://thewikiblog.appspot.com/]
+*/
+
+load mxml
+load regex
+
+/*==============================================================================
+                            Useful functions
+==============================================================================*/
+
+function loadText(fname)
+    // Read the template
+    size = FileStat(fname).size
+    contents = strBuffer(size)
+    f = InputStream( fname )
+    buf = strBuffer( 10960 )
+    while not f.eof()
+       f.read(buf)
+       contents += buf
+    end
+    f.close()
+    return contents
+end
+
+function saveText(fname, contents)
+    f = OutputStream( fname )
+    wpos = 0
+    loop
+       wpos += f.write( contents, contents.len(), wpos )
+    end wpos == contents.len()
+    f.close()
+end
+
+/*==============================================================================
+                            Formatters
+==============================================================================*/
+
+class HtmlFormatter()
+    // The formatter is used by the highlighter to render 
+    // a line of text to a given format
+    parent = nil
+    tpl = nil
+    
+    function loadTemplate()
+        self.tpl = loadText( vmRelativePath("Template.html"))
+    end
+    
+    function saveRes(name, finalText)
+        // feed the template with what is nescessary:
+        // hl, title, lang
+        hl = finalText
+        title = "Generic Falcon Highlighter"
+        lang = strLower(self.parent.langage) + ".css"
+        saveText("out.html", @ self.tpl)
+    end    
+    
+    function highlight(text, style)
+        q = self.esc(text)
+        
+        if style == "default"
+            ln = q
+        else
+            ln = @ "<span class=\"$(style)\">$(q)</span>"
+        end
+        
+        return ln
+    end
+    
+    function esc(s, quote)
+        /*Replace special characters "&", "<" and ">" to HTML-safe sequences.
+        If the optional flag quote is true, the quotation mark character (")
+        is also translated.*/
+        s = strReplace( s, "&", "&amp;") // Must be done first!
+        s = strReplace( s, "<", "&lt;")
+        s = strReplace( s, ">", "&gt;")
+        if quote : s = strReplace( s,'"', "&quot;")
+        return s
+    end
+    
+end
+
+/*==============================================================================
+                            Rule Class
+==============================================================================*/
+class Rule(rules)
+    rules = rules
+    
+    function toString()
+        out = []
+        for k,v in self.rules
+            out += @ "$k = $v"
+        end
+        out += "\n"
+        return (["\n".join] + out)()
+        //return "\n".merge(out)
+    end
+end
+
+/*==============================================================================
+                            Highlighter Class
+==============================================================================*/
+class HL(formatter, langage)
+    formatter = formatter       // the output formatter (ie html, etc.)
+    langage   = langage         // the source langage (ie falcon, haskell, etc.)
+    allRules  = []              // the highlighting rules read from an XML file
+    states = List( "default" )  // a List is perfect to handle a state stack
+    
+    init
+        self.formatter.parent = self
+        self.loadSyntaxDef()
+        self.formatter.loadTemplate()
+    end
+    
+    function loadSyntaxDef()
+        // Feed the self.allRules array with a langage Rule instances
+        // read from an XML file type.
+        try
+           // read the XML document
+           doc = MXMLDocument()
+           stream = InputStream(vmRelativePath( self.langage + "Syntax.xml"))
+           stream.setEncoding("utf-8")
+           doc.deserialize( stream )
+        
+           // Get the root's node child, if any
+           root = doc.root()
+           
+           child = root.firstChild()
+           
+           // Find all the other children until none is found
+           while child != nil // and child.name() != "rule"
+              // Get all the attribs in a dictionnary
+              r = Rule(child.getAttribs( ))
+              self.allRules += r
+              child = child.nextSibling()
+           end
+        
+        catch MXMLError in error
+           > "Couldn't read or parse the XML document: "
+           > error
+           exit( 1 )
+        end
+    end
+    
+    function getNextMatch(line)
+        // This method returns the next regular expression matched on a given
+        // line according to the rules given in self.allRules
+        lowest  = len(line)
+        longest = 0
+        match   = nil
+        style   = nil
+        rule    = nil
+        pop     = false
+        push    = nil
+        the_reg = nil
+        
+        for r in self.allRules
+            reg = Regex ( r.rules["pattern"] )
+            if (r.rules["from"] == self.states.back() and reg.match(line))
+                m = reg.captured(0)
+                
+                if (m[0] < lowest or m[0] == lowest and m[1] > longest)
+                    match = m
+                    rule = r
+                    the_reg = reg
+                    if "useStyle" in r.rules
+                        style = [r.rules["useStyle"]]
+                    elif "fromGroups"
+                        style = strSplit( r.rules["fromGroups"], "-")
+                    end
+                    lowest  = m[0]
+                    longest = m[1]
+                end
+            end
+        end
+        
+        if match
+            
+            if "pop" in rule.rules
+                pop = true
+            end
+            
+            if "push" in rule.rules
+                push = rule.rules["push"]
+            end
+            
+            // A rule matched
+            return [ match[0], match[1], style, pop, push, the_reg]
+        else
+            return [ 0, lowest, self.states.back(), pop, push, the_reg]
+        end
+    end
+    
+    function highlightLine(line)
+        // Just highlights a line of text with the help
+        // of a corresponding Formatter
+        out = []
+        while el = self.getNextMatch(line)
+            oldState = self.states.back()
+    
+            if el[0] != el[1] // start pos != end pos       
+
+                if el[5] // highlight with group
+                    out += self.formatter.highlight( line[:el[0]], oldState ) //self.states.back() )
+                    for j in [1:el[5].capturedCount()]
+                        cts = line[ el[5].captured(j) ]
+                        out += self.formatter.highlight( cts , el[2][j-1] )
+                        
+                        oldState = self.states.back()
+                        // Push a state ?
+                        if el[4]: self.states.push( el[4] )
+                        // Pop a state ?
+                        if el[3]: self.states.pop()
+                    end
+                else
+                    out += self.formatter.highlight( line[el[0]:el[1]], self.states.back() )
+                end
+                line = line[el[1]:]  
+            else // we are at the end
+                break 
+            end
+
+        end
+        //return (["".join] + out)()
+        return "".merge(out)
+    end
+
+    function highlightTPL(piece)
+        // Highlights a piece of text
+        out = []
+        for line in piece
+            //> self.highlightLine(line)
+            out += self.highlightLine(line)
+        end
+
+        self.formatter.saveRes("out", "\n".merge(out) )
+        
+    end
+    
+    function highlight(piece)
+        // Highlights a piece of text
+        out = []
+        for line in piece
+            //> self.highlightLine(line)
+            out += self.highlightLine(line)
+        end
+
+        return "\n".merge(out)
+        
+    end
+    
+end
+
+export HtmlFormatter
+export HL
+
+/*==============================================================================
+                            MAIN PROGRAM
+==============================================================================*/
+// lines = loadText("gfh.fal") //hl/test1.fal") //wikiparser.fal")
+// lines = strSplit(lines, "\n")
+// 
+// f = HtmlFormatter()
+// hl = HL(f, "Falcon")
+// 
+// // to a file
+// // hl.highlightTPL(lines)
+// > hl.highlight(lines)

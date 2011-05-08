@@ -1,0 +1,47 @@
+<? // common prologue
+   load site_functions
+   load bbexpand
+
+   // gather query data
+   news_id = Request.getField( "news_id" )
+
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>News <?=news_id?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="falcon_site.css">
+</head>
+<body class="falcon">
+<?
+   // load the news text
+   query = "
+      select news_title, news_heading, news_content, news_poster, news_posted_on
+      from project_news where news_id=:1"
+   
+   r = connectDB().query( query, news_id )
+   r.next()
+   output = stdOut()
+?>
+<div class="news">
+   <div class="news_title">
+      <? htmlEscape( r.asString(0), output ); ?>
+   </div>
+   <div style="margin:15pt;">
+      <div class="news_signature">
+         Posted by <?=r.asString(3)?> on
+         <?= r.asDate(4).toString( "%Y-%m-%d") ?>
+      </div>
+      <div class="news_heading_part">
+         <? bbExpand( htmlEscape( r.asString(1) ), output)  ?>
+      </div>
+      <div class="news_body">
+         <? bbExpand( htmlEscape( r.asString(2) ), output)  ?>
+      </div>
+   </div>
+</div>
+<hr/>
+<p><a href="javascript:window.close()">Close this window</a></p>
+</body>
+</html>
