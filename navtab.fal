@@ -22,7 +22,7 @@ function navtab()
       .[ 'Downloads' .[
             .[ 'Official download' 'official_download']
             .[ 'Bleeding edge' 'bleeding_dl']
-            .[ 'Direct SVN' 'svn_dl']
+            .[ 'Git Repositories' 'git_dl']
             .[ 'Older releases' 'older_dl']
             ]
       ]

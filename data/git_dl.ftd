@@ -1,0 +1,25 @@
+<h1>Falcon Git Repositories</h1>
+
+<p>Development of Falcon has been moved from SVN to Git. The official git 
+repositories can be found at <a href="http://git.falconpl.org">
+http://git.falconpl.org</a>. There is also a mirror on github at 
+<a href="https://github.com/falconpl">https://github.com/falconpl</a> that you
+can fork at will. </p>
+
+<p>There are currently three repositories in the official git site and the github
+mirror. </p>
+
+<ul>
+	<li>falcon - the Falcon programming language itself</li>
+	<li>falbot - an IRC bot written in Falcon used on the #falcon channel on 
+		freenode.net</li>
+	<li>falcon-site - the source code for this site</li>
+</ul>
+
+<p>Falcon can be cloned from any of the following urls.</p>
+
+<ul>
+	<li>http://git.falconpl.org/falcon.git</li>
+	<li>https://github.com/falconpl/falcon.git</li>
+	<li>git://github.com/falconpl/falcon.git</li>
+</ul>
