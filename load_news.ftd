@@ -1,16 +1,10 @@
 <?
 load dbi
 load bbexpand
+load site_functions
 
 try
-   //HIDE: DB Connection code Hidden for security reasons.
-   dbh = DBIConnect( "
-      mysql:localhost,
-      falcon10,
-      VpWfvkJ,
-      falcon10_falconforums,
-      0,0,0," )
-   //HIDE.
+   dbh = connectDB()
 
    query="select "
       "phpbb_posts.post_id, topic_id, post_subject, post_text "
