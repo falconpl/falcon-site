@@ -14,8 +14,8 @@
       old_members = Request.getField( "member" )
       roles = Request.getField( "role" )
 
-      query_change = "update project_members set role=:1 where project=:2 and member=:3"
-      query_delete = "delete from project_members where project=:1 and member=:2"
+      query_change = "update project_members set role=? where project=? and member=?"
+      query_delete = "delete from project_members where project=? and member=?"
       for i in [0:roles.len()]
          member = old_members[i]
          role = roles[i]
@@ -32,9 +32,9 @@
    function addMember()
       con = connectDB()
       member_id = Request.getField( "new_member" )
-      r = con.query( "select name from members where member_id=:1", member_id )
+      r = con.query( "select name from members where member_id=?", member_id )
       if r.getRowCount() > 0
-         con.query( "insert into project_members( project, member, role) values( :1, :2, :3)",
+         con.query( "insert into project_members( project, member, role) values( ?, ?, ?)",
             project_id,
             member_id,
             Request.getField( "new_role" )
@@ -88,8 +88,8 @@
    <table border="0">
    <?
       // load the project roles.
-      r = connectDB().query( "select member, role from project_members where project=:1", project_id )
-      while( data = r.fetchArray() )
+      r = connectDB().query( "select member, role from project_members where project=?", project_id )
+      while( data = r.fetch([]) )
          > '<tr><td>', data[0], '<td/><td>'
          makeSelRole( data[0], data[1] )
          > '</td></tr>'

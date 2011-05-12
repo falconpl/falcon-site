@@ -4,9 +4,10 @@
 
    function fillReleases()
       con = connectDB()
-      r = con.query( "select * from project_releases where project_id=:1 order by rel_id desc", project_id )
+      r = con.query( "select * from project_releases where project_id=? order by rel_id desc", project_id )
 
-      while (data = r.fetchDict())
+      data = [=>]
+      while (data = r.fetch(data))
          // send the release in the correct place.
          switch data['rel_id']
 
@@ -26,7 +27,7 @@
       con = connectDB()
 
       // get the other dloads associated with this project.
-      r = con.query( "select * from project_dloads where rel_id is null and project_id=:1 and relevant=1", project_id )
+      r = con.query( "select * from project_dloads where rel_id is null and project_id=? and relevant=1", project_id )
       if r.getRowCount() > 0
          > "<hr style=\"clear: both;\"/>"
          > "<div class=\"falcon_downloads\">"
@@ -50,7 +51,7 @@
 
    function add_release()
       query = "insert into project_releases (project_id, rel_name, changelog, free_text) "
-              "values (:1, :2, :3, :4)"
+              "values (?, ?, ?, ?)"
 
       con = connectDB()
       con.query( query,
@@ -64,17 +65,17 @@
 
    function del_release( rel_id, rel_name )
       con= connectDB()
-      con.query( "delete from project_releases where rel_id=:1", rel_id )
+      con.query( "delete from project_releases where rel_id=?", rel_id )
       > @"<b>Deleted release \"$( rel_name )\"</b>"
    end
 
    function setOfficialRelease( rel_id )
       con= connectDB()
       if rel_id
-         con.query( "update projects set official_release=:1 where project_id=:2",
+         con.query( "update projects set official_release=? where project_id=?",
             rel_id, project_id )
       else
-         con.query( "update projects set official_release=null where project_id=:1",
+         con.query( "update projects set official_release=null where project_id=?",
             project_id )
       end
       > @"<b>Changed official release</b>"
@@ -83,10 +84,10 @@
    function setLatestRelease( rel_id )
       con= connectDB()
       if rel_id
-         con.query( "update projects set latest_release=:1 where project_id=:2",
+         con.query( "update projects set latest_release=? where project_id=?",
             rel_id, project_id )
       else
-         con.query( "update projects set latest_release=null where project_id=:1",
+         con.query( "update projects set latest_release=null where project_id=?",
             project_id )
       end
       > @"<b>Changed latest release</b>"
@@ -96,7 +97,7 @@
 <? function MakeDloadSet( r ) ?>
    <table width="0" cellspacing="2" cellpadding="5">
    <tr style="border:1px"><th>File</th><th>Description</th><th>Type</th></tr>
-   <? while ( dload = r.fetchDict() ) ?>
+   <? while ( dload = r.fetch([=>]) ) ?>
       <? if dload['dl_type'] == 'text' ?>
       <tr><td><a target="_blank" href="project_dl/<?=project_id?>/<?=dload['sysres'] ?>"><?=dload['sysres'] ?></a></td><td><?=dload['description']?></td><td><?=dload['dl_type']?></td></tr>
       <? else ?>
@@ -129,7 +130,7 @@
    <? end ?>
    <?
       // get the dloads associated with this rel_id
-      r = con.query( "select * from project_dloads where rel_id=:1", data['rel_id'] )
+      r = con.query( "select * from project_dloads where rel_id=?", data['rel_id'] )
       MakeDloadSet( r )
    ?>
    </div>

@@ -9,7 +9,7 @@ and are usually managed and developed by the Committee members.</p>
       where project_type='featured' order by name;"
 
    r = connectDB().query( query )
-   while (adata = r.fetchArray() )
+   while (adata = r.fetch([]) )
    ?>
    <li><a href="?page_id=prjs&prj_id=<?=adata[0]?>"><?=adata[1]?></a>: <?=adata[2]?></li>
    <? end ?>

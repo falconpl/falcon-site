@@ -28,12 +28,12 @@
       con = connectDB()
       // perform the real update
       // first, clear the release
-      con.query( "update project_dloads set rel_id=null where rel_id=:1", rel_id )
+      con.query( "update project_dloads set rel_id=null where rel_id=?", rel_id )
 
       // then set the rel_id to the required downloads
-      query = "update project_dloads set rel_id=:2 where dload_id=:1 "
+      query = "update project_dloads set rel_id=? where dload_id=? "
       for dlid in Request.posts['assign']
-         con.query( query, dlid, rel_id )
+         con.query( query, rel_id, dlid )
       end
       // if we had no error, we can tell the user we're done.
    ?>
@@ -45,17 +45,17 @@
    <?
       con = connectDB()
       // load related and unrelated releases
-      query = "select dload_id, sysres, description from project_dloads where rel_id=:1"
+      query = "select dload_id, sysres, description from project_dloads where rel_id=?"
       r = con.query( query, rel_id )
       related = []
-      while ( data = r.fetchDict() )
+      while ( data = r.fetch([=>]) )
          related += data
       end
 
-      query = "select dload_id, sysres, description from project_dloads where project_id=:1 and rel_id is null and relevant=0"
+      query = "select dload_id, sysres, description from project_dloads where project_id=? and rel_id is null and relevant=0"
       r = con.query( query, project_id )
       unrelated = []
-      while ( data = r.fetchDict() )
+      while ( data = r.fetch([=>]) )
          unrelated += data
       end
    ?>

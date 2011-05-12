@@ -91,7 +91,7 @@ function createDload()
       >> "Adding the record to the DB: "
       query = "insert into project_dloads " +
          "( project_id, name, sysres, description, dl_type, relevant, rel_id ) " + 
-         "values( :1, :2, :3, :4, :5, :6, :7 )"
+         "values( ?, ?, ?, ?, ?, ?, ? )"
 
       try
          r = con.query( query,
@@ -121,8 +121,8 @@ function updateDload()
    // now add the record to the db
    >> "Updating the record to the DB: "
    query = "update project_dloads " + 
-      "set name=:2, sysres=:3, description=:4, dl_type=:5, relevant=:6, rel_id=:7 " +
-      "where dload_id=:1"
+      "set name=?, sysres=?, description=?, dl_type=?, relevant=?, rel_id=? " +
+      "where dload_id=?"
 
    try
       r = con.query( query,
@@ -150,7 +150,7 @@ function removeDload()
    // now add the record to the db
    >> "Removing the record to the DB: "
    query = "delete from project_dloads " +
-      "where dload_id=:1"
+      "where dload_id=?"
 
    try
       r = con.query( query, Request.getField( "dload_id" ) )
@@ -169,18 +169,18 @@ function editDload()
 
    // create the release dictionary
    releases = [=>]
-   r = con.query( "select rel_name, rel_id from project_releases where project_id=:1",
+   r = con.query( "select rel_name, rel_id from project_releases where project_id=?",
                   project_id )
-   while r.next(): releases[ r.asString(0) ] = r.asInteger(1)
+   while (data = r.fetch([])): releases[ data[0] ] = data[1]
 
    // load this release
    dload_id = Request.getField( "dload_id" )
    r = con.query( "
                select name, rel_id, sysres, description, dl_type, relevant
                from project_dloads
-               where dload_id=:1",
+               where dload_id=?",
             int(dload_id) )
-   data = r.fetchDict()
+   data = r.fetch([=>])
    dloadName = data[ 'name' ]
 ?>
    <h2>Edit Download <?= dloadName ?></h2>
@@ -206,9 +206,8 @@ function confirmRemove()
    global dloadName, con
    dload_id=Request.getField( "dload_id" )
 
-   r = con.query( "select name from project_dloads where dload_id=:1", int(dload_id) )
-   r.next()
-   dloadName = r.asString(0)
+   r = con.query( "select name from project_dloads where dload_id=?", int(dload_id) )
+   dloadName = r.fetch([])[0]
 ?>
    <p>Confirm removal of the download named "<?= dloadName ?>?</p>
    <form action="popup_manage_dl.ftd" method="POST">
@@ -232,11 +231,12 @@ function showDloadList()
 
    releases = [=>]
    rel_ids = [=>]
-   r = con.query( "select rel_name, rel_id from project_releases where project_id=:1",
+   r = con.query( "select rel_name, rel_id from project_releases where project_id=?",
                   project_id )
-   while r.next()
-      releases[ r.asString(0) ] = r.asInteger(1)
-      rel_ids[r.asInteger(1)] = r.asString(0)
+   data = []
+   while r.fetch(data)
+      releases[ data[0] ] = data[1]
+      rel_ids[ data[1] ] = data[0]
    end
 
 ?>
@@ -254,9 +254,12 @@ function showDloadList()
 <td><?
    // create the release dictionary
    releases = [=>]
-   r = con.query( "select rel_name, rel_id from project_releases where project_id=:1",
+   r = con.query( "select rel_name, rel_id from project_releases where project_id=?",
                   project_id )
-   while r.next(): releases[ r.asString(0) ] = r.asInteger(1)
+   data = []
+   while r.fetch(data)
+      releases[ data[0] ] = data[1]
+   end
 
    makeReleaseSelector( releases ) ?></td>
 <td><input type="checkbox" name="relevant" value="yes"/></td>
@@ -266,10 +269,11 @@ function showDloadList()
    r = con.query( "
             select rel_id, dload_id, name, sysres, description, dl_type, relevant
             from project_dloads
-            where project_id=:1",
+            where project_id=?",
          project_id )
 
-   while (data = r.fetchDict())
+   data = [=>]
+   while (data = r.fetch(data))
    ?>
    <tr>
       <td><?=data['name']?></td>

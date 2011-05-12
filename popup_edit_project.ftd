@@ -23,12 +23,11 @@
    <?
       // perform the real update
       query = "update projects set " + 
-         "name=:2, description=:3, project_type=:4, status=:5, current_version=:6, next_version=:7, " +
-         "svnloc=:8, details=:9 " + 
-         "where project_id=:1 "
+         "name=?, description=?, project_type=?, status=?, current_version=?, next_version=?, " +
+         "svnloc=?, details=? " +
+         "where project_id=?"
 
       connectDB().query( query,
-         project_id,
          Request.getField( "name" ),
          Request.getField( "description" ),
          Request.getField( "project_type" ),
@@ -36,7 +35,8 @@
          Request.getField( "current_version" ),
          Request.getField( "next_version" ),
          Request.getField( "svnloc" ),
-         Request.getField( "details" )
+         Request.getField( "details" ),
+         project_id
          )
       // if we had no error, we can tell the user we're done.
    ?>
@@ -46,9 +46,9 @@
    <p><a href="javascript:window.close()">Close this window</a></p>
    <? else
       // load the changelog text
-      query = "select * from projects where project_id=:1"
+      query = "select * from projects where project_id=?"
       r = connectDB().query( query, project_id )
-      data = r.fetchDict()
+      data = r.fetch([=>])
       ?>
 
       <h2>Editing project <?=project_id?> - "<?=htmlEscape(data['name'])?>"</h2>

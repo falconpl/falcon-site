@@ -12,8 +12,9 @@ try
       "where forum_id = 11 order by topic_id desc limit 20"
 
    r = dbh.query( query )
-   while r.next()
-      showNews( r )
+   data = []
+   while r.fetch(data)
+      showNews( data )
    end
 
 catch DBIError in error
@@ -25,9 +26,9 @@ function showNews( recordset )
       output = stdOut()
    end
 
-   > "<p> SUBJECT: ", recordset.asString( 2 ), "</p>\n"
+   > "<p> SUBJECT: ", data[ 2 ], "</p>\n"
    > "<p>"
-   bbExpand( recordset.asString( 3 ), output )
+   bbExpand( recordset.data[ 3 ], output )
    > "</p>\n"
 end
 ?>

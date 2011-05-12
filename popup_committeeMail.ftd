@@ -22,8 +22,9 @@ if Request.getField( "req", "" ) == "send"
    query = "select email from members where membership='inner'"
    r = connectDB().query( query )
    try
-      while r.next()
-         email = r.asString(0)
+      data = []
+      while r.fetch(data)
+         email = data[0]
          postMail( sender, email, subject, content )
       end
       > "<h2>Email sent to the Inner Committee.</h2>"

@@ -3,15 +3,11 @@
 
    // get project data
    query="select name, description, details, svnloc from projects " + 
-         "where project_id=:1"
+         "where project_id=?"
 
    con = connectDB()
    r = con.query( query, project_id )
-   r.next()
-   prj_name = r.asString(0)
-   prj_descr = r.asString(1)
-   prj_details = r.asString(2)
-   prj_svn = r.asString(3)
+   prj_name, prj_descr, prj_details, prj_svn = r.fetch([])
 
    // read the clearance level
    level = checkPrjRights( project_id )
@@ -20,12 +16,12 @@
    output=stdOut()
 
    // we need to have all the admins, contributors and developers of this project
-   r = con.query( "select member, role from project_members where project=:1 order by member", project_id )
+   r = con.query( "select member, role from project_members where project=? order by member", project_id )
    admins = []
    developers = []
    contributors = []
    hasMembers = r.getRowCount() > 0
-   while (data = r.fetchArray())
+   while (data = r.fetch([]))
       switch data[1]
          case 'admin': admins += data[0]
          case 'developer': developers += data[0]

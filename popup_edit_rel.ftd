@@ -7,9 +7,9 @@
    project_id = Request.getField( "project_id" )
 
    // load the changelog text
-   query = "select * from project_releases where rel_id=:1"
+   query = "select * from project_releases where rel_id=?"
    r = connectDB().query( query, rel_id )
-   data = r.fetchDict()
+   data = r.fetch([=>])
 
    // are we allowed to change things?
    clearance = checkPrjRights( project_id )
@@ -31,14 +31,14 @@
    <?
       // perform the real update
       query = "update project_releases set " +
-         "rel_name=:2, free_text=:3, changelog=:4 " +
-         "where rel_id=:1 "
+         "rel_name=?, free_text=?, changelog=? " +
+         "where rel_id=? "
 
       connectDB().query( query,
-         rel_id,
          Request.getField( "rel_name" ),
          Request.getField( "free_text" ),
-         Request.getField( "changelog" )
+         Request.getField( "changelog" ),
+         rel_id
          )
       // if we had no error, we can tell the user we're done.
    ?>

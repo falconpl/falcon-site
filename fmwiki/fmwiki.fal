@@ -178,13 +178,16 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
 
       // if we found it it's an update
       if data
-         pageEntry[oob("page_id")] = data[0]
          if "creator" in pageEntry and "editor" notin pageEntry
             pageEntry["editor"] = pageEntry["creator"]
             pageEntry.remove("creator")
          end
-         self.dbi_data.update( tablename, pageEntry )
-         return pageEntry["page_id"]
+
+         sql = "update " + tablename + " set " + ",".merge(map( {s=>s+"=?"}, pageEntry.keys())) +
+                " where page_id=?"
+         > sql
+         self.dbi_data.aquery( sql, pageEntry.values() + data[0])
+         return data[0]
       else
          // new page.
          // sets the defaults
@@ -196,8 +199,12 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
                pageEntry[row.field] = row.defval
             end
          end
-         self.dbi_data.insert( tablename, pageEntry )
-         return self.dbi_data.getLastInsertedId()
+
+         sql = "insert into " + tablename + "(" + ",".merge(pageEntry.keys()) + ")" +
+               " values (?" + ",?" * (pageEntry.len()-1) + ")"
+
+         self.dbi_data.aquery( sql, pageEntry.values() )
+         return self.dbi_data.getLastID()
       end
    end
 

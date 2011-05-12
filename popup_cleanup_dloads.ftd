@@ -62,9 +62,9 @@
       while ( entry = d.read() )
          if fileType( dir + "/"+ entry ) == FileStat.NORMAL
             // is this file not listed in any download?
-            r = con.query( "select count(*) from project_dloads where project_id=:1 and sysres=:2",
+            r = con.query( "select count(*) from project_dloads where project_id=? and sysres=?",
                project_id, entry )
-            if r.next() and r.asInteger(0) == 0
+            if (data = r.fetch([])) and data[0] == 0
                unrelated += entry
             end
          end
