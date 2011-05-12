@@ -3,20 +3,18 @@
 
    // get project data
    query="select name from projects " + 
-         "where project_id=:1"
+         "where project_id=?"
 
    clearance = checkPrjRights( project_id )
    con = connectDB()
 
    // determine official and latest release
-   r = con.query( "select latest_release, name from projects where project_id=:1", project_id )
+   r = con.query( "select latest_release, name from projects where project_id=?", project_id )
    if r.getRowCount() == 0: raise "Project ID \"$project_id\" not found in database"
-   r.next()
-   latest_release = r.asInteger(0)
-   prj_name = r.asString(1)
+   latest_release, prj_name = r.fetch([])
 
-   r = con.query( "select * from project_releases where project_id=:1 and rel_id=:2", project_id, latest_release )
-   latest_data = r.fetchDict()
+   r = con.query( "select * from project_releases where project_id=? and rel_id=?", project_id, latest_release )
+   latest_data = r.fetch([=>])
 ?>
 <script language="javascript">
 
@@ -82,7 +80,7 @@ a new official releases clears them.</p>
 <? function MakeDloadSet( r ) ?>
    <table width="0" cellspacing="2" cellpadding="5">
    <tr style="border:1px"><th>File</th><th>Description</th><th>Type</th></tr>
-   <? while ( dload = r.fetchDict() ) ?>
+   <? while ( dload = r.fetch([=>]) ) ?>
       <? if dload['dl_type'] == 'text' ?>
       <tr><td><a target="_blank" href="project_dl/<?=project_id?>/<?=dload['sysres'] ?>"><?=dload['sysres'] ?></a></td><td><?=dload['description']?></td><td><?=dload['dl_type']?></td></tr>
       <? else ?>
@@ -114,7 +112,7 @@ a new official releases clears them.</p>
    <? end ?>
    <?
       // get the dloads associated with this rel_id
-      r = con.query( "select * from project_dloads where rel_id=:1", data['rel_id'] )
+      r = con.query( "select * from project_dloads where rel_id=?", data['rel_id'] )
       MakeDloadSet( r )
    ?>
    </div>

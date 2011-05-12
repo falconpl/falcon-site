@@ -20,7 +20,7 @@
    function addMember()
       query = "insert into members " + 
          "(  member_id, password, name, surname, email, status, membership ) " + 
-         "values( :1, :2, :3, :4, :5, :6, :7 )"
+         "values( ?, ?, ?, ?, ?, ?, ? )"
 
       con.query( query,
          Request.getField( "member_id"),
@@ -34,7 +34,7 @@
    end
 
    function delMember( member_id )
-      con.query( "delete from members where member_id=:1", member_id )
+      con.query( "delete from members where member_id=?", member_id )
    end
 ?>
 <script language="javascript">
@@ -65,7 +65,7 @@ function delMember( id ) {
    <td><? makeSelLevel() ?></td>
    <td><input type="submit" value="Add"></td>
 </tr>
-<? while( data = r.fetchDict() ) ?>
+<? while( data = r.fetch([=>]) ) ?>
 <tr>
    <td><a href="?page_id=member_home&amp;member_id=<?=URI.encode( data['member_id'] )?>"><?=htmlEscape(data['member_id'])?></a></td>
    <td><?=htmlEscape(data['password'])?></td>

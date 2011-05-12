@@ -35,27 +35,20 @@ con = connectDB()
 query = "
    select
    news_id, news_title, news_heading,
-   news_poster, news_posted_on, CHAR_LENGTH(news_content)
-   from project_news where project=:1 order by news_id desc limit 10"
+   news_poster, news_posted_on, CHAR_LENGTH(news_content) as length
+   from project_news where project=? order by news_id desc limit 10"
 
-r = con.query( query, project_id, false )
+r = con.query( query, project_id )
 
-if r.next()
-   > "<h2>News</h2>"
-   // anyhow; allow to add news
-   if clearance == "support" or clearance == "developer" or clearance == "admin"
-      include( "addNews.ftd" )
-   end
+> "<h2>News</h2>"
+// anyhow; allow to add news
+if clearance == "support" or clearance == "developer" or clearance == "admin"
+   include( "addNews.ftd" )
+end
 
-   loop
-      showNews( r )
-      if not r.next(): break
-   end
-else
-   // anyhow; allow to add news
-   if clearance == "support" or clearance == "developer" or clearance == "admin"
-      include( "addNews.ftd" )
-   end
+data = bless([=>])
+while r.fetch( data )
+   showNews( data )
 end
 
 function showNews( recordset, showAlsoDetails )
@@ -65,27 +58,27 @@ function showNews( recordset, showAlsoDetails )
 
    date = TimeStamp()
    content = ""
-   news_id = recordset.asNumeric(0)
+   news_id = recordset.news_id
 ?>
 
 <div class="news">
    <div class="news_title">
-      <? htmlEscape( recordset.asString(1), output ) ?>
+      <? htmlEscape( recordset.news_title, output ) ?>
       <? if clearance ?>
       <div class="news_actions">
          <a href="javascript:openEditWnd('<?=news_id?>');">Edit</a>
-         <br/><a href="javascript:openDeleteWnd('<?=news_id?>', '<? htmlEscape( recordset.asString(1), output ) ?>');">Delete</a>
+         <br/><a href="javascript:openDeleteWnd('<?=news_id?>', '<? htmlEscape( recordset.news_title, output ) ?>');">Delete</a>
       </div>
       <? end ?>
    </div>
    <div class="news_signature">
-      Posted by <?=recordset.asString(3)?> on
-      <?= recordset.asDate(4, date).toString()[0:10] ?>
+      Posted by <?=recordset.news_poster?> on
+      <?= recordset.news_posted_on.toString()[0:10] ?>
    </div>
    <div class="news_heading">
-      <? bbExpand( htmlEscape( recordset.asString(2, content) ), output)  ?>
+      <? bbExpand( htmlEscape( recordset.news_heading ), output)  ?>
    </div>
-   <? if recordset.asNumeric(5) > 0 ?>
+   <? if recordset.length > 0 ?>
       <div class="news_more">
          <a href="javascript:openDetailsWin('<?=news_id?>');">more...</a>
       </div>

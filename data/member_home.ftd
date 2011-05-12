@@ -1,6 +1,6 @@
 <?
    // get project data
-   query="select * from members where member_id=:1"
+   query="select * from members where member_id=?"
    try
       member_id = Request.getField( "member_id" )
    catch
@@ -10,7 +10,7 @@
    
    con = connectDB()
    r = con.query( query, member_id )
-   data = r.fetchDict()
+   data = r.fetch([=>])
 
    function calcPos( role )
       switch role
@@ -53,13 +53,13 @@ function sendMail()
    r = con.query( "
          select project, role, name from
          project_members join projects on (project=project_id)
-         where member=:1 order by role, name",
+         where member=? order by role, name",
       member_id )
 
    if r.getRowCount() > 0
       > "<h2>Involvements</h2>"
       > "<ul>"
-      while ( pm = r.fetchDict() )
+      while ( pm = r.fetch([=>]) )
          >> "<li>"
          switch pm['role']
             case 'admin': >> "Admin at "

@@ -245,11 +245,12 @@ function checkLogin()
       
       try
          db = connectDB()
-         r = db.query(
-            "select membership from members where member_id=:1 and password=:2 and status='enabled'",
-            uID, password )
+         query = "
+            select membership from members where
+            member_id=? and password=? and status='enabled'"
+         r = db.query( query, uID, password )
 
-         if (data = r.fetchArray())
+         if (data = r.fetch([]))
             global userID, userLevel
             userID = uID
             userLevel = data[0]
@@ -291,9 +292,9 @@ function checkPrjRights( prid )
    end
 
    r = connectDB().query(
-      "select role from project_members where member=:1 and project=:2",
+      "select role from project_members where member=? and project=?",
       userID, prid )
-   if ( data = r.fetchArray() )
+   if ( data = r.fetch([]) )
       userProjectLevel = data[0]
    end
 
@@ -333,7 +334,7 @@ function add_news()
       con = connectDB()
       con.query( "insert into project_news " +
          "(project, news_title, news_heading, news_content, news_poster, news_posted_on)" +
-         " values( :1, :2, :3, :4, :5, now())",
+         " values( ?, ?, ?, ?, ?, now())",
          project,
          Request.getField( "news_title" ),
          Request.getField( "news_heading" ),
@@ -352,20 +353,19 @@ function edit_news()
    con = connectDB()
    // retreive rights on the current project
    nid = Request.getField( "news_id" )
-   r = con.query( "select project from project_news where news_id=:1", nid )
-   if not r.next()
+   r = con.query( "select project from project_news where news_id=?", nid )
+   if not ( data = r.fetch([]) )
       reportError( @"News id $(nid) not found" )
       return
    end
 
    // get the project
-   prj_id = r.asString( 0 )
+   prj_id = data[0]
    level = checkPrjRights( prj_id )
    if  level == "admin" or level == "developer"
       con = connectDB()
-      con.query( "update project_news where news_id=:1 set " +
-         "news_title=:2, news_heading=:3, news_content=:4" +
-         " values( :1, :2, :3, :4, :5, 'now')",
+      con.query( "update project_news where news_id=? set " +
+         "news_title=?, news_heading=?, news_content=?",
          nid,
          Request.getField( "news_title" ),
          Request.getField( "news_heading" ),
@@ -380,9 +380,8 @@ function getProjectName()
    prj = Request.getField( "prj_id" )
    // get project data
 
-   r = connectDB().query( "select name from projects where project_id=:1", prj )
-   r.next()
-   return r.asString(0)
+   r = connectDB().query( "select name from projects where project_id=?", prj )   
+   return r.fetch([])[0]
 end
 
 function getMemberName()
@@ -393,9 +392,9 @@ function getMemberName()
    end
    // get project data
 
-   r = connectDB().query( "select name, surname from members where member_id=:1", mid )
-   r.next()
-   return r.asString(1)+ ", "+ r.asString(0)
+   r = connectDB().query( "select name, surname from members where member_id=?", mid )
+   name, surname = r.fetch([])
+   return surname+ ", "+ name
 end
 
 //===========================================
@@ -498,10 +497,10 @@ function connectDB()
    if dbcon: return dbcon
  
    cfgfile = InputStream("db.config")
-   data = cfgfile.grab(4096)
+   data = cfgfile.grab(4096).trim()
    cfgfile.close()
 
-   dbcon = DBIConnect(data)
+   dbcon = connect(data)
    return dbcon
 end
 

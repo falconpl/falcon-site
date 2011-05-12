@@ -21,11 +21,10 @@
    <?
       // perform the real update
       query = "update members set " +
-         "password=:2, name=:3, surname=:4, email=:5, homesite=:6, status=:7, activity=:8, membership=:9 " +
-         "where member_id=:1 "
+         "password=?, name=?, surname=?, email=?, homesite=?, status=?, activity=?, membership=? " +
+         "where member_id=? "
 
       connectDB().query( query,
-         member_id,
          Request.getField( "f_password" ),
          Request.getField( "name" ),
          Request.getField( "surname" ),
@@ -33,7 +32,8 @@
          Request.getField( "homesite" ),
          Request.getField( "status" ),
          Request.getField( "activity" ),
-         Request.getField( "membership" )
+         Request.getField( "membership" ),
+         member_id
          )
       // if we had no error, we can tell the user we're done.
    ?>
@@ -43,9 +43,9 @@
    <p><a href="javascript:window.close()">Close this window</a></p>
    <? else
       // load the changelog text
-      query = "select * from members where member_id=:1"
+      query = "select * from members where member_id=?"
       r = connectDB().query( query, member_id )
-      data = r.fetchDict()
+      data = r.fetch([=>])
       ?>
 
       <form method="POST" action="?req=update_user&amp;member_id=<?=member_id?>">

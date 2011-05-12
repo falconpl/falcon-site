@@ -48,8 +48,8 @@ if Request.getField( "req", "" ) == "send"
    content = (@"[MESSAGE FOR $(tgt)]\r\n\r\n") + Request.posts[ "content" ]
    r = connectDB().query( query )
    try
-      while r.next()
-         email = r.asString(0)
+      while( data = r.fetch([]) )
+         email = data[0]
          > @"Sending mail to:$email <br/>\n"
          postMail( sender, email, subject, content )
       end

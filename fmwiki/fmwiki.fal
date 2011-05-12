@@ -94,15 +94,14 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
    */
    function getPage( page_name )
       if page_name.typeId() == NumericType
-         pname = "page_id=:2"
+         pname = "page_id=?"
       else
-         pname = "page_name=:2"
+         pname = "page_name=?"
       end
 
-      sql =  "select * from " + tablename + " where section=:1 and "+ pname
-      > sql
+      sql =  "select * from " + tablename + " where section=? and "+ pname
       r = self.dbi_data.query( sql, self.section_id, page_name )
-      if (res = r.fetchDict()) == nil
+      if (res = r.fetch([=>])) == nil
          raise FMWikiError( ec_notfound, nil, "page_name=" + page_name )
       end
 
@@ -129,22 +128,23 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
    
    function _inner_getPageText( page_name, inner )
       if page_name.typeId() == NumericType
-         pname = "page_id=:2"
+         pname = "page_id=?"
       else
-         pname = "page_name=:2"
+         pname = "page_name=?"
       end
       
-      sql =  "select "+inner+", read_lv from " + tablename + " where section=:1 and " + pname
+      sql =  "select "+inner+", read_lv from " + tablename + " where section=? and " + pname
       r = self.dbi_data.query( sql, self.section_id, page_name )
-      if not r.next()
+      data = r.fetch([])
+      if not data
          raise FMWikiError( ec_notfound, nil, "page_name=" + page_name )
       end
 
-      if r.asInteger(1) > self.clearance
+      if data[1] > self.clearance
          raise FMWikiError( ec_clearance, nil, "page_name=" + page_name )
       end
 
-      return r.asString(0)
+      return data[0]
    end
 
    /*#
@@ -162,11 +162,11 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
    */
    function updatePage( pageEntry )
       // first, check if the page exists; in that case we must have clearance to write it.
-      sql =  "select page_id, write_lv from " + tablename + " where section=:1 and page_name=:2"
+      sql =  "select page_id, write_lv from " + tablename + " where section=? and page_name=?"
       r = self.dbi_data.query( sql, self.section_id, pageEntry["page_name"] )
-      found = r.next()
+      data = r.fetch([])
 
-      if found and r.asInteger(1) > self.clearance
+      if data and data[1] > self.clearance
          raise FMWikiError( ec_clearance, nil, "page_name=" + pageEntry["page_name"] )
       end
 
@@ -177,8 +177,8 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
       end
 
       // if we found it it's an update
-      if found
-         pageEntry[oob("page_id")] = r.asInteger(0)
+      if data
+         pageEntry[oob("page_id")] = data[0]
          if "creator" in pageEntry and "editor" notin pageEntry
             pageEntry["editor"] = pageEntry["creator"]
             pageEntry.remove("creator")
@@ -212,10 +212,10 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
    */
    function removePage( page_name )
       if typeOf( page_name ) == StringType
-         sql =  "delete from " + tablename + " where section=:1 and page_name=:2"
+         sql =  "delete from " + tablename + " where section=? and page_name=?"
          self.dbi_data.query( sql, self.section_id, page_name )
       else
-         sql =  "delete from " + tablename + " where page_id=:1"
+         sql =  "delete from " + tablename + " where page_id=?"
          self.dbi_data.query( sql, page_name )
       end
    end
@@ -224,11 +224,16 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
    /*#
       @brief Determines if a page exists or not.
       @param page_name The id of the page to be retreives.
-      @return true on success, false if the page cannot be created.
+      @return page ID on success, false if the page cannot be created.
    */
    function hasPage( page_name )
-      sql =  "select page_id from " + tablename + " where section=:1 and page_name=:2"
-      return self.dbi_data.queryOne( sql, self.section_id, page_name )
+      sql =  "select page_id from " + tablename + " where section=? and page_name=?"
+      r = self.dbi_data.query( sql, self.section_id, page_name )
+      if ( data = r.fetch([]) )
+         return data[0]
+      end
+
+      return false
    end
 
    function makeEntity()

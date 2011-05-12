@@ -43,8 +43,8 @@ activites, as packaging, marketing, bug hunting, reviewing and so on.</p>
 <?
 function makeUserList( level )
    con = connectDB()
-   r = con.query( "select member_id, name, surname, activity from members where membership=:1 order by surname", level )
-   while ( data = r.fetchDict() )
+   r = con.query( "select member_id, name, surname, activity from members where membership=? order by surname", level )
+   while ( data = r.fetch([=>]) )
       >> "<li>"
       >> "<b><a href=\"?page_id=member_home&amp;member_id=", data['member_id'], "\">"
       >> data['name'], " ", data['surname'], "</a></b>"

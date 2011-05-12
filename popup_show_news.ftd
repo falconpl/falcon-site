@@ -18,26 +18,26 @@
    // load the news text
    query = "
       select news_title, news_heading, news_content, news_poster, news_posted_on
-      from project_news where news_id=:1"
+      from project_news where news_id=?"
    
    r = connectDB().query( query, news_id )
-   r.next()
+   data = r.fetch([])
    output = stdOut()
 ?>
 <div class="news">
    <div class="news_title">
-      <? htmlEscape( r.asString(0), output ); ?>
+      <? htmlEscape( data[0], output ); ?>
    </div>
    <div style="margin:15pt;">
       <div class="news_signature">
-         Posted by <?=r.asString(3)?> on
-         <?= r.asDate(4).toString( "%Y-%m-%d") ?>
+         Posted by <?=data[3]?> on
+         <?= data[4].toString( "%Y-%m-%d") ?>
       </div>
       <div class="news_heading_part">
-         <? bbExpand( htmlEscape( r.asString(1) ), output)  ?>
+         <? bbExpand( htmlEscape( data[1] ), output)  ?>
       </div>
       <div class="news_body">
-         <? bbExpand( htmlEscape( r.asString(2) ), output)  ?>
+         <? bbExpand( htmlEscape( data[2] ), output)  ?>
       </div>
    </div>
 </div>

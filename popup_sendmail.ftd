@@ -6,8 +6,8 @@
    member_id = Request.getField( "member_id" )
 
    con = connectDB()
-   r = con.query( "select name, surname from members where member_id=:1", member_id )
-   name, surname = r.fetchArray()
+   r = con.query( "select name, surname from members where member_id=?", member_id )
+   name, surname = r.fetch([])
    name = name +  " " + surname
 
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -28,10 +28,9 @@ if Request.getField( "req", "" ) == "send"
    content = Request.posts[ "content" ]
 
    // perform the real update
-   query = "select email from members where member_id=:1 "
+   query = "select email from members where member_id=? "
    r = connectDB().query( query, member_id )
-   r.next()
-   email = r.asString(0)
+   email = r.fetch([])[0]
    try
       postMail( sender, email, subject, content )
       ?>

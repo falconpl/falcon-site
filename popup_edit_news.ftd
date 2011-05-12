@@ -28,14 +28,14 @@
       // perform the real update
       query = "
          update project_news set
-         news_title=:2, news_heading=:3, news_content=:4
-         where news_id=:1 "
+         news_title=?, news_heading=?, news_content=?
+         where news_id=?"
 
       connectDB().query( query,
-         int(news_id),
          news_title,
          Request.getField( "news_heading" ),
-         Request.getField( "news_content" )
+         Request.getField( "news_content" ),
+         int(news_id)
          )
       // if we had no error, we can tell the user we're done.
    ?>
@@ -48,26 +48,26 @@
          // load the news text (unescaped)
          query = "
             select news_title, news_heading, news_content,news_poster, news_posted_on
-            from project_news where news_id=:1"
+            from project_news where news_id=?"
 
          r = connectDB().query( query, news_id )
-         r.next()
+         data = r.fetch([])
       ?>
       <form method="POST" action="?req=update_news&news_id=<?=news_id?>&project_id=<?=project_id?>">
       <div class="news">
          <div class="news_title">
             <input type="text" size="30" maxsize="60" name="news_title"
-               value="<?= r.asString(0) ?>"/>
+               value="<?= data[0] ?>"/>
          </div>
          <div class="news_signature">
-            Posted by <?=r.asString(3)?> on
-            <?= r.asDate(4).toString()[0:10] ?>
+            Posted by <?=data[3]?> on
+            <?= data[4].toString()[0:10] ?>
          </div>
          <div class="news_heading">
             <p>Front heeading news:</p>
-            <textarea rows="6" cols="60" name="news_heading"><?=r.asString(1)?></textarea>
+            <textarea rows="6" cols="60" name="news_heading"><?=data[1]?></textarea>
             <p>Main news:</p>
-            <textarea rows="6" cols="60" name="news_content"><?=r.asString(2)?></textarea>
+            <textarea rows="6" cols="60" name="news_content"><?=data[2]?></textarea>
          </div>
          <input type="submit" name="submit" value="Update">
          <input type="button" value="Abort" onclick="javascript:window.close();">

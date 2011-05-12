@@ -5,9 +5,9 @@
    rel_id = Request.getField( "rel_id" )
 
    // load the changelog text
-   query = "select rel_name, changelog from project_releases where rel_id=:1"
+   query = "select rel_name, changelog from project_releases where rel_id=?"
    r = connectDB().query( query, rel_id )
-   rel_name, changelog = r.fetchArray()
+   rel_name, changelog = r.fetch([])
 
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
