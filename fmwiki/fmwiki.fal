@@ -185,7 +185,6 @@ class FMWiki( dbi_data, clearance, link, section_id, provider )
 
          sql = "update " + tablename + " set " + ",".merge(map( {s=>s+"=?"}, pageEntry.keys())) +
                 " where page_id=?"
-         > sql
          self.dbi_data.aquery( sql, pageEntry.values() + data[0])
          return data[0]
       else

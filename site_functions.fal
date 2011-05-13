@@ -501,6 +501,7 @@ function connectDB()
    cfgfile.close()
 
    dbcon = connect(data)
+   dbcon.query( 'SET NAMES latin1')
    return dbcon
 end
 
