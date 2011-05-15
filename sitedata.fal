@@ -18,8 +18,8 @@ function makeSiteData()
              [xinclude, "data/official_download.ftd"], "Home", 2 )
    PageData( "bleeding_dl", "Bleeding edge",
              [xinclude, "data/bleeding_dl.ftd"], "Home", 2 )
-   PageData( "svn_dl", "Development resources",
-             [xinclude, "data/svn_dl.ftd"], "Home", 2 )
+   PageData( "git_dl", "Development resources",
+             [xinclude, "data/git_dl.ftd"], "Home", 2 )
    PageData( "older_dl", "Older releases",
              [xinclude, "data/older_dl.ftd"], "Home", 2 )
 
