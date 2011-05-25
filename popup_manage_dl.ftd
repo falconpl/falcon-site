@@ -126,13 +126,14 @@ function updateDload()
 
    try
       r = con.query( query,
-         int(Request.getField( "dload_id" )),
          Request.getField( "name", "" ),
          Request.getField( "sysres", "" ),
          Request.getField( "description", "" ),
          Request.getField( "dl_type", "none" ),
          Request.getField( "relevant", "" ) == "yes" ? 1 : 0, // no real boolean type in mysql
-         (rel_id = Request.getField( "rel_id", "" )) == "" ? nil : int(rel_id) )
+         (rel_id = Request.getField( "rel_id", "" )) == "" ? nil : int(rel_id) ,
+         int(Request.getField( "dload_id" ))
+         )
       > " Ok."
    catch DBIError in err
       > " Failed."
